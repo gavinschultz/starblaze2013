@@ -3,6 +3,9 @@
 #include <vector>
 #include "Phys.h"
 #include <memory>
+#include "timer.h"
+#include "Entity.h"
+#include "Phys.h"
 
 class Window
 {
@@ -16,10 +19,8 @@ class Sprite
 public:
 	Sprite();
 	~Sprite();
-	SDL_Rect rect;
 	Point2D world_pos;
-	SDL_Texture* texture;
-	SDL_RendererFlip flip;
+	virtual void render(SDL_Renderer* sdlRenderer) = 0;
 };
 
 class SpriteRegister
@@ -50,3 +51,28 @@ public:
 	float scaling;
 };
 
+class ShipSprite : public Sprite
+{
+private:
+	std::shared_ptr<Ship> _ship;	// TODO: weak_ptr / shared_ptr?
+	SDL_Texture* _ship_texture;
+	SDL_Texture* _taillight_texture;
+	SDL_Texture* _stripe_texture;
+	SDL_Texture* _burner_texture;
+	SDL_Texture* _burner_rev_texture;
+	SDL_Rect _ship_texture_rect;
+	SDL_Rect _taillight_texture_rect;
+	SDL_Rect _stripe_texture_rect;
+	SDL_Rect _burner_texture_rect;
+	SDL_Rect _burner_rev_texture_rect;
+
+	Point2D _stripe_offset;
+	Point2D _burner_offset;
+	Point2D _burner_rev_offset;
+	float _scaling;
+public:
+	ShipSprite(Renderer* renderer, Ship* ship);
+	~ShipSprite();
+	void render(SDL_Renderer* sdlRenderer);
+	bool smooth_animation = true;
+};

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <memory>
 
 class Timer
 {
@@ -21,3 +22,4 @@ public:
 	uint32_t getTotalFrames() const;
 };
 
+extern std::unique_ptr<Timer> timer;

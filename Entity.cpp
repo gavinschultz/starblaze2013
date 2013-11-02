@@ -24,13 +24,13 @@ const int EntityRegister::getShipCount()
 
 void EntityRegister::registerEntity(Ship* ship)
 {
-	_ship = std::unique_ptr<Ship>{ship};
+	_ship = std::shared_ptr<Ship>{ship};
 	_ship->bounding_box = { 0, 0, 32 * 4, 8 * 4 };	// TODO: scaling real-time
 }
 
 EntityRegister::EntityRegister()
 {
-	_ship = std::unique_ptr<Ship>{nullptr};
+
 }
 
 EntityRegister::~EntityRegister()

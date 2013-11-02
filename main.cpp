@@ -12,16 +12,24 @@
 #include <algorithm>
 #include "Debug.h"
 #include "Renderer.h"
+#include <limits>
 
 bool handleEvent(SDL_Event*);
 
-Game* game = new Game();
+std::unique_ptr<Game> game;
+std::unique_ptr<Timer> timer;
 
 int main(int argc, char* args[])
 {
+	game = std::unique_ptr<Game>{new Game()};
+	timer = std::unique_ptr<Timer>{new Timer()};
+	/*game.reset(new Game());
+	timer.reset(new Timer());*/
 	SDL_Init(SDL_INIT_EVERYTHING);
 
-	Renderer* renderer = new Renderer(2048, 1536, 0.5);
+	//Renderer* renderer = new Renderer(2048, 1536, 0.5);
+	//Renderer* renderer = new Renderer();
+	Renderer* renderer = new Renderer(2048, 1536, 1.0);
 
 	game->max_ship_motion = Vector2D(1000.0, 800.0);
 	game->min_ship_motion_threshold_vel.x = 30.0;
@@ -29,40 +37,16 @@ int main(int argc, char* args[])
 	game->min_ship_motion_threshold_secs = 0.6;
 	game->smooth_motion = true;
 	game->ship_limits = { 192, 0, 640, 576 };
-
+	
 	// Load assets
 	Ship* s = new Ship();
 	game->entity_register.registerEntity(s);
-	s->sprite.rect = { 0, 0, 32, 8 };
-	s->sprite.texture = renderer->loadTextureFromFile("img\\ship.tga");
-	renderer->sprite_register.registerSprite(&s->sprite);
-
-	/*
-	SDL_Surface* shipstripeSurface = IMG_Load("img\\shipstripe.tga");
-	OutputDebugString(SDL_GetError());
-	uint32_t pixelFormat = SDL_MasksToPixelFormatEnum(shipstripeSurface->format->BitsPerPixel, shipstripeSurface->format->Rmask, shipstripeSurface->format->Gmask, shipstripeSurface->format->Bmask, shipstripeSurface->format->Amask);
-	SDL_Texture* shipstripeTexture = SDL_CreateTexture(renderer, pixelFormat, SDL_TextureAccess::SDL_TEXTUREACCESS_STREAMING, 32, 32);
-	SDL_UpdateTexture(shipstripeTexture, NULL, shipstripeSurface->pixels, shipstripeSurface->format->BytesPerPixel * shipstripeSurface->w);
-	SDL_FreeSurface(shipstripeSurface);
-
-	SDL_Surface* shiptaillightSurface = IMG_Load("img\\shiptaillight.tga");
-	SDL_Texture* shiptaillightTexture = SDL_CreateTextureFromSurface(renderer, shiptaillightSurface);
-	SDL_FreeSurface(shiptaillightSurface);
-
-	SDL_Surface* shipburnerSurface = IMG_Load("img\\shipburner.tga");
-	SDL_Texture* shipburnerTexture = SDL_CreateTextureFromSurface(renderer, shipburnerSurface);
-	SDL_FreeSurface(shipburnerSurface);
-
-	SDL_Surface* shipburnerRevSurface = IMG_Load("img\\shipburner_rev.tga");
-	SDL_Texture* shipburnerRevTexture = SDL_CreateTextureFromSurface(renderer, shipburnerRevSurface);
-	SDL_FreeSurface(shipburnerRevSurface);
-	*/
+	ShipSprite* shipSprite = new ShipSprite(renderer, s);
+	renderer->sprite_register.registerSprite(shipSprite);
 
 	game->start();
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-
-	std::unique_ptr<Timer> ptimer{ new Timer(60) };
 
 	Ship* ship = game->entity_register.getShip();
 	ship->current_state.pos.x = game->ship_limits.x;
@@ -77,8 +61,8 @@ int main(int argc, char* args[])
 
 	while (!quit)
 	{
-		ptimer->startFrame();
-		auto delta_time = ptimer->getLastFrameDuration();
+		timer->startFrame();
+		auto delta_time = timer->getLastFrameDuration();
 		if (delta_time > 0.25)
 		{
 			OutputDebugString("Delta exceeded max");
@@ -151,8 +135,6 @@ int main(int argc, char* args[])
 			else if (ship->current_state.pos.y + ship->bounding_box.h > game->ship_limits.y + game->ship_limits.h)
 				ship->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - ship->bounding_box.h;
 
-			//ship->current_state.vel.x = -ship->current_state.vel.x;
-
 			//debug({ "Current x:", std::to_string(ship->current_state.pos.x), " Current y:", std::to_string(ship->current_state.pos.y) });
 			//debug({ "Current vel X:", std::to_string(ship->current_state.vel.x), " prev vel X: ", std::to_string(ship->prev_state.vel.x), " Y:", std::to_string(ship->current_state.vel.y), " secs at X slow: ", std::to_string(ship->secs_at_slow_vel_x), "secs at Y slow: ", std::to_string(ship->secs_at_slow_vel_y) });
 			if (ship->current_state.vel.x < 0.0 || (ship->current_state.vel.x == 0.0 && ship->direction == ShipDirection::left))
@@ -165,11 +147,10 @@ int main(int argc, char* args[])
 
 		ship->alpha_state.pos.x = ship->current_state.pos.x*alpha + ship->prev_state.pos.x*(1.0 - alpha);
 		ship->alpha_state.pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
-		ship->sprite.world_pos.x = ship->alpha_state.pos.x;
-		ship->sprite.world_pos.y = ship->alpha_state.pos.y;
-		ship->sprite.flip = ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+
 		renderer->render();
-		ptimer->endFrame();
+
+		timer->endFrame();
 	}
 
 	SDL_Quit();
@@ -228,7 +209,5 @@ bool handleEvent(SDL_Event* pevent)
 	int x, y;
 	SDL_GetMouseState(&x, &y);
 
-	//debug({"Mouse state X:", std::to_string(x), " Y:", std::to_string(y) });
-	//debug("Mouse state X:", std::to_string(x).c_str(), " Y:", std::to_string(y));
 	return true;
 }

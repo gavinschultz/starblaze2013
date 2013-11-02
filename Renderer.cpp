@@ -3,16 +3,17 @@
 #include "Debug.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <algorithm>
 
 Renderer::Renderer(int window_width, int window_height, float scaling)
 {
 	this->window.w = window_width;
 	this->window.h = window_height;
-	this->scaling = 0.5;
+	this->scaling = scaling;
 	init();
 }
 
-Renderer::~Renderer()
+Renderer::Renderer()
 {
 	this->window.w = 1024;
 	this->window.h = 768;
@@ -20,9 +21,11 @@ Renderer::~Renderer()
 	init();
 }
 
+Renderer::~Renderer(){}
+
 void Renderer::init()
 {
-	sdlWindow = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w * scaling, window.h * scaling, SDL_WINDOW_BORDERLESS);// SDL_WINDOW_FULLSCREEN_DESKTOP);
+	sdlWindow = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS);// SDL_WINDOW_FULLSCREEN_DESKTOP);
 	debug({ SDL_GetError() });
 	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 	debug({ SDL_GetError() });
@@ -45,59 +48,9 @@ void Renderer::render()
 
 	for (auto& sprite : sprite_register._sprites)
 	{
-		SDL_Rect spriteRect = { (int)sprite->world_pos.x, (int)sprite->world_pos.y, sprite->rect.w * scaling, sprite->rect.h * scaling };
-		SDL_RenderCopyEx(sdlRenderer, sprite->texture, NULL, &spriteRect, 0, NULL, sprite->flip);
+		sprite->render(this->sdlRenderer);
 	}
 
-	/*
-	SDL_Rect shipstripeTextureRectangle;
-	if (game->smooth_motion)
-		shipstripeTextureRectangle = { 0, (ptimer->getTotalFrames() - 1) % 32, 32, 1 };	// smooth scrolling stripe
-	else
-		shipstripeTextureRectangle = { 0, (((ptimer->getTotalFrames() - 1) % 32) / 8) * 8, 32, 1 };	// "original" scrolling stripe
-
-	SDL_Rect shipstripeRect = { shipRect.x, shipRect.y + (6 * game->window.scaling), 32 * game->window.scaling, 1 * game->window.scaling };
-	SDL_RenderCopyEx(renderer, shipstripeTexture, &shipstripeTextureRectangle, &shipstripeRect, 0, NULL, ship->direction == ShipDirection::right ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-
-	if ((ptimer->getTotalFrames() - 1) % 20 < 10)
-	{
-		SDL_Rect shiptaillightTextureRectangle = { 0, 0, 32, 1 };
-		SDL_Rect shiptaillightRect = { shipRect.x, shipRect.y, shiptaillightTextureRectangle.w * game->window.scaling, shiptaillightTextureRectangle.h * game->window.scaling };
-		SDL_RenderCopyEx(renderer, shiptaillightTexture, &shiptaillightTextureRectangle, &shiptaillightRect, 0, NULL, ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-	}
-
-	debug({ "Ship thrust/vel X:", std::to_string(ship->current_state.thrust.x), "/", std::to_string(ship->current_state.vel.x), " accel Y:", std::to_string(ship->current_state.acc.y), " direction:", std::to_string((int)ship->direction) });
-	if (ship->current_state.thrust.x != 0.0)
-	{
-		SDL_Rect shipburnerTextureRect = { min((int)(abs(ship->current_state.thrust.x) / 12.0), 3) * 8, 0, 8, 5 };
-		SDL_Rect shipburnerRevTextureRect = { min((int)(abs(ship->current_state.thrust.x) / 8.0), 1) * 4, 0, 4, 4 };
-		SDL_Rect shipburnerRect;
-		if (ship->current_state.thrust.x > 0.0 && ship->direction == ShipDirection::right)
-		{
-			//debug({ "Flare RIGHT" });
-			shipburnerRect = { shipRect.x - (shipburnerTextureRect.w * game->window.scaling), shipRect.y + (shipRect.h - (shipburnerTextureRect.h * game->window.scaling)), shipburnerTextureRect.w * game->window.scaling, shipburnerTextureRect.h * game->window.scaling };
-			SDL_RenderCopyEx(renderer, shipburnerTexture, &shipburnerTextureRect, &shipburnerRect, 0, NULL, ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-		}
-		else if (ship->current_state.thrust.x < 0.0 && ship->direction == ShipDirection::left)
-		{
-			//debug({ "Flare LEFT" });
-			shipburnerRect = { shipRect.x + shipRect.w, shipRect.y + (shipRect.h - (shipburnerTextureRect.h * game->window.scaling)), shipburnerTextureRect.w * game->window.scaling, shipburnerTextureRect.h * game->window.scaling };
-			SDL_RenderCopyEx(renderer, shipburnerTexture, &shipburnerTextureRect, &shipburnerRect, 0, NULL, ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-		}
-		else if (ship->current_state.thrust.x < 0.0 && ship->direction == ShipDirection::right)
-		{
-			//debug({ "REV Flare RIGHT" });
-			shipburnerRect = { shipRect.x + (17 * game->window.scaling), shipRect.y + (4 * game->window.scaling), shipburnerRevTextureRect.w * game->window.scaling, shipburnerRevTextureRect.h * game->window.scaling };
-			SDL_RenderCopyEx(renderer, shipburnerRevTexture, &shipburnerRevTextureRect, &shipburnerRect, 0, NULL, ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-		}
-		else if (ship->current_state.thrust.x > 0.0 && ship->direction == ShipDirection::left)
-		{
-			//debug({ "REV Flare LEFT" });
-			shipburnerRect = { shipRect.x + (15 * game->window.scaling), shipRect.y + (4 * game->window.scaling), shipburnerRevTextureRect.w * game->window.scaling, shipburnerRevTextureRect.h * game->window.scaling };
-			SDL_RenderCopyEx(renderer, shipburnerRevTexture, &shipburnerRevTextureRect, &shipburnerRect, 0, NULL, ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-		}
-	}
-	*/
 	SDL_RenderPresent(sdlRenderer);
 }
 
@@ -124,4 +77,100 @@ Sprite::Sprite()
 Sprite::~Sprite()
 {
 
+}
+
+ShipSprite::ShipSprite(Renderer* renderer, Ship* ship) : Sprite()
+{
+	this->_scaling = renderer->scaling;
+
+	this->_ship = std::shared_ptr<Ship>(ship);
+	this->_ship_texture_rect = { 0, 0, 32, 8 };
+	this->_stripe_texture_rect = { 0, 0, 32, 1 };
+	this->_taillight_texture_rect = { 0, 0, 32, 1 };
+	this->_burner_texture_rect = { 0, 0, 8, 5 };
+	this->_burner_rev_texture_rect = { 0, 0, 4, 4 };
+	this->_stripe_offset = { 0, 6 * 8 * _scaling };
+	this->_burner_offset = { -_burner_texture_rect.w * 8 * _scaling, (_ship_texture_rect.h - 5) * 8 * _scaling };
+	this->_burner_rev_offset = { 17 * 8 * _scaling, 4 * 8 * _scaling };
+
+	this->_ship_texture = renderer->loadTextureFromFile("img\\ship.tga");
+	this->_stripe_texture = renderer->loadTextureFromFile("img\\shipstripe.tga");
+	this->_taillight_texture = renderer->loadTextureFromFile("img\\shiptaillight.tga");
+	this->_burner_texture = renderer->loadTextureFromFile("img\\shipburner.tga");
+	this->_burner_rev_texture = renderer->loadTextureFromFile("img\\shipburner_rev.tga");
+}
+
+ShipSprite::~ShipSprite()
+{
+	
+}
+
+void ShipSprite::render(SDL_Renderer* sdlRenderer)
+{
+	world_pos.x = _ship->alpha_state.pos.x;
+	world_pos.y = _ship->alpha_state.pos.y;
+	SDL_RendererFlip flip = _ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+
+	SDL_Rect ship_rect = { (int)world_pos.x, (int)world_pos.y, _ship_texture_rect.w * 8 * _scaling, _ship_texture_rect.h * 8 * _scaling };
+
+	if (smooth_animation)
+		_stripe_texture_rect.y = (timer->getTotalFrames() - 1) % 32;				// smooth scrolling stripe
+	else
+		_stripe_texture_rect.y = (((timer->getTotalFrames() - 1) % 32) / 8) * 8;	// "original" scrolling stripe}
+
+	SDL_Rect stripe_rect = { ship_rect.x + _stripe_offset.x, ship_rect.y + _stripe_offset.y, _stripe_texture_rect.w * 8 * _scaling, _stripe_texture_rect.h * 8 * _scaling };
+
+	SDL_Rect taillight_rect = {};
+	if ((timer->getTotalFrames() - 1) % 20 < 10)
+	{
+		taillight_rect = { ship_rect.x, ship_rect.y, _taillight_texture_rect.w * 8 * _scaling, _taillight_texture_rect.h * 8 * _scaling };
+	}
+
+	SDL_RenderCopyEx(sdlRenderer, _ship_texture, &_ship_texture_rect, &ship_rect, 0, NULL, flip);
+	SDL_RenderCopyEx(sdlRenderer, _stripe_texture, &_stripe_texture_rect, &stripe_rect, 0, NULL, flipReverse);
+	if (taillight_rect.w > 0)
+		SDL_RenderCopyEx(sdlRenderer, _taillight_texture, &_taillight_texture_rect, &taillight_rect, 0, NULL, flip);
+
+	debug({ "Ship thrust/vel X:", std::to_string(_ship->current_state.thrust.x), "/", std::to_string(_ship->current_state.vel.x), " accel Y:", std::to_string(_ship->current_state.acc.y), " direction:", std::to_string((int)_ship->direction) });
+	if (_ship->current_state.thrust.x != 0.0)
+	{
+		_burner_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 12.0), 3) * 8;
+		_burner_rev_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 8.0), 1) * 4;
+		SDL_Rect burner_rect;
+		SDL_Texture* burner_texture; // may be either forward or reverse
+		SDL_Rect texture_rect;
+		if ((_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right) || (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left))
+		{
+			burner_texture = _burner_texture;
+			texture_rect = _burner_texture_rect;
+		}
+		else
+		{
+			burner_texture = _burner_rev_texture;
+			texture_rect = _burner_rev_texture_rect;
+		}
+
+		if (_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right)
+		{
+			//debug({ "Flare RIGHT" });
+			burner_rect = { ship_rect.x + _burner_offset.x, ship_rect.y + _burner_offset.y, _burner_texture_rect.w * 8 * _scaling, _burner_texture_rect.h * 8 * _scaling };
+		}
+		else if (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left)
+		{
+			//debug({ "Flare LEFT" });
+			burner_rect = { ship_rect.x + ship_rect.w, ship_rect.y + _burner_offset.y, _burner_texture_rect.w * 8 * _scaling, _burner_texture_rect.h * 8 * _scaling };
+		}
+		else if (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::right)
+		{
+			//debug({ "REV Flare RIGHT" });
+			burner_rect = { ship_rect.x + _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w * 8 * _scaling, _burner_rev_texture_rect.h * 8 * _scaling };
+		}
+		else if (_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::left)
+		{
+			//debug({ "REV Flare LEFT" });
+			burner_rect = { ship_rect.x + ship_rect.w - (_burner_rev_texture_rect.w * 8 * _scaling) - _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w * 8 * _scaling, _burner_rev_texture_rect.h * 8 * _scaling };
+		}
+		SDL_RenderCopyEx(sdlRenderer, burner_texture, &texture_rect, &burner_rect, 0, NULL, flip);
+	}
 }

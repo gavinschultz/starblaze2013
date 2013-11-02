@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "Entity.h"
 #include "Renderer.h"
 
@@ -16,4 +17,4 @@ public:
 	SDL_Rect ship_limits;
 };
 
-extern Game* game;
+extern std::unique_ptr<Game> game;
