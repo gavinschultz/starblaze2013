@@ -1,17 +1,33 @@
 #pragma once
+#include <stdint.h>
 
 struct Point2D
 {
 	double x;
 	double y;
-	Point2D(double x = 0.0, double y = 0.0);
+	//Point2D() : x(0.0), y(0.0) {};
+	Point2D(double x = 0.0, double y = 0.0) : x(x), y(y) {};
+};
+
+struct Point2Di
+{
+	int32_t x;
+	int32_t y;
+	Point2Di(int32_t x = 0, int32_t y = 0) : x(x), y(y) {}
 };
 
 struct Vector2D
 {
 	double x;
 	double y;
-	Vector2D(double x = 0.0, double y = 0.0);
+	Vector2D(double x = 0.0, double y = 0.0) : x(x), y(y) {}
+};
+
+struct Vector2Di
+{
+	int32_t x;
+	int32_t y;
+	Vector2Di(int32_t x = 0, int32_t y = 0) : x(x), y(y) {}
 };
 
 struct State2D

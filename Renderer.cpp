@@ -17,23 +17,20 @@ const SDL_Color& CoCoPalette::getColor(const CoCoPaletteEnum colorEnum) const
 		return coco_palette.at(black);
 }
 
-Renderer::Renderer(int window_width, int window_height, float scaling)
+Camera::Camera(const SDL_Rect& view_rect, const SDL_Rect& focus_rect)
 {
-	this->window.w = window_width;
-	this->window.h = window_height;
+	this->view_rect = view_rect;
+	this->focus_rect = focus_rect;
+	this->focus_point = { 0, 0 };
+}
+
+Renderer::Renderer(int screen_width, int screen_height, float scaling)
+{
+	this->window.w = screen_width;
+	this->window.h = screen_height;
 	this->scaling = scaling;
 	init();
 }
-
-Renderer::Renderer()
-{
-	this->window.w = 1024;
-	this->window.h = 768;
-	this->scaling = 4.0;
-	init();
-}
-
-Renderer::~Renderer(){}
 
 void Renderer::init()
 {
@@ -87,14 +84,14 @@ SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* text
 	return sdlTexture;
 }
 
-void Renderer::render()
+void Renderer::render(Camera* camera)
 {
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 31, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(sdlRenderer);
 
 	for (auto& sprite : sprite_register._sprites)
 	{
-		sprite->render(this->sdlRenderer);
+		sprite->render(this->sdlRenderer, *camera);
 	}
 
 	if (is_grid_visible)
@@ -139,7 +136,7 @@ void Renderer::renderGrid()
 
 SpriteRegister::SpriteRegister()
 {
-	
+
 }
 
 SpriteRegister::~SpriteRegister()
@@ -182,6 +179,8 @@ ShipSprite::ShipSprite(Renderer* renderer, Ship* ship) : Sprite()
 	this->_burner_offset = { -_burner_texture_rect.w  * _scaling, (_ship_texture_rect.h - 5)  * _scaling };
 	this->_burner_rev_offset = { 17 * _scaling, 4 * _scaling };
 	this->_wheels_offset = { 0, _ship_texture_rect.h * _scaling };
+
+	this->smooth_animation = false;
 }
 
 ShipSprite::~ShipSprite()
@@ -189,21 +188,17 @@ ShipSprite::~ShipSprite()
 
 }
 
-void ShipSprite::render(SDL_Renderer* sdlRenderer)
+void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 {
-	Point2D world_pos;
-	world_pos.x = _ship->alpha_state.pos.x;
-	world_pos.y = _ship->alpha_state.pos.y;
 	SDL_RendererFlip flip = _ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
-
-	SDL_Rect ship_rect = { (int)world_pos.x, (int)world_pos.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+	
+	SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 
 	if (smooth_animation)
 		_stripe_texture_rect.y = (timer->getTotalFrames() - 1) % 32;				// smooth scrolling stripe
 	else
-		_stripe_texture_rect.y = (((timer->getTotalFrames() - 1) % 32) / 8);	// "original" scrolling stripe}
-
+		_stripe_texture_rect.y = (((timer->getTotalFrames() - 1) % 32) / 8) * 8;	// "original" scrolling stripe}
 	SDL_Rect stripe_rect = { ship_rect.x + _stripe_offset.x, ship_rect.y + _stripe_offset.y, _stripe_texture_rect.w  * _scaling, _stripe_texture_rect.h  * _scaling };
 
 	SDL_Rect taillight_rect = {};
@@ -220,7 +215,7 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer)
 	SDL_Rect burner_texture_rect = {};
 	if (_ship->current_state.thrust.x != 0.0)
 	{
-		_burner_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 12.0), 3) * 8;
+		_burner_texture_rect.x = std::min((int)((_ship->max_thrust / abs(_ship->current_state.thrust.x))) - 1, 3) * 8;
 		_burner_rev_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 8.0), 1) * 4;
 		if ((_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right) || (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left))
 		{
@@ -277,7 +272,7 @@ BGSprite::BGSprite(Renderer* renderer, World* world) : Sprite()
 	_sky_color = renderer->coco_palette.getColor(blue);
 	_ground_rect = { 0, _sky_rect.h, renderer->window.w, 48 * _scaling };
 	_ground_color = renderer->coco_palette.getColor(green);
-	_hills_texture = renderer->loadTextureFromFile("img\\hills.tga", nullptr);
+	_hills_texture = renderer->loadTextureFromFile("img\\hills_highlight.tga", nullptr);
 	_hills_texture_rect = { 0, 0, 16, 4 };
 	_hills_rect = { 0, _ground_rect.y, renderer->window.w, 28 * _scaling };
 	_bg_rect = { 0, 0, renderer->window.w, renderer->window.h };
@@ -289,18 +284,21 @@ BGSprite::~BGSprite()
 
 }
 
-void BGSprite::render(SDL_Renderer* sdl_renderer)
+void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 {
+	const std::array<int, 4> y_channel_coords = { { 0 - _hills_texture_rect.h * _scaling, 9 * _scaling, 17 * _scaling, 25 * _scaling } };
+	const std::array<double, 4> y_channel_speeds = { { 0.1, 0.25, 0.5, 0.75 } };
 	SDL_SetRenderDrawColor(sdl_renderer, _bg_color.r, _bg_color.g, _bg_color.b, _bg_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_bg_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _sky_color.r, _sky_color.g, _sky_color.b, _sky_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_sky_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _ground_color.r, _ground_color.g, _ground_color.b, _ground_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_ground_rect);
-	for (auto& hill : _world->hills)
+	for (auto hill : _world->hills)
 	{
 		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
-		SDL_Rect hill_rect = { hill.point.x, _hills_rect.y + (hill.point.y * _hills_rect.h), _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+		SDL_Rect hill_rect = { hill.x_channel * 8 * _scaling, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+		hill_rect.x -= camera.view_rect.x * y_channel_speeds[hill.y_channel];
 		//debug({ "Hill rect X:", std::to_string(hill_rect.x), " Y:", std::to_string(hill_rect.y) });
 		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 	}
@@ -310,11 +308,25 @@ RadarSprite::RadarSprite(Renderer* renderer)
 {
 	_scaling = renderer->scaling;
 	_radar_rect = { 64 * _scaling, 156 * _scaling, 128 * _scaling, 36 * _scaling };
+	_view_points = { {
+		{ 56 * _scaling, 0 * _scaling },
+		{ 70 * _scaling, 0 * _scaling },
+		{ 56 * _scaling, 34 * _scaling },
+		{ 70 * _scaling, 34 * _scaling }
+	} };
 	_radar_color = renderer->coco_palette.getColor(red);
+	_point_color = renderer->coco_palette.getColor(yellow);
 }
 
-void RadarSprite::render(SDL_Renderer* sdl_renderer)
+void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 {
 	SDL_SetRenderDrawColor(sdl_renderer, _radar_color.r, _radar_color.g, _radar_color.b, _radar_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_radar_rect);
+
+	SDL_SetRenderDrawColor(sdl_renderer, _point_color.r, _point_color.g, _point_color.b, _radar_color.a);
+	for (auto& vp : _view_points)
+	{
+		SDL_Rect point_rect = { _radar_rect.x + vp.x, _radar_rect.y + vp.y, 2 * _scaling, 2 * _scaling };
+		SDL_RenderFillRect(sdl_renderer, &point_rect);
+	}
 }

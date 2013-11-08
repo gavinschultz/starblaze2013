@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <vector>
 #include <unordered_map>
+#include <array>
 #include <memory>
 #include "Phys.h"
 #include <memory>
@@ -16,6 +17,20 @@ public:
 	int h;
 };
 
+class Camera
+{
+public:
+	Camera(const SDL_Rect& window_rect, const SDL_Rect& focus_rect);
+	SDL_Rect view_rect;
+	//SDL_Rect prev_view_rect;
+	SDL_Rect focus_rect;
+	Point2Di focus_point;
+	Vector2Di focus_point_vel;
+	Point2Di prev_focus_point;
+
+	//uint32_t wrap_x;
+};
+
 class Sprite
 {
 protected:
@@ -23,7 +38,7 @@ protected:
 public:
 	Sprite();
 	~Sprite();
-	virtual void render(SDL_Renderer* sdlRenderer) = 0;
+	virtual void render(SDL_Renderer* sdlRenderer, const Camera& camera) = 0;
 };
 
 class SpriteRegister
@@ -97,15 +112,14 @@ private:
 	void renderGrid();
 	void init();
 public:
-	Renderer();
 	Renderer(int screen_width, int screen_height, float scaling);
-	~Renderer();
 	SpriteRegister sprite_register;
 	CoCoPalette coco_palette;
-	void render();
+	void render(Camera* camera);
 	SDL_Texture* loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect);
+
 	Window window;
-	float scaling;
+	uint32_t scaling;
 	bool is_fullscreen = false;
 	bool is_grid_visible = false;
 	void toggleFullscreen(bool state);
@@ -136,8 +150,8 @@ private:
 public:
 	ShipSprite(Renderer* renderer, Ship* ship);
 	~ShipSprite();
-	void render(SDL_Renderer* sdlRenderer);
-	bool smooth_animation = true;
+	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
+	bool smooth_animation;
 };
 
 class BGSprite : public Sprite
@@ -159,17 +173,19 @@ private:
 public:
 	BGSprite(Renderer* renderer, World* world);
 	~BGSprite();
-	void render(SDL_Renderer* sdlRenderer);
+	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
 };
 
 class RadarSprite : public Sprite
 {
 private:
 	SDL_Rect _radar_rect;
+	std::array<Point2D, 4> _view_points;
 	SDL_Color _radar_color;
+	SDL_Color _point_color;
 public:
 	RadarSprite(Renderer* renderer);
-	void render(SDL_Renderer* sdlRenderer);
+	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
 };
 
 extern std::unique_ptr<Renderer> renderer;

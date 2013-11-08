@@ -13,7 +13,6 @@ public:
 	Vector2D max_ship_motion;
 	Vector2D min_ship_motion_threshold_vel;
 	double min_ship_motion_threshold_secs;
-	bool smooth_motion = true;
 	SDL_Rect ship_limits;
 	float mouse_sensitivity;
 };

@@ -11,7 +11,8 @@ class Ship
 public:
 	State2D current_state;
 	State2D prev_state;
-	State2D alpha_state;
+	Point2D alpha_pos;
+	Point2D prev_alpha_pos;
 	double secs_at_slow_vel_x{ 0.0 };
 	double secs_at_slow_vel_y{ 0.0 };
 	SDL_Rect bounding_box;
@@ -19,13 +20,17 @@ public:
 	double altitude{ 0.0 };
 	bool isGearDown();
 	const double takeoff_speed{ 250.0 };
+	double max_thrust{ 1500.0 };
+	double weight{ 1.0 };
+
 };
 
 class Hill
 {
 public:
 	int type;
-	Point2D point;
+	int x_channel;
+	int y_channel;
 };
 
 class World
