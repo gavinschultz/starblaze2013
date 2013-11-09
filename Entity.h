@@ -31,14 +31,16 @@ public:
 	int type;
 	int x_channel;
 	int y_channel;
+	double x{ 0.0 };
 };
 
 class World
 {
 public:
 	World(int hill_count = 100);
-	double w{ 1024.0 * 16 };	// 1024 * 16
+	double w{ 1024.0 / 2 };	// 1024 * 16
 	std::vector<Hill> hills;
+	Hill* hill;
 };
 
 class EntityRegister
@@ -53,3 +55,5 @@ private:
 	std::shared_ptr<Ship> _ship;
 	int _ship_count = 3;
 };
+
+extern std::unique_ptr<World> world;

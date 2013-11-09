@@ -192,7 +192,7 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 {
 	SDL_RendererFlip flip = _ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
-	
+
 	SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 
 	if (smooth_animation)
@@ -287,21 +287,32 @@ BGSprite::~BGSprite()
 void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 {
 	const std::array<int, 4> y_channel_coords = { { 0 - _hills_texture_rect.h * _scaling, 9 * _scaling, 17 * _scaling, 25 * _scaling } };
-	const std::array<double, 4> y_channel_speeds = { { 0.1, 0.25, 0.5, 0.75 } };
+	const std::array<double, 4> y_channel_speeds = { { 0.1, 0.25, 0.5, 1 } };
 	SDL_SetRenderDrawColor(sdl_renderer, _bg_color.r, _bg_color.g, _bg_color.b, _bg_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_bg_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _sky_color.r, _sky_color.g, _sky_color.b, _sky_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_sky_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _ground_color.r, _ground_color.g, _ground_color.b, _ground_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_ground_rect);
-	for (auto hill : _world->hills)
-	{
-		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
-		SDL_Rect hill_rect = { hill.x_channel * 8 * _scaling, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-		hill_rect.x -= camera.view_rect.x * y_channel_speeds[hill.y_channel];
-		//debug({ "Hill rect X:", std::to_string(hill_rect.x), " Y:", std::to_string(hill_rect.y) });
-		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
-	}
+	//for (auto hill : _world->hills)
+	//{
+	//	_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
+	//	SDL_Rect hill_rect = { hill.x_channel * 8 * _scaling, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+	//	hill_rect.x -= camera.view_rect.x * y_channel_speeds[hill.y_channel];
+	//	//debug({ "Hill rect X:", std::to_string(hill_rect.x), " Y:", std::to_string(hill_rect.y) });
+	//	SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
+	//}
+
+	Hill* hill = _world->hill;
+	SDL_Rect hill_rect = { hill->x * _scaling, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+	hill_rect.x -= camera.view_rect.x;
+	//debug({ "hill_rect.x:", std::to_string(hill_rect.x), " camera.view_rect.x:", std::to_string(camera.view_rect.x), " world.w:", std::to_string(world->w * _scaling) });
+	/*if (camera.view_rect.x + camera.view_rect.w > world->w * _scaling)
+		hill_rect.x += world->w * _scaling;*/
+	double wrap_factor = world->w * _scaling * ((camera.view_rect.x + camera.view_rect.w) / (int)(world->w * _scaling));
+	//debug({ "world->w * a/b = ", std::to_string(world->w * _scaling), " * ", std::to_string(camera.view_rect.x + camera.view_rect.w), "/", std::to_string((int)(world->w * _scaling)), " = ", std::to_string(wrap_factor) });
+	hill_rect.x += wrap_factor;
+	SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 }
 
 RadarSprite::RadarSprite(Renderer* renderer)

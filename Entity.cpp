@@ -58,4 +58,7 @@ World::World(int hill_count)
 		hill.type = rnd_type();
 		hills.push_back(hill);
 	}
+	hill = new Hill();
+	hill->type = 3;
+	hill->x = 128.0 - 48.0;
 }

@@ -24,6 +24,7 @@ void integrateAlpha(double alpha);
 std::unique_ptr<Game> game;
 std::unique_ptr<Timer> timer;
 std::unique_ptr<Renderer> renderer;
+std::unique_ptr<World> world;
 
 int main(int argc, char* args[])
 {
@@ -32,6 +33,7 @@ int main(int argc, char* args[])
 	game = std::unique_ptr<Game>{new Game()};
 	timer = std::unique_ptr<Timer>{new Timer()};
 	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4.0)};
+	world = std::unique_ptr<World>{new World(500)};
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
 	camera.view_rect.x = -camera.focus_rect.x;
 	camera.focus_rect.x = 0;
@@ -42,8 +44,7 @@ int main(int argc, char* args[])
 	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 * renderer->scaling };
 
 	// Load assets
-	World world{ 500 };
-	BGSprite* bg_sprite = new BGSprite(renderer.get(), &world);
+	BGSprite* bg_sprite = new BGSprite(renderer.get(), world.get());
 	renderer->sprite_register.registerSprite(bg_sprite);
 
 	Ship* s = new Ship();
@@ -189,7 +190,7 @@ bool handleEvent(SDL_Event* pevent)
 
 		mousemotion = pevent->motion;
 		//debug({ "Mouse move Xrel:", std::to_string(mousemotion.xrel), " Yrel:", std::to_string(mousemotion.yrel) });
-		debug({"Vel x:", std::to_string(ship->current_state.vel.x), " acc x:", std::to_string(ship->current_state.acc.x)});
+		debug({ "Vel x:", std::to_string(ship->current_state.vel.x), " acc x:", std::to_string(ship->current_state.acc.x) });
 		if ((ship->current_state.vel.x > 0.0 && ship->current_state.acc.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.acc.x < 0.0))
 		{
 			thrust_multiplier = forward_thrust_multiplier;
@@ -253,7 +254,7 @@ void integrate(double delta_time, double dt)
 
 
 	double dist = (ship->current_state.vel.x * dt) + (accel * 0.5 * dt * dt);
-	debug({ "Thrust:", std::to_string(ship->current_state.thrust.x), " proposed vel x:", std::to_string(vel), " dist x:", std::to_string(dist), " accel x:", std::to_string(accel), "m/s/s current: ", std::to_string(ship->current_state.vel.x) });
+	//debug({ "Thrust:", std::to_string(ship->current_state.thrust.x), " proposed vel x:", std::to_string(vel), " dist x:", std::to_string(dist), " accel x:", std::to_string(accel), "m/s/s current: ", std::to_string(ship->current_state.vel.x) });
 
 	ship->current_state.acc.x = accel;
 	ship->current_state.vel.x = vel;
@@ -311,6 +312,12 @@ void integrate(double delta_time, double dt)
 	else
 	{
 		ship->secs_at_slow_vel_y = 0.0;
+	}
+
+	debug({ "ship x:", std::to_string(ship->current_state.pos.x), " world w:", std::to_string(world->w) });
+	if (ship->current_state.pos.x > world->w)
+	{
+		ship->current_state.pos.x -= world->w;
 	}
 
 	//debug({ "Current x/limit:", std::to_string(ship->current_state.pos.x), "/", std::to_string(game->ship_limits.x), "/", std::to_string(game->ship_limits.x + game->ship_limits.w), " Current y:", std::to_string(ship->current_state.pos.y) });
