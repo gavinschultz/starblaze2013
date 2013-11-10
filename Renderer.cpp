@@ -60,7 +60,7 @@ void Renderer::init()
 		console_debug({ "TTF_Init: %s\n", TTF_GetError() });
 		exit(2);
 	}
-	_font = TTF_OpenFont("ArkitechMedium.ttf", 16);
+	_font = TTF_OpenFont("DroidSans.ttf", 16);
 	if (!_font) {
 		console_debug({ "TTF_OpenFont: %s\n", TTF_GetError() });
 		exit(3);
@@ -159,7 +159,7 @@ void Renderer::renderGrid()
 void Renderer::renderText(const std::string text, uint32_t x, uint32_t y)
 {
 	SDL_Color text_color = { 0, 0, 0 };
-	SDL_Surface* text_surface = TTF_RenderText_Solid(_font, text.c_str(), text_color);
+	SDL_Surface* text_surface = TTF_RenderText_Blended(_font, text.c_str(), text_color);
 	SDL_Rect text_texture_rect = { 0, 0, text_surface->w, text_surface->h };
 	SDL_Rect text_rect = { x, y, text_surface->w, text_surface->h };
 	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(sdlRenderer, text_surface);
@@ -191,7 +191,7 @@ void Renderer::renderDebug(const Debug& debug)
 		this->renderText(text, 50, y);
 		TTF_SizeText(_font, text.c_str(), &text_w, &text_h);
 		max_text_w = std::max(max_text_w, text_w);
-		y += font_height +4;
+		y += font_height + 4;
 	}
 
 	y = initial_y;
@@ -264,7 +264,10 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
 	//SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
-	SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera.view_rect.x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+	int camera_view_rect_rel_x = camera.focus_rect.x - (48 * _scaling);
+	//debug->set("camera.view_rect.x", camera.view_rect.x);
+	debug->set("camera_view_rect_rel_x", camera_view_rect_rel_x);
+	SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 	//debug({ "ship rect x/y: ", std::to_string(ship_rect.x), " / ", std::to_string(ship_rect.y), " ship alpha_x/x: ", std::to_string(_ship->alpha_pos.x), " / ", std::to_string(_ship->current_state.pos.x) });
 	if (smooth_animation)
 		_stripe_texture_rect.y = (timer->getTotalFrames() - 1) % 32;				// smooth scrolling stripe
@@ -358,31 +361,52 @@ BGSprite::~BGSprite()
 void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 {
 	const std::array<int, 4> y_channel_coords = { { 0 - _hills_texture_rect.h * _scaling, 9 * _scaling, 17 * _scaling, 25 * _scaling } };
-	const std::array<double, 4> y_channel_speeds = { { 0.1, 0.25, 0.5, 1 } };
+	const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };// {{ 0.1, 0.25, 0.5, 1 } };
 	SDL_SetRenderDrawColor(sdl_renderer, _bg_color.r, _bg_color.g, _bg_color.b, _bg_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_bg_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _sky_color.r, _sky_color.g, _sky_color.b, _sky_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_sky_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _ground_color.r, _ground_color.g, _ground_color.b, _ground_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_ground_rect);
-	//for (auto hill : _world->hills)
-	//{
-	//	_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
-	//	SDL_Rect hill_rect = { hill.x_channel * 8 * _scaling, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-	//	hill_rect.x -= camera.view_rect.x * y_channel_speeds[hill.y_channel];
-	//	//debug({ "Hill rect X:", std::to_string(hill_rect.x), " Y:", std::to_string(hill_rect.y) });
-	//	SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
-	//}
+
+	//double wrap_factor = world->w * _scaling * ((camera.view_rect.x + camera.view_rect.w) / (int)(world->w * _scaling));
+	double wrap_factor;
+	//debug->set("wrap factor", wrap_factor);
+	for (auto hill : _world->hills)
+	{
+		bool on_other_side_of_wrap_line = (int)(std::abs(hill.x*_scaling - camera.view_rect.x)) > ((world->w*_scaling) / 2);
+		if (!on_other_side_of_wrap_line)
+			wrap_factor = 0.0;
+		else
+			wrap_factor = world->w * _scaling;
+
+		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
+		SDL_Rect hill_rect = { hill.x_channel * 8 * _scaling, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+		hill_rect.x += wrap_factor - camera.view_rect.x * y_channel_speeds[hill.y_channel];
+		//debug->set("hill formula", std::to_string(hill_rect.x) + " - " + std::to_string(camera.view_rect.x) + " * " + std::to_string(y_channel_speeds[hill.y_channel]) + " + " + std::to_string(wrap_factor));
+		//debug->set("hill rect X", hill_rect.x);
+		//console_debug({ "Hill rect X:", std::to_string(hill_rect.x), " cam:", std::to_string(hill_rect.y) });
+		//SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
+	}
 
 	Hill* hill = _world->hill;
+	bool on_other_side_of_wrap_line = (int)(std::abs(hill->x*_scaling - camera.view_rect.x)) > ((world->w*_scaling) / 2);
+	debug->set("(hill.x - cam.view.x) > world.w", "(" + std::to_string(hill->x*_scaling) + " - " + std::to_string(camera.view_rect.x) + ") > " + std::to_string((world->w*_scaling) / 2));
+	if (!on_other_side_of_wrap_line)
+		wrap_factor = 0.0;
+	else
+		wrap_factor = world->w * _scaling;
+	
+	debug->set("wrap factor", wrap_factor);
 	SDL_Rect hill_rect = { hill->x * _scaling, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-	hill_rect.x -= camera.view_rect.x;
-	//debug({ "hill_rect.x:", std::to_string(hill_rect.x), " camera.view_rect.x:", std::to_string(camera.view_rect.x), " world.w:", std::to_string(world->w * _scaling) });
+	hill_rect.x += wrap_factor - camera.view_rect.x;
+	debug->set("hill_rect.x", hill_rect.x);
 	/*if (camera.view_rect.x + camera.view_rect.w > world->w * _scaling)
 		hill_rect.x += world->w * _scaling;*/
-	double wrap_factor = world->w * _scaling * ((camera.view_rect.x + camera.view_rect.w) / (int)(world->w * _scaling));
-	//debug({ "world->w * a/b = ", std::to_string(world->w * _scaling), " * ", std::to_string(camera.view_rect.x + camera.view_rect.w), "/", std::to_string((int)(world->w * _scaling)), " = ", std::to_string(wrap_factor) });
-	hill_rect.x += wrap_factor;
+
+	//double wrap_factor = camera.view_rect.w;
+	//console_debug({ "world->w * a/b = ", std::to_string(world->w * _scaling), " * ", std::to_string(camera.view_rect.x + camera.view_rect.w), "/", std::to_string((int)(world->w * _scaling)), " = ", std::to_string(wrap_factor) });
+	//hill_rect.x += wrap_factor;
 	SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 }
 

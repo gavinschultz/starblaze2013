@@ -55,10 +55,15 @@ World::World(int hill_count)
 		Hill hill = Hill();
 		hill.y_channel = rnd_hill_y_channel();
 		hill.x_channel = rnd_hill_x_channel();
+		hill.x = hill.x_channel * 8;
 		hill.type = rnd_type();
 		hills.push_back(hill);
 	}
+	for (auto& h : hills)
+	{
+		console_debug({"Hill X: ", std::to_string(h.x) });
+	}
 	hill = new Hill();
 	hill->type = 3;
-	hill->x = 128.0 - 48.0;
+	hill->x = this->w - 10.0;
 }

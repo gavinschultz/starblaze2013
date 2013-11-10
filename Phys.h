@@ -5,7 +5,6 @@ struct Point2D
 {
 	double x;
 	double y;
-	//Point2D() : x(0.0), y(0.0) {};
 	Point2D(double x = 0.0, double y = 0.0) : x(x), y(y) {};
 };
 
@@ -48,4 +47,5 @@ struct State2D
 	Vector2D vel;
 	Vector2D acc;
 	Vector2D thrust;
+	int loop_count{ 0 };
 };

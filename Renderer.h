@@ -27,6 +27,8 @@ public:
 	//SDL_Rect prev_view_rect;
 	SDL_Rect focus_rect;
 	Point2Di focus_point;
+	int focus_loop_count{ 0 };
+	int prev_focus_loop_count{ 0 };
 	Vector2Di focus_point_vel;
 	Point2Di prev_focus_point;
 
