@@ -32,13 +32,17 @@ Renderer::Renderer(int screen_width, int screen_height, float scaling)
 	init();
 }
 
+Renderer::~Renderer()
+{
+	TTF_CloseFont(_font);
+	TTF_Quit();
+}
+
 void Renderer::init()
 {
 	sdlWindow = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL);
 	toggleFullscreen(is_fullscreen);
-	debug({ SDL_GetError() });
 	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-	debug({ SDL_GetError() });
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	SDL_RenderSetLogicalSize(sdlRenderer, 1024, 768);
 	//SDL_RenderSetLogicalSize(sdlRenderer, 256, 192);
@@ -48,8 +52,18 @@ void Renderer::init()
 	{
 		// GLEW failed!
 		std::string glew_error = (char*)glewGetErrorString(glew_init);
-		debug({ "GLEW initialization error: ", glew_error });
+		console_debug({ "GLEW initialization error: ", glew_error });
 		exit(1);
+	}
+
+	if (TTF_Init() == -1) {
+		console_debug({ "TTF_Init: %s\n", TTF_GetError() });
+		exit(2);
+	}
+	_font = TTF_OpenFont("ArkitechMedium.ttf", 16);
+	if (!_font) {
+		console_debug({ "TTF_OpenFont: %s\n", TTF_GetError() });
+		exit(3);
 	}
 }
 
@@ -70,7 +84,11 @@ void Renderer::toggleGrid(bool state)
 SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect)
 {
 	SDL_Surface* sdlSurface = IMG_Load(imagePath.c_str());
-	debug({ SDL_GetError() });
+	if (!sdlSurface)
+	{
+		console_debug({ SDL_GetError() });
+		return nullptr;
+	}
 	SDL_Texture* sdlTexture = SDL_CreateTextureFromSurface(sdlRenderer, sdlSurface);
 	SDL_FreeSurface(sdlSurface);
 	SDL_SetTextureBlendMode(sdlTexture, SDL_BLENDMODE_BLEND);
@@ -95,7 +113,11 @@ void Renderer::render(Camera* camera)
 	}
 
 	if (is_grid_visible)
+	{
 		renderGrid();
+		renderFPS((int)timer->getFrameRate());
+		renderDebug(*debug.get());
+	}
 
 	SDL_RenderPresent(sdlRenderer);
 }
@@ -133,6 +155,54 @@ void Renderer::renderGrid()
 	SDL_RenderDrawLine(sdlRenderer, 0, window.h - 1, window.w, window.h - 1);
 	glDisable(GL_LINE_STIPPLE);
 }
+
+void Renderer::renderText(const std::string text, uint32_t x, uint32_t y)
+{
+	SDL_Color text_color = { 0, 0, 0 };
+	SDL_Surface* text_surface = TTF_RenderText_Solid(_font, text.c_str(), text_color);
+	SDL_Rect text_texture_rect = { 0, 0, text_surface->w, text_surface->h };
+	SDL_Rect text_rect = { x, y, text_surface->w, text_surface->h };
+	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(sdlRenderer, text_surface);
+	SDL_FreeSurface(text_surface);
+	SDL_RenderCopy(sdlRenderer, text_texture, &text_texture_rect, &text_rect);
+	SDL_DestroyTexture(text_texture);
+}
+
+void Renderer::renderFPS(int fps)
+{
+	static int cached_fps;
+	if (timer->getTotalFrames() % 10 == 0)
+		cached_fps = fps;
+	this->renderText("FPS:" + std::to_string(fps), 50, 50);
+}
+
+void Renderer::renderDebug(const Debug& debug)
+{
+	//TODO: probably horribly inefficient
+
+	const int initial_y = 100;
+	int y = initial_y;
+	int text_w, text_h;
+	int max_text_w = 0;
+	int font_height = TTF_FontHeight(_font);
+	for (auto& i : debug.items)
+	{
+		std::string text = i->label + ": ";
+		this->renderText(text, 50, y);
+		TTF_SizeText(_font, text.c_str(), &text_w, &text_h);
+		max_text_w = std::max(max_text_w, text_w);
+		y += font_height +4;
+	}
+
+	y = initial_y;
+	for (auto& i : debug.items)
+	{
+		this->renderText(i->value, max_text_w + 50, y);
+		y += font_height + 4;
+	}
+}
+
+
 
 SpriteRegister::SpriteRegister()
 {
@@ -193,8 +263,9 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_RendererFlip flip = _ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
-	SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
-
+	//SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+	SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera.view_rect.x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+	//debug({ "ship rect x/y: ", std::to_string(ship_rect.x), " / ", std::to_string(ship_rect.y), " ship alpha_x/x: ", std::to_string(_ship->alpha_pos.x), " / ", std::to_string(_ship->current_state.pos.x) });
 	if (smooth_animation)
 		_stripe_texture_rect.y = (timer->getTotalFrames() - 1) % 32;				// smooth scrolling stripe
 	else

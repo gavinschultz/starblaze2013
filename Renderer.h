@@ -9,6 +9,8 @@
 #include "timer.h"
 #include "Entity.h"
 #include "Phys.h"
+#include <SDL_ttf.h>
+#include "Debug.h"
 
 class Window
 {
@@ -110,9 +112,14 @@ private:
 	SDL_Renderer* sdlRenderer;
 	SDL_Rect _viewport_rect;
 	void renderGrid();
+	void renderFPS(int fps);
+	void renderDebug(const Debug& debug);
+	void renderText(const std::string text, uint32_t x, uint32_t y);
 	void init();
+	TTF_Font* _font;
 public:
 	Renderer(int screen_width, int screen_height, float scaling);
+	~Renderer();
 	SpriteRegister sprite_register;
 	CoCoPalette coco_palette;
 	void render(Camera* camera);

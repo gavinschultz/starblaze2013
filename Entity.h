@@ -12,7 +12,7 @@ public:
 	State2D current_state;
 	State2D prev_state;
 	Point2D alpha_pos;
-	Point2D prev_alpha_pos;
+	//Point2D prev_alpha_pos;
 	double secs_at_slow_vel_x{ 0.0 };
 	double secs_at_slow_vel_y{ 0.0 };
 	SDL_Rect bounding_box;
@@ -22,7 +22,8 @@ public:
 	const double takeoff_speed{ 250.0 };
 	double max_thrust{ 1500.0 };
 	double weight{ 1.0 };
-
+	double max_velocity{ 1000.0 };
+	double max_lift{ 800.0 };
 };
 
 class Hill

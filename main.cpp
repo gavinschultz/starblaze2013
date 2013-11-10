@@ -25,6 +25,7 @@ std::unique_ptr<Game> game;
 std::unique_ptr<Timer> timer;
 std::unique_ptr<Renderer> renderer;
 std::unique_ptr<World> world;
+std::unique_ptr<Debug> debug;
 
 int main(int argc, char* args[])
 {
@@ -33,15 +34,14 @@ int main(int argc, char* args[])
 	game = std::unique_ptr<Game>{new Game()};
 	timer = std::unique_ptr<Timer>{new Timer()};
 	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4.0)};
+	debug = std::unique_ptr<Debug>{new Debug()};
+#ifdef _DEBUG
+	renderer->toggleGrid(true);
+#endif
 	world = std::unique_ptr<World>{new World(500)};
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
-	camera.view_rect.x = -camera.focus_rect.x;
 	camera.focus_rect.x = 0;
-	game->max_ship_motion = { 1000.0, 800.0 };
-	game->min_ship_motion_threshold_vel = { 30.0, 30.0 };
-	game->min_ship_motion_threshold_secs = 0.6;
-	game->mouse_sensitivity = 3.5;
-	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 * renderer->scaling };
+	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 };
 
 	// Load assets
 	BGSprite* bg_sprite = new BGSprite(renderer.get(), world.get());
@@ -49,7 +49,7 @@ int main(int argc, char* args[])
 
 	Ship* s = new Ship();
 	s->direction = ShipDirection::right;
-	s->bounding_box = { 0, 0, 32 * renderer->scaling, 8 * renderer->scaling };	// TODO: scaling real-time
+	s->bounding_box = { 0, 0, 32, 8 };	// TODO: scaling real-time
 	game->entity_register.registerEntity(s);
 	ShipSprite* shipSprite = new ShipSprite(renderer.get(), s);
 	renderer->sprite_register.registerSprite(shipSprite);
@@ -70,7 +70,7 @@ int main(int argc, char* args[])
 
 	bool quit = false;
 	double accumulator = 0;
-	const double dt = 60.0 / 1000.0;
+	const double dt = 1.0 / 60.0;
 	SDL_Event pevent;
 
 	while (!quit)
@@ -79,7 +79,7 @@ int main(int argc, char* args[])
 		auto delta_time = timer->getLastFrameDuration();
 		if (delta_time > 0.25)
 		{
-			debug({ "Delta exceeded max" });
+			console_debug({ "Delta exceeded max" });
 			delta_time = 0.25;
 		}
 
@@ -98,11 +98,6 @@ int main(int argc, char* args[])
 		if (quit)
 			break;
 
-		/*ship->current_state.vel.x += ship->current_state.thrust.x;
-		ship->current_state.vel.y += ship->current_state.thrust.y;
-		ship->current_state.acc.x = (ship->current_state.vel.x - ship->prev_state.vel.x) * delta_time;
-		ship->current_state.acc.y = (ship->current_state.vel.y - ship->prev_state.vel.y) * delta_time;*/
-
 		accumulator += delta_time;
 		while (accumulator >= dt)
 		{
@@ -114,30 +109,29 @@ int main(int argc, char* args[])
 		const double alpha = accumulator / dt;
 		integrateAlpha(alpha);
 
-		camera.focus_point = { std::lround(ship->alpha_pos.x), std::lround(ship->alpha_pos.y) };
-		camera.focus_point_vel.x = std::lround(ship->alpha_pos.x - ship->prev_alpha_pos.x);
-		//camera.view_rect.x = (int32_t)ship->alpha_state.pos.x - game->ship_limits.x;
-		//camera.focus_rect.x = camera.view_rect.x + 48 * renderer->scaling;
-		/*if (ship->direction == ShipDirection::right)
-			camera.view_rect.x = ship->alpha_state.pos.x + game->ship_limits.x;
-			else
-			camera.view_rect.x = ship->alpha_state.pos.x + game->ship_limits.x + game->ship_limits.w;*/
-		//int32_t camera_vel_x = camera.view_rect.x - camera.prev_view_rect.x;
+		camera.prev_focus_point = camera.focus_point;
+		camera.focus_point = { std::lround(ship->alpha_pos.x * renderer->scaling), std::lround(ship->alpha_pos.y * renderer->scaling) };
+		//camera.focus_point_vel.x = std::lround(ship->alpha_pos.x * renderer->scaling - ship->prev_alpha_pos.x * renderer->scaling);
+		camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x;
 
-		//debug({ "camera view/focus_rect/focus_point x:", std::to_string(camera.view_rect.x), "/", std::to_string(camera.focus_rect.x), "/", std::to_string(camera.focus_point.x), " vel x:", std::to_string(camera.focus_point_vel.x) });
+		debug->set("cam view X", camera.view_rect.x);
+		debug->set("cam focus_rect X", camera.focus_rect.x);
+		debug->set("cam focus point X", camera.focus_point.x);
+		debug->set("cam vel X", camera.focus_point_vel.x);
+		debug->set("ship alpha X", ship->alpha_pos.x);
+		debug->set("ship current X", ship->current_state.pos.x);
 
 		int32_t turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 5L);
-		//turn_speed = (int32_t)std::max(std::abs(std::lround(camera.focus_point_vel.x * 1.0)), 2L);
 		if (ship->direction == ShipDirection::right)
 		{
 			camera.focus_rect.x = std::min(camera.focus_rect.x + camera.focus_point_vel.x + turn_speed, camera.focus_point.x);
 		}
 		else
 		{
-			camera.focus_rect.x = std::max(camera.focus_rect.x + camera.focus_point_vel.x - turn_speed, camera.focus_point.x + ship->bounding_box.w - camera.focus_rect.w);
+			camera.focus_rect.x = std::max(camera.focus_rect.x + camera.focus_point_vel.x - turn_speed, camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling) - camera.focus_rect.w);
 		}
 		camera.view_rect.x = camera.focus_rect.x - (48 * renderer->scaling);
-
+		
 		renderer->render(&camera);
 
 		timer->endFrame();
@@ -190,16 +184,14 @@ bool handleEvent(SDL_Event* pevent)
 
 		mousemotion = pevent->motion;
 		//debug({ "Mouse move Xrel:", std::to_string(mousemotion.xrel), " Yrel:", std::to_string(mousemotion.yrel) });
-		debug({ "Vel x:", std::to_string(ship->current_state.vel.x), " acc x:", std::to_string(ship->current_state.acc.x) });
+		//debug({ "Vel x:", std::to_string(ship->current_state.vel.x), " acc x:", std::to_string(ship->current_state.acc.x) });
 		if ((ship->current_state.vel.x > 0.0 && ship->current_state.acc.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.acc.x < 0.0))
 		{
-			thrust_multiplier = forward_thrust_multiplier;
-			//debug({ "Forward thrust multiplier" });
+			thrust_multiplier = forward_thrust_multiplier;;
 		}
 		else
 		{
 			thrust_multiplier = reverse_thrust_multiplier;
-			//debug({ "Reverse thrust multiplier" });
 		}
 		ship->current_state.thrust.x = mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier;
 		ship->current_state.thrust.y = mousemotion.yrel * game->mouse_sensitivity * 4.5;
@@ -234,12 +226,10 @@ void integrate(double delta_time, double dt)
 {
 	Ship* ship = game->entity_register.getShip();
 
-	//double accel = std::max(-1000.0, ship->current_state.thrust.x * 50.0);
 	if (ship->current_state.thrust.x > ship->max_thrust)
 		ship->current_state.thrust.x = ship->max_thrust;
 	else if (ship->current_state.thrust.x < -ship->max_thrust)
 		ship->current_state.thrust.x = -ship->max_thrust;
-	//ship->current_state.thrust.x = 50.0;
 
 	double accel = ship->current_state.thrust.x / ship->weight;
 	double vel = ship->current_state.vel.x + accel * dt;
@@ -260,21 +250,13 @@ void integrate(double delta_time, double dt)
 	ship->current_state.vel.x = vel;
 	ship->current_state.vel.y += ship->current_state.thrust.y;
 	ship->current_state.pos.x += dist;
-	//ship->current_state.pos.x += ship->current_state.vel.x * dt;
 	ship->current_state.pos.y += ship->current_state.vel.y * dt;
 
-	/*if (ship->current_state.vel.x > game->max_ship_motion.x) ship->current_state.vel.x = game->max_ship_motion.x;
-	if (ship->current_state.vel.x < -game->max_ship_motion.x) ship->current_state.vel.x = -game->max_ship_motion.x;*/
-	if (ship->current_state.vel.y > game->max_ship_motion.y) ship->current_state.vel.y = game->max_ship_motion.y;
-	if (ship->current_state.vel.y < -game->max_ship_motion.y) ship->current_state.vel.y = -game->max_ship_motion.y;
+	if (ship->current_state.vel.y > ship->max_lift) ship->current_state.vel.y = ship->max_lift;
+	if (ship->current_state.vel.y < -ship->max_lift) ship->current_state.vel.y = -ship->max_lift;
 
 	ship->altitude = std::max(0.0, game->ship_limits.y + game->ship_limits.h - ship->current_state.pos.y - ship->bounding_box.h);
 	//debug({ "Altitude:", std::to_string(ship->altitude) });
-
-	/*if (ship->current_state.pos.x < game->ship_limits.x)
-		ship->current_state.pos.x = game->ship_limits.x;
-		else if (ship->current_state.pos.x + ship->bounding_box.w > game->ship_limits.x + game->ship_limits.w)
-		ship->current_state.pos.x = game->ship_limits.x + game->ship_limits.w - ship->bounding_box.w;*/
 
 	if (ship->current_state.pos.y < game->ship_limits.y)
 	{
@@ -287,51 +269,24 @@ void integrate(double delta_time, double dt)
 		ship->current_state.vel.y = 0.0;
 	}
 
-	/*if (std::abs(ship->current_state.vel.x) < game->min_ship_motion_threshold_vel.x)
-	{
-	ship->secs_at_slow_vel_x += delta_time;
-	if (ship->secs_at_slow_vel_x >= game->min_ship_motion_threshold_secs)
-	{
-	ship->current_state.vel.x = 0.0;
-	ship->secs_at_slow_vel_x = 0.0;
-	}
-	}
-	else
-	{
-	ship->secs_at_slow_vel_x = 0.0;
-	}*/
-	if (std::abs(ship->current_state.vel.y) < game->min_ship_motion_threshold_vel.y)
-	{
-		ship->secs_at_slow_vel_y += delta_time;
-		if (ship->secs_at_slow_vel_y >= game->min_ship_motion_threshold_secs)
-		{
-			ship->current_state.vel.y = 0.0;
-			ship->secs_at_slow_vel_y = 0.0;
-		}
-	}
-	else
-	{
-		ship->secs_at_slow_vel_y = 0.0;
-	}
-
-	debug({ "ship x:", std::to_string(ship->current_state.pos.x), " world w:", std::to_string(world->w) });
+	//debug({ "ship x:", std::to_string(ship->current_state.pos.x), " world w:", std::to_string(world->w) });
 	if (ship->current_state.pos.x > world->w)
 	{
 		ship->current_state.pos.x -= world->w;
 	}
 
-	//debug({ "Current x/limit:", std::to_string(ship->current_state.pos.x), "/", std::to_string(game->ship_limits.x), "/", std::to_string(game->ship_limits.x + game->ship_limits.w), " Current y:", std::to_string(ship->current_state.pos.y) });
-	//debug({ "Current vel X:", std::to_string(ship->current_state.vel.x), " prev vel X: ", std::to_string(ship->prev_state.vel.x), " Y:", std::to_string(ship->current_state.vel.y), " secs at X slow: ", std::to_string(ship->secs_at_slow_vel_x), "secs at Y slow: ", std::to_string(ship->secs_at_slow_vel_y) });
 	if (ship->current_state.vel.x > 0.0 || (ship->current_state.vel.x == 0.0 && ship->direction == ShipDirection::right))
 		ship->direction = ShipDirection::right;
 	else
 		ship->direction = ShipDirection::left;
+
+	//debug({ "integrate ship.current.x: ", std::to_string(ship->current_state.pos.x) });
 }
 
 void integrateAlpha(double alpha)
 {
 	Ship* ship = game->entity_register.getShip();
-	ship->prev_alpha_pos = ship->alpha_pos;
+	//ship->prev_alpha_pos = ship->alpha_pos;
 	ship->alpha_pos.x = ship->current_state.pos.x*alpha + ship->prev_state.pos.x*(1.0 - alpha);
 	ship->alpha_pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
 }

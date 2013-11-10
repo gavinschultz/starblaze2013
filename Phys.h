@@ -30,6 +30,18 @@ struct Vector2Di
 	Vector2Di(int32_t x = 0, int32_t y = 0) : x(x), y(y) {}
 };
 
+struct Rect
+{
+	int x, y;
+	int w, h;
+};
+
+struct Rectf
+{
+	double x, y;
+	double w, h;
+};
+
 struct State2D
 {
 	Point2D pos;
