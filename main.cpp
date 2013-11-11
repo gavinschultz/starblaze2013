@@ -40,7 +40,7 @@ int main(int argc, char* args[])
 #endif
 	world = std::unique_ptr<World>{new World(100)};
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
-	camera.focus_rect.x = 0;
+	//camera.focus_rect.x = +192;
 	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 };
 
 	// Load assets
@@ -63,7 +63,7 @@ int main(int argc, char* args[])
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	Ship* ship = game->entity_register.getShip();
-	ship->current_state.pos.x = 0.0;// game->ship_limits.x;
+	ship->current_state.pos.x = 48.0;// game->ship_limits.x;
 	ship->current_state.pos.y = game->ship_limits.y - ship->bounding_box.h;
 	ship->current_state.vel.x = 0.0;
 	ship->current_state.vel.y = 0.0;
@@ -111,6 +111,7 @@ int main(int argc, char* args[])
 
 		camera.prev_focus_point = camera.focus_point;
 		camera.prev_focus_loop_count = camera.focus_loop_count;
+		camera.prev_view_rect = camera.view_rect;
 		camera.focus_point = { std::lround(ship->alpha_pos.x * renderer->scaling), std::lround(ship->alpha_pos.y * renderer->scaling) };
 		camera.focus_loop_count = ship->current_state.loop_count;
 

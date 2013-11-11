@@ -65,5 +65,5 @@ World::World(int hill_count)
 	}
 	hill = new Hill();
 	hill->type = 3;
-	hill->x = this->w - 10.0;
+	hill->x = 25.0;
 }

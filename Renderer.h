@@ -32,6 +32,9 @@ public:
 	Vector2Di focus_point_vel;
 	Point2Di prev_focus_point;
 
+	SDL_Rect prev_view_rect;
+	int camera_loop_count{ 0 };
+
 	//uint32_t wrap_x;
 };
 

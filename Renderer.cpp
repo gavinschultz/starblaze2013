@@ -361,7 +361,8 @@ BGSprite::~BGSprite()
 void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 {
 	const std::array<int, 4> y_channel_coords = { { 0 - _hills_texture_rect.h * _scaling, 9 * _scaling, 17 * _scaling, 25 * _scaling } };
-	const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };// {{ 0.1, 0.25, 0.5, 1 } };
+	//const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };
+	const std::array<double, 4> y_channel_speeds = { 1, 1, 1, 1 };
 	SDL_SetRenderDrawColor(sdl_renderer, _bg_color.r, _bg_color.g, _bg_color.b, _bg_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_bg_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _sky_color.r, _sky_color.g, _sky_color.b, _sky_color.a);
@@ -386,19 +387,30 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 		//debug->set("hill formula", std::to_string(hill_rect.x) + " - " + std::to_string(camera.view_rect.x) + " * " + std::to_string(y_channel_speeds[hill.y_channel]) + " + " + std::to_string(wrap_factor));
 		//debug->set("hill rect X", hill_rect.x);
 		//console_debug({ "Hill rect X:", std::to_string(hill_rect.x), " cam:", std::to_string(hill_rect.y) });
-		//SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
+		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 	}
 
 	Hill* hill = _world->hill;
-	bool on_other_side_of_wrap_line = (int)(std::abs(hill->x*_scaling - camera.view_rect.x)) > ((world->w*_scaling) / 2);
-	debug->set("(hill.x - cam.view.x) > world.w", "(" + std::to_string(hill->x*_scaling) + " - " + std::to_string(camera.view_rect.x) + ") > " + std::to_string((world->w*_scaling) / 2));
+
+	double speed = 0.5;
+	double offset_at_zero = hill->x*_scaling;
+	double offset_at_camera_x = offset_at_zero - camera.view_rect.x*speed; // +(camera.focus_loop_count*camera.view_rect.x*speed);
+	bool on_other_side_of_wrap_line = std::abs(offset_at_camera_x) + camera.camera_loop_count*camera.view_rect.x*speed > ((world->w*_scaling) / 2.0);
+	//bool on_other_side_of_wrap_line = (int)(std::abs(offset_at_camera_x - camera.view_rect.x)) > ((world->w*_scaling) / 2);
+	
+	//bool on_other_side_of_wrap_line = (int)(std::abs(hill->x*_scaling - camera.view_rect.x)) > ((world->w*_scaling) / 2);
+	//debug->set("(hill.x - cam.view.x) > world.w", "(" + std::to_string(hill->x*_scaling) + " - " + std::to_string(camera.view_rect.x) + ") > " + std::to_string((world->w*_scaling) / 2));
 	if (!on_other_side_of_wrap_line)
 		wrap_factor = 0.0;
 	else
 		wrap_factor = world->w * _scaling;
 	
+	debug->set("on_other_side", std::to_string(on_other_side_of_wrap_line));
+	debug->set("offset_at_camera_0", offset_at_zero);
+	debug->set("offset_at_camera_x", offset_at_camera_x);
 	debug->set("wrap factor", wrap_factor);
-	SDL_Rect hill_rect = { hill->x * _scaling, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+	/*SDL_Rect hill_rect = { hill->x * _scaling, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };*/
+	SDL_Rect hill_rect = { offset_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 	hill_rect.x += wrap_factor - camera.view_rect.x;
 	debug->set("hill_rect.x", hill_rect.x);
 	/*if (camera.view_rect.x + camera.view_rect.w > world->w * _scaling)
