@@ -39,7 +39,7 @@ class World
 {
 public:
 	World(int hill_count = 100);
-	double w{ 256.0 * 4 };	// 1024 * 16
+	double w{ 256.0 * 16 };	// 1024 * 16
 	std::vector<Hill> hills;
 	Hill* hill;
 };

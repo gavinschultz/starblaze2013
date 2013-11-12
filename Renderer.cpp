@@ -265,8 +265,7 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 
 	//SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 	int camera_view_rect_rel_x = camera.focus_rect.x - (48 * _scaling);
-	//debug->set("camera.view_rect.x", camera.view_rect.x);
-	debug->set("camera_view_rect_rel_x", camera_view_rect_rel_x);
+	//debug->set("camera_view_rect_rel_x", camera_view_rect_rel_x);
 	SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 	//debug({ "ship rect x/y: ", std::to_string(ship_rect.x), " / ", std::to_string(ship_rect.y), " ship alpha_x/x: ", std::to_string(_ship->alpha_pos.x), " / ", std::to_string(_ship->current_state.pos.x) });
 	if (smooth_animation)
@@ -361,8 +360,8 @@ BGSprite::~BGSprite()
 void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 {
 	const std::array<int, 4> y_channel_coords = { { 0 - _hills_texture_rect.h * _scaling, 9 * _scaling, 17 * _scaling, 25 * _scaling } };
-	//const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };
-	const std::array<double, 4> y_channel_speeds = { 1, 1, 1, 1 };
+	const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };
+	//const std::array<double, 4> y_channel_speeds = { 1, 1, 1, 1 };
 	SDL_SetRenderDrawColor(sdl_renderer, _bg_color.r, _bg_color.g, _bg_color.b, _bg_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_bg_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _sky_color.r, _sky_color.g, _sky_color.b, _sky_color.a);
@@ -370,11 +369,9 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 	SDL_SetRenderDrawColor(sdl_renderer, _ground_color.r, _ground_color.g, _ground_color.b, _ground_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_ground_rect);
 
-	//double wrap_factor = world->w * _scaling * ((camera.view_rect.x + camera.view_rect.w) / (int)(world->w * _scaling));
-	double wrap_factor;
-	//debug->set("wrap factor", wrap_factor);
 	for (auto hill : _world->hills)
 	{
+		/*
 		bool on_other_side_of_wrap_line = (int)(std::abs(hill.x*_scaling - camera.view_rect.x)) > ((world->w*_scaling) / 2);
 		if (!on_other_side_of_wrap_line)
 			wrap_factor = 0.0;
@@ -384,14 +381,58 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
 		SDL_Rect hill_rect = { hill.x_channel * 8 * _scaling, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 		hill_rect.x += wrap_factor - camera.view_rect.x * y_channel_speeds[hill.y_channel];
-		//debug->set("hill formula", std::to_string(hill_rect.x) + " - " + std::to_string(camera.view_rect.x) + " * " + std::to_string(y_channel_speeds[hill.y_channel]) + " + " + std::to_string(wrap_factor));
-		//debug->set("hill rect X", hill_rect.x);
-		//console_debug({ "Hill rect X:", std::to_string(hill_rect.x), " cam:", std::to_string(hill_rect.y) });
-		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
+		*/
+
+		//int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, y_channel_speeds[hill.y_channel]);
+		//SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+		//SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 	}
 
 	Hill* hill = _world->hill;
 
+	double distance_factor = 0.25;
+	int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill->x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, distance_factor);
+	
+	/* latest working
+	double entity_x_at_zero = hill->x*_scaling;
+	double entity_width = _hills_texture_rect.w*_scaling;
+	double camera_x_abs = camera.view_rect.x;
+	double world_width = _world->w*_scaling;
+
+	double camera_x_rel;
+	if (camera_x_abs > world_width / 2)
+		camera_x_rel = camera_x_abs - world_width;
+	else
+		camera_x_rel = camera_x_abs;
+
+	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
+
+	if (entity_x_at_camera_x + entity_width > world_width / 2)
+		entity_x_at_camera_x -= world_width / 2;
+	*/
+	SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+
+	/*
+	double cam_rel_x;
+	double speed = 0.5;
+	if (camera.view_rect.x > (world->w*_scaling) / 2.0)
+		cam_rel_x = camera.view_rect.x - world->w*_scaling;
+	else
+		cam_rel_x = camera.view_rect.x;
+
+	debug->set("cam_rel_x", cam_rel_x);
+
+	double offset_at_camera_x = hill->x*_scaling - (cam_rel_x * speed);
+	SDL_Rect hill_rect = { offset_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+
+	if (hill_rect.x + hill_rect.w > world->w*_scaling / 2.0)
+		hill_rect.x -= world->w*_scaling / 2.0;
+
+	debug->set("offset_at_cam_x", offset_at_camera_x);
+	debug->set("hill_rect.x B", hill_rect.x);
+	*/
+
+	/*
 	double speed = 0.5;
 	double offset_at_zero = hill->x*_scaling;
 	double offset_at_camera_x = offset_at_zero - camera.view_rect.x*speed; // +(camera.focus_loop_count*camera.view_rect.x*speed);
@@ -405,14 +446,15 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 	else
 		wrap_factor = world->w * _scaling;
 	
-	debug->set("on_other_side", std::to_string(on_other_side_of_wrap_line));
 	debug->set("offset_at_camera_0", offset_at_zero);
 	debug->set("offset_at_camera_x", offset_at_camera_x);
+	debug->set("on_other_side", std::to_string(on_other_side_of_wrap_line));
 	debug->set("wrap factor", wrap_factor);
-	/*SDL_Rect hill_rect = { hill->x * _scaling, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };*/
+	//SDL_Rect hill_rect = { hill->x * _scaling, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 	SDL_Rect hill_rect = { offset_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 	hill_rect.x += wrap_factor - camera.view_rect.x;
 	debug->set("hill_rect.x", hill_rect.x);
+	*/
 	/*if (camera.view_rect.x + camera.view_rect.w > world->w * _scaling)
 		hill_rect.x += world->w * _scaling;*/
 
@@ -447,4 +489,29 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 		SDL_Rect point_rect = { _radar_rect.x + vp.x, _radar_rect.y + vp.y, 2 * _scaling, 2 * _scaling };
 		SDL_RenderFillRect(sdl_renderer, &point_rect);
 	}
+}
+
+int32_t render::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, uint32_t entity_sprite_width, uint32_t world_width, const Camera& camera, double distance_factor)
+{
+	double camera_x_abs = camera.view_rect.x;
+
+	double camera_x_rel;
+	if (camera_x_abs > world_width / 2)
+		camera_x_rel = camera_x_abs - world_width;
+	else
+		camera_x_rel = camera_x_abs;
+
+	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
+	//debug->set("entity_x_cam A", entity_x_at_camera_x);
+
+	if (entity_x_at_camera_x + entity_sprite_width > world_width / 2)
+		entity_x_at_camera_x -= world_width / 2;
+
+	debug->set("world_width", (int)world_width);
+	debug->set("sprite_width", (int)entity_sprite_width);
+	debug->set("entity_x_zero", entity_x_at_zero);
+	debug->set("camera_x_rel", camera_x_rel);
+	debug->set("entity_x_cam B", entity_x_at_camera_x);
+
+	return (int32_t)entity_x_at_camera_x;
 }

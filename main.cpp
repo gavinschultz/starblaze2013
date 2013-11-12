@@ -38,7 +38,7 @@ int main(int argc, char* args[])
 #ifdef _DEBUG
 	renderer->toggleGrid(true);
 #endif
-	world = std::unique_ptr<World>{new World(100)};
+	world = std::unique_ptr<World>{new World(25)};
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
 	//camera.focus_rect.x = +192;
 	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 };
@@ -63,7 +63,7 @@ int main(int argc, char* args[])
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	Ship* ship = game->entity_register.getShip();
-	ship->current_state.pos.x = 48.0;// game->ship_limits.x;
+	ship->current_state.pos.x = 45.5;// game->ship_limits.x;
 	ship->current_state.pos.y = game->ship_limits.y - ship->bounding_box.h;
 	ship->current_state.vel.x = 0.0;
 	ship->current_state.vel.y = 0.0;
@@ -206,7 +206,7 @@ bool handleEvent(SDL_Event* pevent)
 			thrust_multiplier = reverse_thrust_multiplier;
 		}
 		ship->current_state.thrust.x = mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier;
-		ship->current_state.thrust.y = mousemotion.yrel * game->mouse_sensitivity * 4.5;
+		ship->current_state.thrust.y = mousemotion.yrel * game->mouse_sensitivity * 0.8;
 		//debug({ "Mouse xrel:", std::to_string(mousemotion.xrel), " yrel:", std::to_string(mousemotion.yrel), " Ship current vel X:", std::to_string(ship->current_state.vel.x), " vel Y:", std::to_string(ship->current_state.vel.y), " prev vel X:", std::to_string(ship->prev_state.vel.x), " vel Y:", std::to_string(ship->prev_state.vel.y) });
 		break;
 

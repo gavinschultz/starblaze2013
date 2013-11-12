@@ -49,21 +49,28 @@ World::World(int hill_count)
 	auto rnd_hill_y_channel = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine(time(0)));
 	auto rnd_hill_x_channel = std::bind(std::uniform_int_distribution<int>{0, (int)(this->w / 8) - 1}, std::default_random_engine(time(0) - 1));
 	auto rnd_type = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine(time(0) - 2));
+	const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };
 	hills.reserve(hill_count);
 	for (int i = 0; i < hill_count; i++)
 	{
 		Hill hill = Hill();
 		hill.y_channel = rnd_hill_y_channel();
+
+		//hill.y_channel = 2;
+
 		hill.x_channel = rnd_hill_x_channel();
 		hill.x = hill.x_channel * 8;
+
+		if (hill.x > this->w * y_channel_speeds[hill.y_channel])
+		{
+			console_debug({ "Hill orig X: ", std::to_string(hill.x), " new X: ", std::to_string(hill.x * y_channel_speeds[hill.y_channel]) });
+			hill.x = hill.x * y_channel_speeds[hill.y_channel];
+		}
+
 		hill.type = rnd_type();
 		hills.push_back(hill);
 	}
-	for (auto& h : hills)
-	{
-		console_debug({"Hill X: ", std::to_string(h.x) });
-	}
 	hill = new Hill();
 	hill->type = 3;
-	hill->x = 25.0;
+	hill->x = this->w / 4;
 }
