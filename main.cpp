@@ -38,7 +38,7 @@ int main(int argc, char* args[])
 #ifdef _DEBUG
 	renderer->toggleGrid(true);
 #endif
-	world = std::unique_ptr<World>{new World(25)};
+	world = std::unique_ptr<World>{new World(100)};
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
 	//camera.focus_rect.x = +192;
 	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 };
@@ -98,52 +98,86 @@ int main(int argc, char* args[])
 		if (quit)
 			break;
 
-		accumulator += delta_time;
-		while (accumulator >= dt)
+		if (!game->is_paused || game->is_frame_by_frame)
 		{
-			ship->prev_state = ship->current_state;
-			accumulator -= dt;
-			integrate(delta_time, dt);
+			if (game->is_frame_by_frame)
+				game->is_frame_by_frame = false;
+
+			accumulator += delta_time;
+			while (accumulator >= dt)
+			{
+				ship->prev_state = ship->current_state;
+				accumulator -= dt;
+				integrate(delta_time, dt);
+			}
+
+			const double alpha = accumulator / dt;
+			integrateAlpha(alpha);
+
+			camera.prev_focus_point = camera.focus_point;
+			camera.prev_focus_loop_count = camera.focus_loop_count;
+			camera.prev_view_rect = camera.view_rect;
+			camera.prev_focus_rect = camera.focus_rect;
+			camera.focus_point = { std::lround(ship->alpha_pos.x * renderer->scaling), std::lround(ship->alpha_pos.y * renderer->scaling) };
+			camera.focus_loop_count = ship->current_state.loop_count;
+
+			if (camera.view_rect.x > world->w*renderer->scaling / 2 && camera.focus_point.x < world->w*renderer->scaling / 2)
+			{
+				//game->togglePause(true);
+				//camera.focus_point.x += world->w*renderer->scaling;
+			}
+
+			//camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x;
+			camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x + ((camera.focus_loop_count - camera.prev_focus_loop_count) * world->w * renderer->scaling);
+
+			//camera.focus_point.x = render::getScreenXForEntityByCameraAndDistance(camera.fo)
+
+			int32_t turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 5L);
+			if (ship->direction == ShipDirection::right)
+			{
+				int proposed_x = camera.focus_rect.x + camera.focus_point_vel.x + turn_speed;
+				debug->set("proposed x", proposed_x);
+				if (proposed_x > world->w / 2 && camera.focus_point.x < world->w / 2)
+				{
+					camera.focus_rect.x = camera.focus_rect.x + camera.focus_point_vel.x + turn_speed;
+				}
+				else
+				{
+					camera.focus_rect.x = std::min(camera.focus_rect.x + camera.focus_point_vel.x + turn_speed, camera.focus_point.x);
+				}
+			}
+			else
+			{
+				camera.focus_rect.x = std::max(camera.focus_rect.x + camera.focus_point_vel.x - turn_speed, camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w));
+			}
+			if (camera.focus_rect.x < 0)
+			{
+				camera.focus_rect.x += world->w * renderer->scaling;
+				//game->togglePause(true);
+			}
+			else if (camera.focus_rect.x > world->w * renderer->scaling)
+			{
+				camera.focus_rect.x -= world->w * renderer->scaling;
+			}
+			camera.view_rect.x = camera.focus_rect.x - (48 * renderer->scaling);
+			if (camera.view_rect.x < 0)
+				camera.view_rect.x += world->w * renderer->scaling;
+			
+			debug->set("cam view X", camera.view_rect.x);
+			debug->set("cam prev X", camera.prev_view_rect.x);
+			debug->set("cam foc_rct X", camera.focus_rect.x);
+			debug->set("cam foc_pt X", camera.focus_point.x);
+			debug->set("cam vel X", camera.focus_point_vel.x);
+			debug->set("ship alpha X", ship->alpha_pos.x);
+			//debug->set("ship current X", ship->current_state.pos.x);
+			debug->set("loop count", ship->current_state.loop_count);
+
+			if (camera.view_rect.x - camera.prev_view_rect.x < -200)
+			{
+				//game->togglePause(true);
+				//console_debug({ "camera jump: ", std::to_string(camera.view_rect.x - camera.prev_view_rect.x) });
+			}
 		}
-
-		const double alpha = accumulator / dt;
-		integrateAlpha(alpha);
-
-		camera.prev_focus_point = camera.focus_point;
-		camera.prev_focus_loop_count = camera.focus_loop_count;
-		camera.prev_view_rect = camera.view_rect;
-		camera.focus_point = { std::lround(ship->alpha_pos.x * renderer->scaling), std::lround(ship->alpha_pos.y * renderer->scaling) };
-		camera.focus_loop_count = ship->current_state.loop_count;
-
-		//camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x;
-		camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x + ((camera.focus_loop_count - camera.prev_focus_loop_count) * world->w * renderer->scaling);
-
-		if (camera.focus_loop_count != camera.prev_focus_loop_count)
-		{
-			console_debug({ "Focus point a/b: ", std::to_string(camera.focus_point.x), "/", std::to_string(camera.prev_focus_point.x), " focus point vel X:", std::to_string(camera.focus_point_vel.x) });
-		}
-
-		debug->set("cam view X", camera.view_rect.x);
-		debug->set("cam foc_rct X", camera.focus_rect.x);
-		debug->set("cam foc_pt X", camera.focus_point.x);
-		debug->set("cam vel X", camera.focus_point_vel.x);
-		debug->set("ship alpha X", ship->alpha_pos.x);
-		//debug->set("ship current X", ship->current_state.pos.x);
-		debug->set("loop count", ship->current_state.loop_count);
-
-		int32_t turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 5L);
-		if (ship->direction == ShipDirection::right)
-		{
-			camera.focus_rect.x = std::min(camera.focus_rect.x + camera.focus_point_vel.x + turn_speed, camera.focus_point.x);
-		}
-		else
-		{
-			camera.focus_rect.x = std::max(camera.focus_rect.x + camera.focus_point_vel.x - turn_speed, camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling) - camera.focus_rect.w);
-		}
-		camera.view_rect.x = camera.focus_rect.x - (48 * renderer->scaling);
-		if (camera.view_rect.x < 0)
-			camera.view_rect.x += world->w * renderer->scaling;
-
 		renderer->render(&camera);
 
 		timer->endFrame();
@@ -185,6 +219,12 @@ bool handleEvent(SDL_Event* pevent)
 			break;
 		case SDLK_F11:
 			renderer->toggleGrid(!renderer->is_grid_visible);
+			break;
+		case SDLK_p:
+			game->togglePause(!game->is_paused);
+			break;
+		case SDLK_f:
+			game->advanceFrameByFrame();
 			break;
 		case SDLK_RETURN:
 			if (pevent->key.keysym.mod & KMOD_ALT)
@@ -251,7 +291,6 @@ void integrate(double delta_time, double dt)
 	else
 		vel -= ship->current_state.vel.x * (1.3 * dt);
 
-	//if (ship->current_state.thrust.y == 0.0)
 	ship->current_state.vel.y -= ship->current_state.vel.y * (4.0 * dt);
 
 
@@ -320,4 +359,6 @@ void integrateAlpha(double alpha)
 
 	ship->alpha_pos.x = ship->current_state.pos.x*alpha + ship->prev_state.pos.x*(1.0 - alpha);
 	ship->alpha_pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
+
+	//console_debug({ "ship alpha jump: ", std::to_string(ship->alpha_pos.x - ship->prev_state.pos.x) });
 }

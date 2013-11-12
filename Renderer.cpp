@@ -117,9 +117,23 @@ void Renderer::render(Camera* camera)
 		renderGrid();
 		renderFPS((int)timer->getFrameRate());
 		renderDebug(*debug.get());
+		renderZeroLine(*camera);
 	}
 
 	SDL_RenderPresent(sdlRenderer);
+}
+
+void Renderer::renderZeroLine(const Camera& camera)
+{
+	glLineWidth(2.0f);
+	SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	int view_rect_abs_x;
+	if (camera.view_rect.x < 0)
+		view_rect_abs_x = camera.view_rect.x + world->w*renderer->scaling;
+	else
+		view_rect_abs_x = camera.view_rect.x;
+	int zero_point_x = world->w*this->scaling - view_rect_abs_x;
+	SDL_RenderDrawLine(sdlRenderer, zero_point_x, 0, zero_point_x, window.h);
 }
 
 void Renderer::renderGrid()
@@ -138,7 +152,7 @@ void Renderer::renderGrid()
 			line_height = x % 32;
 		SDL_RenderDrawLine(sdlRenderer, x, y1, x, y1 + line_height);
 	}
-
+	
 	glLineWidth(2.0f);
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(1, 0x0101);
@@ -264,8 +278,14 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
 	//SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
-	int camera_view_rect_rel_x = camera.focus_rect.x - (48 * _scaling);
+	int camera_view_rect_rel_x;
+	if (camera.focus_rect.x > world->w*_scaling / 2)
+		camera_view_rect_rel_x = camera.view_rect.x - world->w*_scaling;
+	else
+		camera_view_rect_rel_x = camera.view_rect.x;
+	//int camera_view_rect_rel_x = camera.focus_rect.x - (48 * _scaling);
 	//debug->set("camera_view_rect_rel_x", camera_view_rect_rel_x);
+	/*SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };*/
 	SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 	//debug({ "ship rect x/y: ", std::to_string(ship_rect.x), " / ", std::to_string(ship_rect.y), " ship alpha_x/x: ", std::to_string(_ship->alpha_pos.x), " / ", std::to_string(_ship->current_state.pos.x) });
 	if (smooth_animation)
@@ -371,97 +391,17 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 
 	for (auto hill : _world->hills)
 	{
-		/*
-		bool on_other_side_of_wrap_line = (int)(std::abs(hill.x*_scaling - camera.view_rect.x)) > ((world->w*_scaling) / 2);
-		if (!on_other_side_of_wrap_line)
-			wrap_factor = 0.0;
-		else
-			wrap_factor = world->w * _scaling;
-
-		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
-		SDL_Rect hill_rect = { hill.x_channel * 8 * _scaling, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-		hill_rect.x += wrap_factor - camera.view_rect.x * y_channel_speeds[hill.y_channel];
-		*/
-
-		//int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, y_channel_speeds[hill.y_channel]);
-		//SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-		//SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
+		int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, y_channel_speeds[hill.y_channel]);
+		SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
+		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 	}
 
+	/*
 	Hill* hill = _world->hill;
-
 	double distance_factor = 0.25;
 	int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill->x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, distance_factor);
-	
-	/* latest working
-	double entity_x_at_zero = hill->x*_scaling;
-	double entity_width = _hills_texture_rect.w*_scaling;
-	double camera_x_abs = camera.view_rect.x;
-	double world_width = _world->w*_scaling;
-
-	double camera_x_rel;
-	if (camera_x_abs > world_width / 2)
-		camera_x_rel = camera_x_abs - world_width;
-	else
-		camera_x_rel = camera_x_abs;
-
-	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
-
-	if (entity_x_at_camera_x + entity_width > world_width / 2)
-		entity_x_at_camera_x -= world_width / 2;
-	*/
 	SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-
-	/*
-	double cam_rel_x;
-	double speed = 0.5;
-	if (camera.view_rect.x > (world->w*_scaling) / 2.0)
-		cam_rel_x = camera.view_rect.x - world->w*_scaling;
-	else
-		cam_rel_x = camera.view_rect.x;
-
-	debug->set("cam_rel_x", cam_rel_x);
-
-	double offset_at_camera_x = hill->x*_scaling - (cam_rel_x * speed);
-	SDL_Rect hill_rect = { offset_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-
-	if (hill_rect.x + hill_rect.w > world->w*_scaling / 2.0)
-		hill_rect.x -= world->w*_scaling / 2.0;
-
-	debug->set("offset_at_cam_x", offset_at_camera_x);
-	debug->set("hill_rect.x B", hill_rect.x);
-	*/
-
-	/*
-	double speed = 0.5;
-	double offset_at_zero = hill->x*_scaling;
-	double offset_at_camera_x = offset_at_zero - camera.view_rect.x*speed; // +(camera.focus_loop_count*camera.view_rect.x*speed);
-	bool on_other_side_of_wrap_line = std::abs(offset_at_camera_x) + camera.camera_loop_count*camera.view_rect.x*speed > ((world->w*_scaling) / 2.0);
-	//bool on_other_side_of_wrap_line = (int)(std::abs(offset_at_camera_x - camera.view_rect.x)) > ((world->w*_scaling) / 2);
-	
-	//bool on_other_side_of_wrap_line = (int)(std::abs(hill->x*_scaling - camera.view_rect.x)) > ((world->w*_scaling) / 2);
-	//debug->set("(hill.x - cam.view.x) > world.w", "(" + std::to_string(hill->x*_scaling) + " - " + std::to_string(camera.view_rect.x) + ") > " + std::to_string((world->w*_scaling) / 2));
-	if (!on_other_side_of_wrap_line)
-		wrap_factor = 0.0;
-	else
-		wrap_factor = world->w * _scaling;
-	
-	debug->set("offset_at_camera_0", offset_at_zero);
-	debug->set("offset_at_camera_x", offset_at_camera_x);
-	debug->set("on_other_side", std::to_string(on_other_side_of_wrap_line));
-	debug->set("wrap factor", wrap_factor);
-	//SDL_Rect hill_rect = { hill->x * _scaling, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-	SDL_Rect hill_rect = { offset_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-	hill_rect.x += wrap_factor - camera.view_rect.x;
-	debug->set("hill_rect.x", hill_rect.x);
-	*/
-	/*if (camera.view_rect.x + camera.view_rect.w > world->w * _scaling)
-		hill_rect.x += world->w * _scaling;*/
-
-	//double wrap_factor = camera.view_rect.w;
-	//console_debug({ "world->w * a/b = ", std::to_string(world->w * _scaling), " * ", std::to_string(camera.view_rect.x + camera.view_rect.w), "/", std::to_string((int)(world->w * _scaling)), " = ", std::to_string(wrap_factor) });
-	//hill_rect.x += wrap_factor;
-	SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
+	SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);*/
 }
 
 RadarSprite::RadarSprite(Renderer* renderer)
@@ -504,14 +444,16 @@ int32_t render::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, 
 	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
 	//debug->set("entity_x_cam A", entity_x_at_camera_x);
 
-	if (entity_x_at_camera_x + entity_sprite_width > world_width / 2)
-		entity_x_at_camera_x -= world_width / 2;
+	if (entity_x_at_camera_x + entity_sprite_width > world_width * distance_factor)
+		entity_x_at_camera_x -= world_width * distance_factor;
 
+	/*
 	debug->set("world_width", (int)world_width);
 	debug->set("sprite_width", (int)entity_sprite_width);
 	debug->set("entity_x_zero", entity_x_at_zero);
 	debug->set("camera_x_rel", camera_x_rel);
 	debug->set("entity_x_cam B", entity_x_at_camera_x);
+	*/
 
 	return (int32_t)entity_x_at_camera_x;
 }

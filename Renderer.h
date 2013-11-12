@@ -24,8 +24,12 @@ class Camera
 public:
 	Camera(const SDL_Rect& window_rect, const SDL_Rect& focus_rect);
 	SDL_Rect view_rect;
+	SDL_Rect view_rect_rel;
 	//SDL_Rect prev_view_rect;
 	SDL_Rect focus_rect;
+	SDL_Rect focus_rect_rel;
+	SDL_Rect prev_focus_rect;
+	SDL_Rect prev_focus_rect_rel;
 	Point2Di focus_point;
 	int focus_loop_count{ 0 };
 	int prev_focus_loop_count{ 0 };
@@ -120,6 +124,7 @@ private:
 	void renderFPS(int fps);
 	void renderDebug(const Debug& debug);
 	void renderText(const std::string text, uint32_t x, uint32_t y);
+	void renderZeroLine(const Camera& camera);
 	void init();
 	TTF_Font* _font;
 public:

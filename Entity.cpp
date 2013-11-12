@@ -56,14 +56,12 @@ World::World(int hill_count)
 		Hill hill = Hill();
 		hill.y_channel = rnd_hill_y_channel();
 
-		//hill.y_channel = 2;
-
 		hill.x_channel = rnd_hill_x_channel();
 		hill.x = hill.x_channel * 8;
 
 		if (hill.x > this->w * y_channel_speeds[hill.y_channel])
 		{
-			console_debug({ "Hill orig X: ", std::to_string(hill.x), " new X: ", std::to_string(hill.x * y_channel_speeds[hill.y_channel]) });
+			console_debug({ "(", std::to_string(y_channel_speeds[hill.y_channel]), ") Hill orig X: ", std::to_string(hill.x), " new X: ", std::to_string(hill.x * y_channel_speeds[hill.y_channel]) });
 			hill.x = hill.x * y_channel_speeds[hill.y_channel];
 		}
 
