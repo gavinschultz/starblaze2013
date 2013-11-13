@@ -13,8 +13,6 @@ public:
 	State2D prev_state;
 	Point2D alpha_pos;
 	int alpha_loop_count;
-	double secs_at_slow_vel_x{ 0.0 };
-	double secs_at_slow_vel_y{ 0.0 };
 	SDL_Rect bounding_box;
 	ShipDirection direction;
 	double altitude{ 0.0 };
@@ -22,24 +20,25 @@ public:
 	const double takeoff_speed{ 250.0 };
 	double max_thrust{ 400.0 };
 	double weight{ 1.0 };
-	double max_velocity{ 1000.0 };
+	double max_velocity{ 20000.0 };
 	double max_lift{ 800.0 };
 };
 
 class Hill
 {
 public:
-	int type;
-	int x_channel;
-	int y_channel;
+	int type{ 0 };
+	//int x_channel;
+	int y_channel{ 0 };
 	double x{ 0.0 };
+	double distance_factor{ 0.0 };
 };
 
 class World
 {
 public:
 	World(int hill_count = 100);
-	double w{ 256.0 * 16 };	// 1024 * 16
+	const double w{ 256.0 * 16 }; // equivalent to 16 screens
 	std::vector<Hill> hills;
 	Hill* hill;
 };

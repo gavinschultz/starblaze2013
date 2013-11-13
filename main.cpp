@@ -15,6 +15,7 @@
 #include "Renderer.h"
 #include "Phys.h"
 #include <math.h>
+#include "Util.h"
 
 bool handleEvent(SDL_Event*);
 void handleState();
@@ -31,14 +32,15 @@ int main(int argc, char* args[])
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
+	world = std::unique_ptr<World>{new World(100)};
 	game = std::unique_ptr<Game>{new Game()};
 	timer = std::unique_ptr<Timer>{new Timer()};
-	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4.0)};
+	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4, world->w)};
 	debug = std::unique_ptr<Debug>{new Debug()};
 #ifdef _DEBUG
 	renderer->toggleGrid(true);
 #endif
-	world = std::unique_ptr<World>{new World(100)};
+
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
 	//camera.focus_rect.x = +192;
 	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 };
@@ -128,63 +130,59 @@ int main(int argc, char* args[])
 			}
 
 			//camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x;
-			camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x + ((camera.focus_loop_count - camera.prev_focus_loop_count) * world->w * renderer->scaling);
+			camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x + ((camera.focus_loop_count - camera.prev_focus_loop_count) * renderer->width);
 
 			//camera.focus_point.x = render::getScreenXForEntityByCameraAndDistance(camera.fo)
 
+			//int32_t turn_speed = std::abs(std::lround(camera.focus_point_vel.x));
 			int32_t turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 5L);
+			int32_t max_velocity;
+			if (ship->direction == ShipDirection::right)
+				max_velocity = camera.focus_point_vel.x + turn_speed;
+			else
+				max_velocity = camera.focus_point_vel.x - turn_speed;
+			int32_t desired_x_abs;
+			int32_t proposed_x_abs = camera.prev_focus_rect.x + max_velocity;  // NOTE: might fail to be absolute once we can have direction = right and negative velocity
 			if (ship->direction == ShipDirection::right)
 			{
-				int proposed_x = camera.focus_rect.x + camera.focus_point_vel.x + turn_speed;
-				//debug->set("proposed x", proposed_x);
-				if (proposed_x > world->w / 2 && camera.focus_point.x < world->w / 2)
-				{
-					camera.focus_rect.x = camera.focus_rect.x + camera.focus_point_vel.x + turn_speed;
-				}
+				desired_x_abs = camera.focus_point.x;
+				if (desired_x_abs < 0)
+					desired_x_abs += renderer->width;
+				if (renderer->isRightOf(desired_x_abs, proposed_x_abs))
+					camera.focus_rect.x = proposed_x_abs;
 				else
-				{
-					camera.focus_rect.x = std::min(camera.focus_rect.x + camera.focus_point_vel.x + turn_speed, camera.focus_point.x);
-				}
+					camera.focus_rect.x = desired_x_abs;
 			}
 			else
 			{
-				int proposed_x = camera.focus_point.x + camera.focus_point_vel.x - turn_speed;
-				int proposed_x_abs = proposed_x;
-				if (proposed_x > world->w*renderer->scaling)
-					proposed_x_abs -= world->w*renderer->scaling;
-				else if (proposed_x < 0)
-					proposed_x_abs += world->w*renderer->scaling;
-				double compare = camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w);
-				debug->set("proposed x > compare", std::to_string(proposed_x) + " > " + std::to_string(compare));
-			
-				debug->set("cam view X", camera.view_rect.x);
-				debug->set("cam prev X", camera.prev_view_rect.x);
-				debug->set("cam foc_rct X", camera.focus_rect.x);
-				debug->set("cam foc_pt X", camera.focus_point.x);
-				debug->set("cam vel X", camera.focus_point_vel.x);
-				debug->set("ship alpha X", ship->alpha_pos.x);
-				//debug->set("ship current X", ship->current_state.pos.x);
-				debug->set("loop count", ship->current_state.loop_count);
-
-				if (proposed_x_abs > camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w))
-					camera.focus_rect.x = camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w);
+				desired_x_abs = camera.focus_point.x + ship->bounding_box.w*renderer->scaling - camera.focus_rect.w;
+				if (desired_x_abs < 0)
+					desired_x_abs += renderer->width;
+				if (!renderer->isRightOf(desired_x_abs, proposed_x_abs))
+					camera.focus_rect.x = proposed_x_abs;
 				else
-					camera.focus_rect.x = std::max(camera.focus_rect.x + camera.focus_point_vel.x - turn_speed, camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w));
+					camera.focus_rect.x = desired_x_abs;
 			}
+
+			debug->set("max cam vel", max_velocity);
+			debug->set("desired x abs", desired_x_abs);
+			debug->set("proposed x abs", proposed_x_abs);
+			debug->set("desired right of proposed", renderer->isRightOf(desired_x_abs, proposed_x_abs));
+
 			if (camera.focus_rect.x < 0)
 			{
-				camera.focus_rect.x += world->w * renderer->scaling;
+				camera.focus_rect.x += renderer->width;
 				//game->togglePause(true);
 			}
 			else if (camera.focus_rect.x > world->w * renderer->scaling)
 			{
-				camera.focus_rect.x -= world->w * renderer->scaling;
+				camera.focus_rect.x -= renderer->width;
 			}
 			camera.view_rect.x = camera.focus_rect.x - (48 * renderer->scaling);
 			if (camera.view_rect.x < 0)
-				camera.view_rect.x += world->w * renderer->scaling;
-			
-			
+				camera.view_rect.x += renderer->width;
+
+
 
 			if (camera.view_rect.x - camera.prev_view_rect.x < -200)
 			{

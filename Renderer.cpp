@@ -24,11 +24,10 @@ Camera::Camera(const SDL_Rect& view_rect, const SDL_Rect& focus_rect)
 	this->focus_point = { 0, 0 };
 }
 
-Renderer::Renderer(int screen_width, int screen_height, float scaling)
+Renderer::Renderer(uint32_t screen_width, uint32_t screen_height, uint32_t scaling, double world_width) : scaling(scaling), width((uint32_t)(world_width*scaling))
 {
 	this->window.w = screen_width;
 	this->window.h = screen_height;
-	this->scaling = scaling;
 	init();
 }
 
@@ -81,6 +80,21 @@ void Renderer::toggleGrid(bool state)
 	is_grid_visible = state;
 }
 
+// only works for absolute coordinates
+bool Renderer::isRightOf(int32_t x, int32_t y)
+{
+	if ((x - y) >= 0)
+		return ((x - y) % width) < width / 2;
+	else
+		return ((y - x) % width) > width / 2;
+	//return std::abs(x - y) > _width / 2;
+	/*if (x < window.w)
+		x += _width;
+	if (y < window.w)
+		y += _width;
+	return y > x;*/
+}
+
 SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect)
 {
 	SDL_Surface* sdlSurface = IMG_Load(imagePath.c_str());
@@ -129,10 +143,10 @@ void Renderer::renderZeroLine(const Camera& camera)
 	SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	int view_rect_abs_x;
 	if (camera.view_rect.x < 0)
-		view_rect_abs_x = camera.view_rect.x + world->w*renderer->scaling;
+		view_rect_abs_x = camera.view_rect.x + this->width;
 	else
 		view_rect_abs_x = camera.view_rect.x;
-	int zero_point_x = world->w*this->scaling - view_rect_abs_x;
+	int zero_point_x = this->width - view_rect_abs_x;
 	SDL_RenderDrawLine(sdlRenderer, zero_point_x, 0, zero_point_x, window.h);
 }
 
@@ -140,7 +154,7 @@ void Renderer::renderGrid()
 {
 	glLineWidth(2.0f);
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	for (int x = 0; x <= this->window.w; x += 8)
+	for (uint32_t x = 0; x <= this->window.w; x += 8)
 	{
 		int y1 = 8;
 		int line_height = 0;
@@ -156,13 +170,13 @@ void Renderer::renderGrid()
 	glLineWidth(2.0f);
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(1, 0x0101);
-	for (int x = 0; x < this->window.w; x += 256)
+	for (uint32_t x = 0; x < this->window.w; x += 256)
 	{
 		SDL_RenderDrawLine(sdlRenderer, x, 0, x, window.h);
 	}
 	SDL_RenderDrawLine(sdlRenderer, window.w - 1, 0, window.w - 1, window.h);
 
-	for (int y = 0; y <= this->window.h; y += 256)
+	for (uint32_t y = 0; y <= this->window.h; y += 256)
 	{
 		SDL_RenderDrawLine(sdlRenderer, 0, y, window.w - 1, y);
 	}
@@ -259,10 +273,10 @@ ShipSprite::ShipSprite(Renderer* renderer, Ship* ship) : Sprite()
 	this->_burner_rev_texture = renderer->loadTextureFromFile("img\\shipburner_rev.tga", nullptr);
 	this->_wheels_texture = renderer->loadTextureFromFile("img\\shipwheels.tga", &this->_wheels_texture_rect);
 
-	this->_stripe_offset = { 0, 6 * _scaling };
-	this->_burner_offset = { -_burner_texture_rect.w  * _scaling, (_ship_texture_rect.h - 5)  * _scaling };
-	this->_burner_rev_offset = { 17 * _scaling, 4 * _scaling };
-	this->_wheels_offset = { 0, _ship_texture_rect.h * _scaling };
+	this->_stripe_offset = { 0, 6 * (int32_t)_scaling };
+	this->_burner_offset = { -_burner_texture_rect.w  * (int32_t)_scaling, (_ship_texture_rect.h - 5)  * (int32_t)_scaling };
+	this->_burner_rev_offset = { 17 * (int32_t)_scaling, 4 * (int32_t)_scaling };
+	this->_wheels_offset = { 0, _ship_texture_rect.h * (int32_t)_scaling };
 
 	this->smooth_animation = false;
 }
@@ -287,7 +301,7 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	//debug->set("camera_view_rect_rel_x", camera_view_rect_rel_x);
 	/*SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };*/
 
-	int32_t entity_x = render::getScreenXForEntityByCameraAndDistance(_ship->alpha_pos.x*_scaling, _ship_texture_rect.w*_scaling, world->w*_scaling, camera, 1.0);
+	int32_t entity_x = render::getScreenXForEntityByCameraAndDistance(_ship->alpha_pos.x*(double)_scaling, _ship_texture_rect.w*_scaling, renderer->width, camera, 1.0);
 
 	SDL_Rect ship_rect = { entity_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 	//debug({ "ship rect x/y: ", std::to_string(ship_rect.x), " / ", std::to_string(ship_rect.y), " ship alpha_x/x: ", std::to_string(_ship->alpha_pos.x), " / ", std::to_string(_ship->current_state.pos.x) });
@@ -383,8 +397,6 @@ BGSprite::~BGSprite()
 void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 {
 	const std::array<int, 4> y_channel_coords = { { 0 - _hills_texture_rect.h * _scaling, 9 * _scaling, 17 * _scaling, 25 * _scaling } };
-	const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };
-	//const std::array<double, 4> y_channel_speeds = { 1, 1, 1, 1 };
 	SDL_SetRenderDrawColor(sdl_renderer, _bg_color.r, _bg_color.g, _bg_color.b, _bg_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_bg_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, _sky_color.r, _sky_color.g, _sky_color.b, _sky_color.a);
@@ -394,7 +406,7 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 
 	for (auto hill : _world->hills)
 	{
-		int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, y_channel_speeds[hill.y_channel]);
+		int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, hill.distance_factor);
 		SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 	}
@@ -410,12 +422,12 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 RadarSprite::RadarSprite(Renderer* renderer)
 {
 	_scaling = renderer->scaling;
-	_radar_rect = { 64 * _scaling, 156 * _scaling, 128 * _scaling, 36 * _scaling };
+	_radar_rect = { 64 * (int32_t)_scaling, 156 * (int32_t)_scaling, 128 * (int32_t)_scaling, 36 * (int32_t)_scaling };
 	_view_points = { {
-		{ 56 * _scaling, 0 * _scaling },
-		{ 70 * _scaling, 0 * _scaling },
-		{ 56 * _scaling, 34 * _scaling },
-		{ 70 * _scaling, 34 * _scaling }
+		{ 56 * (int32_t)_scaling, 0 * (int32_t)_scaling },
+		{ 70 * (int32_t)_scaling, 0 * (int32_t)_scaling },
+		{ 56 * (int32_t)_scaling, 34 * (int32_t)_scaling },
+		{ 70 * (int32_t)_scaling, 34 * (int32_t)_scaling }
 	} };
 	_radar_color = renderer->coco_palette.getColor(red);
 	_point_color = renderer->coco_palette.getColor(yellow);

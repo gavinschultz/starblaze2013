@@ -15,8 +15,8 @@
 class Window
 {
 public:
-	int w;
-	int h;
+	uint32_t w;
+	uint32_t h;
 };
 
 class Camera
@@ -25,7 +25,6 @@ public:
 	Camera(const SDL_Rect& window_rect, const SDL_Rect& focus_rect);
 	SDL_Rect view_rect;
 	SDL_Rect view_rect_rel;
-	//SDL_Rect prev_view_rect;
 	SDL_Rect focus_rect;
 	SDL_Rect focus_rect_rel;
 	SDL_Rect prev_focus_rect;
@@ -38,14 +37,12 @@ public:
 
 	SDL_Rect prev_view_rect;
 	int camera_loop_count{ 0 };
-
-	//uint32_t wrap_x;
 };
 
 class Sprite
 {
 protected:
-	float _scaling;
+	uint32_t _scaling;
 public:
 	Sprite();
 	~Sprite();
@@ -119,7 +116,6 @@ class Renderer
 private:
 	SDL_Window* sdlWindow;
 	SDL_Renderer* sdlRenderer;
-	SDL_Rect _viewport_rect;
 	void renderGrid();
 	void renderFPS(int fps);
 	void renderDebug(const Debug& debug);
@@ -128,7 +124,7 @@ private:
 	void init();
 	TTF_Font* _font;
 public:
-	Renderer(int screen_width, int screen_height, float scaling);
+	Renderer(uint32_t screen_width, uint32_t screen_height, uint32_t scaling, double world_width);
 	~Renderer();
 	SpriteRegister sprite_register;
 	CoCoPalette coco_palette;
@@ -136,11 +132,15 @@ public:
 	SDL_Texture* loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect);
 
 	Window window;
-	uint32_t scaling;
+	const uint32_t scaling;
 	bool is_fullscreen = false;
 	bool is_grid_visible = false;
 	void toggleFullscreen(bool state);
 	void toggleGrid(bool state);
+
+	bool isRightOf(int32_t x, int32_t y);
+
+	const uint32_t width;
 };
 
 class ShipSprite : public Sprite
@@ -160,10 +160,10 @@ private:
 	SDL_Rect _burner_rev_texture_rect;
 	SDL_Rect _wheels_texture_rect;
 
-	Point2D _stripe_offset;
-	Point2D _burner_offset;
-	Point2D _burner_rev_offset;
-	Point2D _wheels_offset;
+	Point2Di _stripe_offset;
+	Point2Di _burner_offset;
+	Point2Di _burner_rev_offset;
+	Point2Di _wheels_offset;
 public:
 	ShipSprite(Renderer* renderer, Ship* ship);
 	~ShipSprite();
@@ -197,7 +197,7 @@ class RadarSprite : public Sprite
 {
 private:
 	SDL_Rect _radar_rect;
-	std::array<Point2D, 4> _view_points;
+	std::array<Point2Di, 4> _view_points;
 	SDL_Color _radar_color;
 	SDL_Color _point_color;
 public:
