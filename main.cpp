@@ -136,7 +136,7 @@ int main(int argc, char* args[])
 			if (ship->direction == ShipDirection::right)
 			{
 				int proposed_x = camera.focus_rect.x + camera.focus_point_vel.x + turn_speed;
-				debug->set("proposed x", proposed_x);
+				//debug->set("proposed x", proposed_x);
 				if (proposed_x > world->w / 2 && camera.focus_point.x < world->w / 2)
 				{
 					camera.focus_rect.x = camera.focus_rect.x + camera.focus_point_vel.x + turn_speed;
@@ -148,7 +148,28 @@ int main(int argc, char* args[])
 			}
 			else
 			{
-				camera.focus_rect.x = std::max(camera.focus_rect.x + camera.focus_point_vel.x - turn_speed, camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w));
+				int proposed_x = camera.focus_point.x + camera.focus_point_vel.x - turn_speed;
+				int proposed_x_abs = proposed_x;
+				if (proposed_x > world->w*renderer->scaling)
+					proposed_x_abs -= world->w*renderer->scaling;
+				else if (proposed_x < 0)
+					proposed_x_abs += world->w*renderer->scaling;
+				double compare = camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w);
+				debug->set("proposed x > compare", std::to_string(proposed_x) + " > " + std::to_string(compare));
+			
+				debug->set("cam view X", camera.view_rect.x);
+				debug->set("cam prev X", camera.prev_view_rect.x);
+				debug->set("cam foc_rct X", camera.focus_rect.x);
+				debug->set("cam foc_pt X", camera.focus_point.x);
+				debug->set("cam vel X", camera.focus_point_vel.x);
+				debug->set("ship alpha X", ship->alpha_pos.x);
+				//debug->set("ship current X", ship->current_state.pos.x);
+				debug->set("loop count", ship->current_state.loop_count);
+
+				if (proposed_x_abs > camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w))
+					camera.focus_rect.x = camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w);
+				else
+					camera.focus_rect.x = std::max(camera.focus_rect.x + camera.focus_point_vel.x - turn_speed, camera.focus_point.x + (ship->bounding_box.w * (int)renderer->scaling - camera.focus_rect.w));
 			}
 			if (camera.focus_rect.x < 0)
 			{
@@ -163,14 +184,7 @@ int main(int argc, char* args[])
 			if (camera.view_rect.x < 0)
 				camera.view_rect.x += world->w * renderer->scaling;
 			
-			debug->set("cam view X", camera.view_rect.x);
-			debug->set("cam prev X", camera.prev_view_rect.x);
-			debug->set("cam foc_rct X", camera.focus_rect.x);
-			debug->set("cam foc_pt X", camera.focus_point.x);
-			debug->set("cam vel X", camera.focus_point_vel.x);
-			debug->set("ship alpha X", ship->alpha_pos.x);
-			//debug->set("ship current X", ship->current_state.pos.x);
-			debug->set("loop count", ship->current_state.loop_count);
+			
 
 			if (camera.view_rect.x - camera.prev_view_rect.x < -200)
 			{

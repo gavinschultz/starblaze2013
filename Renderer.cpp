@@ -278,15 +278,18 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
 	//SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
-	int camera_view_rect_rel_x;
+	/*int camera_view_rect_rel_x;
 	if (camera.focus_rect.x > world->w*_scaling / 2)
 		camera_view_rect_rel_x = camera.view_rect.x - world->w*_scaling;
 	else
-		camera_view_rect_rel_x = camera.view_rect.x;
+		camera_view_rect_rel_x = camera.view_rect.x;*/
 	//int camera_view_rect_rel_x = camera.focus_rect.x - (48 * _scaling);
 	//debug->set("camera_view_rect_rel_x", camera_view_rect_rel_x);
 	/*SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };*/
-	SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+
+	int32_t entity_x = render::getScreenXForEntityByCameraAndDistance(_ship->alpha_pos.x*_scaling, _ship_texture_rect.w*_scaling, world->w*_scaling, camera, 1.0);
+
+	SDL_Rect ship_rect = { entity_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
 	//debug({ "ship rect x/y: ", std::to_string(ship_rect.x), " / ", std::to_string(ship_rect.y), " ship alpha_x/x: ", std::to_string(_ship->alpha_pos.x), " / ", std::to_string(_ship->current_state.pos.x) });
 	if (smooth_animation)
 		_stripe_texture_rect.y = (timer->getTotalFrames() - 1) % 32;				// smooth scrolling stripe
