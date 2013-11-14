@@ -10,7 +10,6 @@ private:
 	double _elapsed_time;
 	double _total_time;
 	uint32_t _frame;
-	double getTime() const;
 	void debug();
 public:
 	Timer(const int fps = 60);
@@ -20,6 +19,7 @@ public:
 	double getFrameRate() const;
 	double getLastFrameDuration() const;
 	uint32_t getTotalFrames() const;
+	double getTime() const;
 };
 
 extern std::unique_ptr<Timer> timer;

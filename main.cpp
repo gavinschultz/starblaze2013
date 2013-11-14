@@ -1,9 +1,9 @@
 #pragma comment(lib, "glew32.lib")
 #include <SDL.h>
 //#include <Windows.h>
-#include <iostream>
 #include <memory>
 #include <string>
+#include <iostream>
 #include <sstream>
 #include "timer.h"
 #include <SDL_image.h>
@@ -42,7 +42,6 @@ int main(int argc, char* args[])
 #endif
 
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
-	//camera.focus_rect.x = +192;
 	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 };
 
 	// Load assets
@@ -65,10 +64,8 @@ int main(int argc, char* args[])
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	Ship* ship = game->entity_register.getShip();
-	ship->current_state.pos.x = 45.5;// game->ship_limits.x;
-	ship->current_state.pos.y = game->ship_limits.y - ship->bounding_box.h;
-	ship->current_state.vel.x = 0.0;
-	ship->current_state.vel.y = 0.0;
+	ship->current_state.pos.x = game->ship_limits.x;
+	ship->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - ship->bounding_box.h;
 
 	bool quit = false;
 	double accumulator = 0;
@@ -78,6 +75,7 @@ int main(int argc, char* args[])
 	while (!quit)
 	{
 		timer->startFrame();
+		double time_start_frame = timer->getTime();
 		auto delta_time = timer->getLastFrameDuration();
 		if (delta_time > 0.25)
 		{
@@ -123,18 +121,8 @@ int main(int argc, char* args[])
 			camera.focus_point = { std::lround(ship->alpha_pos.x * renderer->scaling), std::lround(ship->alpha_pos.y * renderer->scaling) };
 			camera.focus_loop_count = ship->current_state.loop_count;
 
-			if (camera.view_rect.x > world->w*renderer->scaling / 2 && camera.focus_point.x < world->w*renderer->scaling / 2)
-			{
-				//game->togglePause(true);
-				//camera.focus_point.x += world->w*renderer->scaling;
-			}
-
-			//camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x;
 			camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x + ((camera.focus_loop_count - camera.prev_focus_loop_count) * renderer->width);
 
-			//camera.focus_point.x = render::getScreenXForEntityByCameraAndDistance(camera.fo)
-
-			//int32_t turn_speed = std::abs(std::lround(camera.focus_point_vel.x));
 			int32_t turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 5L);
 			int32_t max_velocity;
 			if (ship->direction == ShipDirection::right)
@@ -164,15 +152,9 @@ int main(int argc, char* args[])
 					camera.focus_rect.x = desired_x_abs;
 			}
 
-			debug->set("max cam vel", max_velocity);
-			debug->set("desired x abs", desired_x_abs);
-			debug->set("proposed x abs", proposed_x_abs);
-			debug->set("desired right of proposed", renderer->isRightOf(desired_x_abs, proposed_x_abs));
-
 			if (camera.focus_rect.x < 0)
 			{
 				camera.focus_rect.x += renderer->width;
-				//game->togglePause(true);
 			}
 			else if (camera.focus_rect.x > world->w * renderer->scaling)
 			{
@@ -181,16 +163,20 @@ int main(int argc, char* args[])
 			camera.view_rect.x = camera.focus_rect.x - (48 * renderer->scaling);
 			if (camera.view_rect.x < 0)
 				camera.view_rect.x += renderer->width;
-
-
-
-			if (camera.view_rect.x - camera.prev_view_rect.x < -200)
-			{
-				//game->togglePause(true);
-				//console_debug({ "camera jump: ", std::to_string(camera.view_rect.x - camera.prev_view_rect.x) });
-			}
 		}
+
+		double time_before_render = timer->getTime();
+		double usage_game = util::round(((time_before_render - time_start_frame) / delta_time), 3) * 100.0;
 		renderer->render(&camera);
+
+		double time_after_render = timer->getTime();
+		double render_time = util::round(((time_after_render - time_before_render) / delta_time), 3) * 100.0;
+
+		if (timer->getTotalFrames() % 10 == 0)
+		{
+			debug->set("% Usage (game)", std::to_string(usage_game).substr(0, 4));
+			debug->set("% Usage (render)", std::to_string(render_time).substr(0, 4));
+		}
 
 		timer->endFrame();
 	}

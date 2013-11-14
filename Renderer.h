@@ -139,6 +139,7 @@ public:
 	void toggleGrid(bool state);
 
 	bool isRightOf(int32_t x, int32_t y);
+	bool isLeftOf(int32_t x, int32_t y);
 
 	const uint32_t width;
 };

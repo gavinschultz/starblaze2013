@@ -44,7 +44,6 @@ void Renderer::init()
 	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	SDL_RenderSetLogicalSize(sdlRenderer, 1024, 768);
-	//SDL_RenderSetLogicalSize(sdlRenderer, 256, 192);
 
 	GLenum glew_init = glewInit();
 	if (GLEW_OK != glew_init)
@@ -87,12 +86,10 @@ bool Renderer::isRightOf(int32_t x, int32_t y)
 		return ((x - y) % width) < width / 2;
 	else
 		return ((y - x) % width) > width / 2;
-	//return std::abs(x - y) > _width / 2;
-	/*if (x < window.w)
-		x += _width;
-	if (y < window.w)
-		y += _width;
-	return y > x;*/
+}
+
+bool Renderer::isLeftOf(int32_t x, int32_t y) { 
+	return !isRightOf(x, y); 
 }
 
 SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect)
@@ -181,6 +178,10 @@ void Renderer::renderGrid()
 		SDL_RenderDrawLine(sdlRenderer, 0, y, window.w - 1, y);
 	}
 	SDL_RenderDrawLine(sdlRenderer, 0, window.h - 1, window.w, window.h - 1);
+
+	SDL_SetRenderDrawColor(sdlRenderer, 64, 64, 255, SDL_ALPHA_OPAQUE);
+	SDL_RenderDrawLine(sdlRenderer, 48 * scaling, 0, 48 * scaling, window.h);
+	SDL_RenderDrawLine(sdlRenderer, 208 * scaling, 0, 208 * scaling, window.h);
 	glDisable(GL_LINE_STIPPLE);
 }
 
@@ -291,20 +292,9 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_RendererFlip flip = _ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
-	//SDL_Rect ship_rect = { camera.focus_point.x - camera.view_rect.x, camera.focus_point.y - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
-	/*int camera_view_rect_rel_x;
-	if (camera.focus_rect.x > world->w*_scaling / 2)
-		camera_view_rect_rel_x = camera.view_rect.x - world->w*_scaling;
-	else
-		camera_view_rect_rel_x = camera.view_rect.x;*/
-	//int camera_view_rect_rel_x = camera.focus_rect.x - (48 * _scaling);
-	//debug->set("camera_view_rect_rel_x", camera_view_rect_rel_x);
-	/*SDL_Rect ship_rect = { std::lround(_ship->alpha_pos.x * _scaling) - camera_view_rect_rel_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };*/
-
 	int32_t entity_x = render::getScreenXForEntityByCameraAndDistance(_ship->alpha_pos.x*(double)_scaling, _ship_texture_rect.w*_scaling, renderer->width, camera, 1.0);
 
 	SDL_Rect ship_rect = { entity_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
-	//debug({ "ship rect x/y: ", std::to_string(ship_rect.x), " / ", std::to_string(ship_rect.y), " ship alpha_x/x: ", std::to_string(_ship->alpha_pos.x), " / ", std::to_string(_ship->current_state.pos.x) });
 	if (smooth_animation)
 		_stripe_texture_rect.y = (timer->getTotalFrames() - 1) % 32;				// smooth scrolling stripe
 	else
@@ -319,7 +309,6 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 		taillight_texture = this->_taillight_texture;
 	}
 
-	//debug({ "Ship thrust/vel X:", std::to_string(_ship->current_state.thrust.x), "/", std::to_string(_ship->current_state.vel.x), " accel Y:", std::to_string(_ship->current_state.acc.y), " direction:", std::to_string((int)_ship->direction) });
 	SDL_Rect burner_rect = {};
 	SDL_Texture* burner_texture = nullptr; // may be either forward or reverse
 	SDL_Rect burner_texture_rect = {};
@@ -406,17 +395,11 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 
 	for (auto hill : _world->hills)
 	{
+		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
 		int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, hill.distance_factor);
 		SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 	}
-
-	/*
-	Hill* hill = _world->hill;
-	double distance_factor = 0.25;
-	int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill->x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, distance_factor);
-	SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + 17 * _scaling, _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
-	SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);*/
 }
 
 RadarSprite::RadarSprite(Renderer* renderer)
@@ -457,18 +440,9 @@ int32_t render::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, 
 		camera_x_rel = camera_x_abs;
 
 	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
-	//debug->set("entity_x_cam A", entity_x_at_camera_x);
 
 	if (entity_x_at_camera_x + entity_sprite_width > world_width * distance_factor)
 		entity_x_at_camera_x -= world_width * distance_factor;
-
-	/*
-	debug->set("world_width", (int)world_width);
-	debug->set("sprite_width", (int)entity_sprite_width);
-	debug->set("entity_x_zero", entity_x_at_zero);
-	debug->set("camera_x_rel", camera_x_rel);
-	debug->set("entity_x_cam B", entity_x_at_camera_x);
-	*/
 
 	return (int32_t)entity_x_at_camera_x;
 }

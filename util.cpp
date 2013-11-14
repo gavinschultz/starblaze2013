@@ -1,4 +1,8 @@
 #include "Util.h"
+#include <math.h>
+//#include "Renderer.h"
+#include <cmath>
+
 
 int util::getsign(int value)
 {
@@ -18,4 +22,9 @@ int util::getsign(double value)
 		return 1;
 	else
 		return -1;
+}
+
+double util::round(double value, int sf)
+{
+	return std::floor((value*std::pow(10, sf)) + 0.5) / std::pow(10, sf);
 }

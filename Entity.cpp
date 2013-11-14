@@ -64,6 +64,7 @@ World::World(int hill_count)
 
 		hill.distance_factor = y_channel_speeds[hill.y_channel];
 		hill.type = rnd_type();
+		console_debug({ "hill type:", std::to_string(hill.type) });
 		hills.push_back(hill);
 	}
 	hill = new Hill();
