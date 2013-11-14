@@ -76,6 +76,7 @@ int main(int argc, char* args[])
 	{
 		timer->startFrame();
 		double time_start_frame = timer->getTime();
+
 		auto delta_time = timer->getLastFrameDuration();
 		if (delta_time > 0.25)
 		{
@@ -131,6 +132,7 @@ int main(int argc, char* args[])
 				max_velocity = camera.focus_point_vel.x - turn_speed;
 			int32_t desired_x_abs;
 			int32_t proposed_x_abs = camera.prev_focus_rect.x + max_velocity;  // NOTE: might fail to be absolute once we can have direction = right and negative velocity
+
 			if (ship->direction == ShipDirection::right)
 			{
 				desired_x_abs = camera.focus_point.x;
@@ -283,6 +285,7 @@ void integrate(double delta_time, double dt)
 
 	double accel = ship->current_state.thrust.x / ship->weight;
 	double vel = ship->current_state.vel.x + accel * dt;
+	
 	// decceleration
 	if (std::abs(ship->current_state.vel.x) > 200 || std::abs(ship->current_state.thrust.x) > 0)
 		vel -= ship->current_state.vel.x * (0.4 * dt);
@@ -291,9 +294,7 @@ void integrate(double delta_time, double dt)
 
 	ship->current_state.vel.y -= ship->current_state.vel.y * (4.0 * dt);
 
-
 	double dist = (ship->current_state.vel.x * dt) + (accel * 0.5 * dt * dt);
-	//debug({ "Thrust:", std::to_string(ship->current_state.thrust.x), " proposed vel x:", std::to_string(vel), " dist x:", std::to_string(dist), " accel x:", std::to_string(accel), "m/s/s current: ", std::to_string(ship->current_state.vel.x) });
 
 	ship->current_state.acc.x = accel;
 	ship->current_state.vel.x = vel;
@@ -318,7 +319,6 @@ void integrate(double delta_time, double dt)
 		ship->current_state.vel.y = 0.0;
 	}
 
-	//debug({ "ship x:", std::to_string(ship->current_state.pos.x), " world w:", std::to_string(world->w) });
 	if (ship->current_state.pos.x > world->w)
 	{
 		ship->current_state.pos.x -= world->w;
@@ -334,14 +334,11 @@ void integrate(double delta_time, double dt)
 		ship->direction = ShipDirection::right;
 	else
 		ship->direction = ShipDirection::left;
-
-	//debug({ "integrate ship.current.x: ", std::to_string(ship->current_state.pos.x) });
 }
 
 void integrateAlpha(double alpha)
 {
 	Ship* ship = game->entity_register.getShip();
-	//ship->prev_alpha_pos = ship->alpha_pos;
 
 	if (ship->current_state.loop_count != ship->prev_state.loop_count)
 	{
@@ -349,14 +346,10 @@ void integrateAlpha(double alpha)
 		double currentX = ship->current_state.pos.x*alpha;
 		double prevX = (ship->prev_state.pos.x - wrap_factor)*(1.0 - alpha);
 		ship->alpha_pos.x = currentX + prevX;
-		//console_debug({ "current/prev X: ", std::to_string(ship->current_state.pos.x), " / ", std::to_string(ship->prev_state.pos.x) });
-		//console_debug({ "special alpha (", std::to_string(alpha), ") calculation: current X + prev X = ", std::to_string(currentX), " + ", std::to_string(prevX), " = ", std::to_string(ship->alpha_pos.x) });
-		ship->alpha_pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
-		return;
 	}
-
-	ship->alpha_pos.x = ship->current_state.pos.x*alpha + ship->prev_state.pos.x*(1.0 - alpha);
+	else
+	{
+		ship->alpha_pos.x = ship->current_state.pos.x*alpha + ship->prev_state.pos.x*(1.0 - alpha);
+	}
 	ship->alpha_pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
-
-	//console_debug({ "ship alpha jump: ", std::to_string(ship->alpha_pos.x - ship->prev_state.pos.x) });
 }
