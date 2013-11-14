@@ -117,21 +117,24 @@ int main(int argc, char* args[])
 
 			camera.prev_focus_point = camera.focus_point;
 			camera.prev_focus_loop_count = camera.focus_loop_count;
-			camera.prev_view_rect = camera.view_rect;
 			camera.prev_focus_rect = camera.focus_rect;
 			camera.focus_point = { std::lround(ship->alpha_pos.x * renderer->scaling), std::lround(ship->alpha_pos.y * renderer->scaling) };
 			camera.focus_loop_count = ship->current_state.loop_count;
 
 			camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x + ((camera.focus_loop_count - camera.prev_focus_loop_count) * renderer->width);
 
-			int32_t turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 5L);
+			int32_t turn_speed;
+			if ((camera.focus_point_vel.x < 0 && ship->direction == ShipDirection::right) || (camera.focus_point_vel.x > 0 && ship->direction == ShipDirection::left))
+				turn_speed = 4L;
+			else
+				turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 6L);
 			int32_t max_velocity;
 			if (ship->direction == ShipDirection::right)
 				max_velocity = camera.focus_point_vel.x + turn_speed;
 			else
 				max_velocity = camera.focus_point_vel.x - turn_speed;
 			int32_t desired_x_abs;
-			int32_t proposed_x_abs = camera.prev_focus_rect.x + max_velocity;  // NOTE: might fail to be absolute once we can have direction = right and negative velocity
+			int32_t proposed_x_abs = camera.prev_focus_rect.x + max_velocity;  // NOTE: might fail to be absolute once we can have dir = right and negative velocity
 
 			if (ship->direction == ShipDirection::right)
 			{
@@ -235,11 +238,9 @@ bool handleEvent(SDL_Event* pevent)
 	case SDL_MOUSEMOTION:
 
 		mousemotion = pevent->motion;
-		//debug({ "Mouse move Xrel:", std::to_string(mousemotion.xrel), " Yrel:", std::to_string(mousemotion.yrel) });
-		//debug({ "Vel x:", std::to_string(ship->current_state.vel.x), " acc x:", std::to_string(ship->current_state.acc.x) });
 		if ((ship->current_state.vel.x > 0.0 && ship->current_state.acc.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.acc.x < 0.0))
 		{
-			thrust_multiplier = forward_thrust_multiplier;;
+			thrust_multiplier = forward_thrust_multiplier;
 		}
 		else
 		{
@@ -247,7 +248,11 @@ bool handleEvent(SDL_Event* pevent)
 		}
 		ship->current_state.thrust.x = mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier;
 		ship->current_state.thrust.y = mousemotion.yrel * game->mouse_sensitivity * 0.8;
-		//debug({ "Mouse xrel:", std::to_string(mousemotion.xrel), " yrel:", std::to_string(mousemotion.yrel), " Ship current vel X:", std::to_string(ship->current_state.vel.x), " vel Y:", std::to_string(ship->current_state.vel.y), " prev vel X:", std::to_string(ship->prev_state.vel.x), " vel Y:", std::to_string(ship->prev_state.vel.y) });
+		if (mousemotion.xrel > 0)
+			ship->direction = ShipDirection::right;
+		else if (mousemotion.xrel < 0)
+			ship->direction = ShipDirection::left;
+
 		break;
 
 	default:
@@ -267,11 +272,17 @@ void handleState()
 	if (keystate[SDL_SCANCODE_UP])
 		ship->current_state.thrust.y = -ship->max_thrust * 0.04;
 	if (keystate[SDL_SCANCODE_DOWN])
-		ship->current_state.thrust.y = +ship->max_thrust * 0.04;
+		ship->current_state.thrust.y = ship->max_thrust * 0.04;
 	if (keystate[SDL_SCANCODE_LEFT])
+	{
 		ship->current_state.thrust.x = -ship->max_thrust;
+		ship->direction = ShipDirection::left;
+	}
 	if (keystate[SDL_SCANCODE_RIGHT])
-		ship->current_state.thrust.x = +ship->max_thrust;
+	{
+		ship->current_state.thrust.x = ship->max_thrust;
+		ship->direction = ShipDirection::right;
+	}
 }
 
 void integrate(double delta_time, double dt)
@@ -329,11 +340,6 @@ void integrate(double delta_time, double dt)
 		ship->current_state.pos.x += world->w;
 		ship->current_state.loop_count--;
 	}
-
-	if (ship->current_state.vel.x > 0.0 || (ship->current_state.vel.x == 0.0 && ship->direction == ShipDirection::right))
-		ship->direction = ShipDirection::right;
-	else
-		ship->direction = ShipDirection::left;
 }
 
 void integrateAlpha(double alpha)

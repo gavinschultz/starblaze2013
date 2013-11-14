@@ -327,14 +327,16 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 			burner_texture_rect = _burner_rev_texture_rect;
 		}
 
-		if (_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right)
+		if (_ship->current_state.thrust.x != 0.0 && _ship->direction == ShipDirection::right)
 		{
 			burner_rect = { ship_rect.x + _burner_offset.x, ship_rect.y + _burner_offset.y, _burner_texture_rect.w  * _scaling, _burner_texture_rect.h  * _scaling };
 		}
-		else if (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left)
+		else if (_ship->current_state.thrust.x != 0.0 && _ship->direction == ShipDirection::left)
 		{
 			burner_rect = { ship_rect.x + ship_rect.w, ship_rect.y + _burner_offset.y, _burner_texture_rect.w  * _scaling, _burner_texture_rect.h  * _scaling };
 		}
+
+		/* reverse texture - disabled for now
 		else if (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::right)
 		{
 			burner_rect = { ship_rect.x + _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w  * _scaling, _burner_rev_texture_rect.h  * _scaling };
@@ -343,6 +345,7 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 		{
 			burner_rect = { ship_rect.x + ship_rect.w - (_burner_rev_texture_rect.w  * _scaling) - _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w  * _scaling, _burner_rev_texture_rect.h  * _scaling };
 		}
+		*/
 	}
 
 	SDL_Texture* wheels_texture = nullptr;
@@ -359,6 +362,8 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 		SDL_RenderCopyEx(sdlRenderer, taillight_texture, &_taillight_texture_rect, &taillight_rect, 0, NULL, flip);
 	if (burner_texture)
 		SDL_RenderCopyEx(sdlRenderer, burner_texture, &burner_texture_rect, &burner_rect, 0, NULL, flip);
+	/*if (burner_rev_texture)
+		SDL_RenderCopyEx(sdlRenderer, burner_rev_texture, &burner_rev_texture_rect, &burner_rect, 0, NULL, flip);*/
 	if (wheels_texture)
 		SDL_RenderCopyEx(sdlRenderer, wheels_texture, &_wheels_texture_rect, &wheels_rect, 0, NULL, flip);
 }
