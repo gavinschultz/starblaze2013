@@ -5,6 +5,7 @@
 #include <SDL_image.h>
 #include <algorithm>
 #include "glew.h"
+#include "Util.h"
 
 //#define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
@@ -79,6 +80,11 @@ void Renderer::toggleGrid(bool state)
 	is_grid_visible = state;
 }
 
+void Renderer::toggleMotionHistory(bool state)
+{
+	is_motionhistory_visible = state;
+}
+
 // only works for absolute coordinates
 bool Renderer::isRightOf(int32_t x, int32_t y)
 {
@@ -130,6 +136,9 @@ void Renderer::render(Camera* camera)
 		renderDebug(*debug.get());
 		renderZeroLine(*camera);
 	}
+
+	if (is_motionhistory_visible)
+		renderMotionHistory(*debug.get());
 
 	SDL_RenderPresent(sdlRenderer);
 }
@@ -231,7 +240,76 @@ void Renderer::renderDebug(const Debug& debug)
 	}
 }
 
+void Renderer::renderMotionHistory(const Debug& debug)
+{
+	const int initial_y = (window.h / 2);
+	const int threshold_line_offset = 75;
+	const int axis_line_offset = 100;
 
+	glLineWidth(1.0f);
+
+	// background
+	SDL_SetRenderDrawBlendMode(sdlRenderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 176);
+	auto bgrect = SDL_Rect{ 0, initial_y - axis_line_offset - threshold_line_offset - 50, window.w, (axis_line_offset + threshold_line_offset + 50) * 2 };
+	SDL_RenderFillRect(sdlRenderer, &bgrect);
+
+	// base lines
+	SDL_SetRenderDrawColor(sdlRenderer, 128, 128, 128, 255);
+	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset, window.w, initial_y - axis_line_offset);
+	SDL_RenderDrawLine(sdlRenderer, 0, initial_y + axis_line_offset, window.w, initial_y + axis_line_offset);
+
+	// threshold lines
+	SDL_SetRenderDrawColor(sdlRenderer, 64, 64, 64, 255);
+	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset - threshold_line_offset, window.w, initial_y - axis_line_offset - threshold_line_offset); // X motion - upper threshold
+	SDL_RenderDrawLine(sdlRenderer, 0, initial_y + axis_line_offset - threshold_line_offset, window.w, initial_y + axis_line_offset - threshold_line_offset); // X motion - lower threshold
+	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset + threshold_line_offset, window.w, initial_y - axis_line_offset + threshold_line_offset); // Y motion - upper threshold
+	SDL_RenderDrawLine(sdlRenderer, 0, initial_y + axis_line_offset + threshold_line_offset, window.w, initial_y + axis_line_offset + threshold_line_offset); // Y motion - lower threshold
+
+	// points
+	Vector2Di render_point_y{ 0, 0 };
+	Vector2Di prev_render_point_y;
+	for (unsigned int i = 0; i < debug.motion_history.size(); i++)
+	{
+		Vector2D p = debug.motion_history[i];
+		glPointSize(1.0f);
+
+		int scaled_xmotion = std::lround(((double)threshold_line_offset / debug.motion_max_thresholds.x) * p.x); // X motion
+		int scaled_ymotion = std::lround(((double)threshold_line_offset / debug.motion_max_thresholds.y) * p.y); // Y motion
+
+		if (i > 0)
+		{
+			prev_render_point_y = render_point_y;
+			render_point_y = { initial_y - axis_line_offset - scaled_xmotion, initial_y + axis_line_offset + scaled_ymotion };
+			Vector2D prev_p = debug.motion_history[i - 1];
+
+			if (std::abs(scaled_xmotion) > threshold_line_offset)
+			{
+				SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
+				SDL_RenderDrawPoint(sdlRenderer, i, initial_y - axis_line_offset - (threshold_line_offset*util::getsign(scaled_xmotion)));
+			}
+			else
+			{
+				int r, g, b;
+				int frame_age = (int)debug.motion_history_counter - (int)i;
+				if (frame_age < 0)
+					frame_age += 1024;	// TODO: make variable
+				b = 255 - std::min(frame_age * 2, 255);
+				g = 155 + std::min(frame_age * 2, 100);
+				r = 64 + std::min(frame_age, 191);
+				//console_debug({ "frame_age: ", std::to_string(frame_age), "r, g, b: ", std::to_string(r), " , ", std::to_string(g), " , ", std::to_string(b) });
+				SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
+			}
+
+			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.x, i, render_point_y.x);
+
+			SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 0, 255);
+			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.y, i, render_point_y.y);
+			/*SDL_RenderDrawPoint(sdlRenderer, i, initial_y - axis_line_offset - scaled_xmotion);
+			SDL_RenderDrawPoint(sdlRenderer, i, initial_y + axis_line_offset + scaled_ymotion);*/
+		}
+	}
+}
 
 SpriteRegister::SpriteRegister()
 {
@@ -376,7 +454,7 @@ BGSprite::BGSprite(Renderer* renderer, World* world) : Sprite()
 	_sky_color = renderer->coco_palette.getColor(blue);
 	_ground_rect = { 0, _sky_rect.h, renderer->window.w, 48 * _scaling };
 	_ground_color = renderer->coco_palette.getColor(green);
-	_hills_texture = renderer->loadTextureFromFile("img\\hills_highlight.tga", nullptr);
+	_hills_texture = renderer->loadTextureFromFile("img\\hills.tga", nullptr);
 	_hills_texture_rect = { 0, 0, 16, 4 };
 	_hills_rect = { 0, _ground_rect.y, renderer->window.w, 28 * _scaling };
 	_bg_rect = { 0, 0, renderer->window.w, renderer->window.h };
@@ -401,6 +479,7 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 	for (auto hill : _world->hills)
 	{
 		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
+		_hills_texture_rect.x = (hill.y_channel == 0) ? 16 : 0;	// Blue version for ground, green version for horizon
 		int32_t entity_x_at_camera_x = render::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, hill.distance_factor);
 		SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);

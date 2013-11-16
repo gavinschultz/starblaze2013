@@ -15,7 +15,7 @@ public:
 	bool is_frame_by_frame{ false };
 	EntityRegister entity_register;
 	SDL_Rect ship_limits;
-	float mouse_sensitivity{ 3.5 };
+	float mouse_sensitivity{ 1.0 };
 };
 
 extern std::unique_ptr<Game> game;

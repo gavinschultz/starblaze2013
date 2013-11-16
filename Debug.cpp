@@ -17,9 +17,14 @@ void console_debug(std::initializer_list<std::string> args)
 	OutputDebugString(ss.str().c_str());
 }
 
-Debug::Debug()
+Debug::Debug() : motion_history(motion_history_limit, Vector2D{0.0,0.0})
 {
 	
+}
+
+Debug::~Debug()
+{
+
 }
 
 void Debug::set(std::string label, std::string value)
@@ -45,4 +50,19 @@ void Debug::set(std::string label, double value)
 void Debug::set(std::string label, int value)
 {
 	this->set(label, std::to_string(value));
+}
+
+void Debug::setMotionRecordMaxThresholds(double x, double y)
+{
+	motion_max_thresholds = Vector2D{ x, y };
+}
+
+void Debug::addMotionRecord(double x, double y)
+{
+	if (motion_history_counter >= motion_history.size()-1)
+		motion_history_counter = 0;
+	else
+		motion_history_counter++;
+	console_debug({ "motion history[", std::to_string(motion_history_counter), "] = (", std::to_string(x), ", ", std::to_string(y), ")" });
+	motion_history[motion_history_counter] = Vector2D{ x, y };
 }

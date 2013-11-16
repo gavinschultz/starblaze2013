@@ -5,20 +5,6 @@
 #include "Debug.h"
 #include <ctime>
 
-//Point2D::Point2D(double x, double y)
-//{
-//	this->x = x;
-//	this->y = y;
-//}
-//
-////Point2Di::Point2Di(int32_t x, int32_t)
-//
-//Vector2D::Vector2D(double x, double y)
-//{
-//	this->x = x;
-//	this->y = y;
-//}
-
 Ship* EntityRegister::getShip()
 {
 	return _ship.get();
@@ -64,10 +50,6 @@ World::World(int hill_count)
 
 		hill.distance_factor = y_channel_speeds[hill.y_channel];
 		hill.type = rnd_type();
-		console_debug({ "hill type:", std::to_string(hill.type) });
 		hills.push_back(hill);
 	}
-	hill = new Hill();
-	hill->type = 3;
-	hill->x = this->w / 4;
 }

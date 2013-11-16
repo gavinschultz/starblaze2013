@@ -1,6 +1,12 @@
+#pragma comment(lib, "SDL2.lib")
+#pragma comment(lib, "SDL2main.lib")
+#pragma comment(lib, "SDL2_image.lib")
+#pragma comment(lib, "SDL2_ttf.lib")
+#pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "glu32.lib")
 #pragma comment(lib, "glew32.lib")
+
 #include <SDL.h>
-//#include <Windows.h>
 #include <memory>
 #include <string>
 #include <iostream>
@@ -38,7 +44,8 @@ int main(int argc, char* args[])
 	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4, world->w)};
 	debug = std::unique_ptr<Debug>{new Debug()};
 #ifdef _DEBUG
-	renderer->toggleGrid(true);
+	//renderer->toggleGrid(true);
+	renderer->toggleMotionHistory(true);
 #endif
 
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
@@ -98,6 +105,9 @@ int main(int argc, char* args[])
 		handleState();
 		if (quit)
 			break;
+
+		debug->setMotionRecordMaxThresholds(400, 80);
+		debug->addMotionRecord(ship->current_state.thrust.x, ship->current_state.thrust.y);
 
 		if (!game->is_paused || game->is_frame_by_frame)
 		{
@@ -200,8 +210,8 @@ bool handleEvent(SDL_Event* pevent)
 	SDL_KeyboardEvent key;
 	SDL_MouseMotionEvent mousemotion;
 
-	double reverse_thrust_multiplier = 800.0;
-	double forward_thrust_multiplier = 40.0;
+	double reverse_thrust_multiplier = 16.0;
+	double forward_thrust_multiplier = 8.0;
 	double thrust_multiplier;
 
 	switch (pevent->type)
@@ -213,12 +223,14 @@ bool handleEvent(SDL_Event* pevent)
 		case SDLK_ESCAPE:
 		case SDLK_q:
 			return false;
-			break;
 		case SDLK_F6:
 			game->mouse_sensitivity = std::max(2.0f, game->mouse_sensitivity - 0.5f);
 			break;
 		case SDLK_F7:
 			game->mouse_sensitivity = std::min(6.0f, game->mouse_sensitivity + 0.5f);
+			break;
+		case SDLK_F10:
+			renderer->toggleMotionHistory(!renderer->is_motionhistory_visible);
 			break;
 		case SDLK_F11:
 			renderer->toggleGrid(!renderer->is_grid_visible);
@@ -237,50 +249,55 @@ bool handleEvent(SDL_Event* pevent)
 		break;
 	case SDL_MOUSEMOTION:
 
-		mousemotion = pevent->motion;
-		if ((ship->current_state.vel.x > 0.0 && ship->current_state.acc.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.acc.x < 0.0))
+		if (!game->is_paused)
 		{
-			thrust_multiplier = forward_thrust_multiplier;
-		}
-		else
-		{
-			thrust_multiplier = reverse_thrust_multiplier;
-		}
-		ship->current_state.thrust.x = mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier;
-		ship->current_state.thrust.y = mousemotion.yrel * game->mouse_sensitivity * 0.8;
-		if (mousemotion.xrel > 0)
-			ship->direction = ShipDirection::right;
-		else if (mousemotion.xrel < 0)
-			ship->direction = ShipDirection::left;
+			mousemotion = pevent->motion;
+			if ((ship->current_state.vel.x > 0.0 && ship->current_state.thrust.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.thrust.x < 0.0))
+			{
+				thrust_multiplier = forward_thrust_multiplier;
+			}
+			else
+			{
+				thrust_multiplier = reverse_thrust_multiplier;
+			}
 
+			debug->set("thrust X (unmod)", mousemotion.xrel * game->mouse_sensitivity);
+			debug->set("thrust X (mod)", mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier);
+			ship->current_state.thrust.x = mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier;
+			ship->current_state.thrust.y = mousemotion.yrel * game->mouse_sensitivity * 0.8;
+			if (mousemotion.xrel > 0)
+				ship->direction = ShipDirection::right;
+			else if (mousemotion.xrel < 0)
+				ship->direction = ShipDirection::left;
+		}
 		break;
 
 	default:
 		break;
 	}
 
-	int x, y;
-	SDL_GetMouseState(&x, &y);
-
 	return true;
 }
 
 void handleState()
 {
+	if (game->is_paused)
+		return;
+
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	Ship* ship = game->entity_register.getShip();
 	if (keystate[SDL_SCANCODE_UP])
-		ship->current_state.thrust.y = -ship->max_thrust * 0.04;
+		ship->current_state.thrust.y = -400.0 * 0.04;
 	if (keystate[SDL_SCANCODE_DOWN])
-		ship->current_state.thrust.y = ship->max_thrust * 0.04;
+		ship->current_state.thrust.y = 400 * 0.04;
 	if (keystate[SDL_SCANCODE_LEFT])
 	{
-		ship->current_state.thrust.x = -ship->max_thrust;
+		ship->current_state.thrust.x = -400.0;
 		ship->direction = ShipDirection::left;
 	}
 	if (keystate[SDL_SCANCODE_RIGHT])
 	{
-		ship->current_state.thrust.x = ship->max_thrust;
+		ship->current_state.thrust.x = 400.0;
 		ship->direction = ShipDirection::right;
 	}
 }
@@ -297,12 +314,13 @@ void integrate(double delta_time, double dt)
 	double accel = ship->current_state.thrust.x / ship->weight;
 	double vel = ship->current_state.vel.x + accel * dt;
 	
-	// decceleration
+	// decceleration X
 	if (std::abs(ship->current_state.vel.x) > 200 || std::abs(ship->current_state.thrust.x) > 0)
 		vel -= ship->current_state.vel.x * (0.4 * dt);
 	else
 		vel -= ship->current_state.vel.x * (1.3 * dt);
 
+	// decceleration Y
 	ship->current_state.vel.y -= ship->current_state.vel.y * (4.0 * dt);
 
 	double dist = (ship->current_state.vel.x * dt) + (accel * 0.5 * dt * dt);

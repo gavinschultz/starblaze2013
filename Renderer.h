@@ -113,6 +113,7 @@ private:
 	void renderGrid();
 	void renderFPS(int fps);
 	void renderDebug(const Debug& debug);
+	void renderMotionHistory(const Debug& debug);
 	void renderText(const std::string text, uint32_t x, uint32_t y);
 	void renderZeroLine(const Camera& camera);
 	void init();
@@ -127,10 +128,12 @@ public:
 
 	Window window;
 	const uint32_t scaling;
-	bool is_fullscreen = false;
-	bool is_grid_visible = false;
+	bool is_fullscreen{ false };
+	bool is_grid_visible{ false };
+	bool is_motionhistory_visible{ false };
 	void toggleFullscreen(bool state);
 	void toggleGrid(bool state);
+	void toggleMotionHistory(bool state);
 
 	bool isRightOf(int32_t x, int32_t y);
 	bool isLeftOf(int32_t x, int32_t y);
