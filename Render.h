@@ -12,6 +12,8 @@
 #include <SDL_ttf.h>
 #include "Debug.h"
 #include "Game.h"
+#include <random>
+#include <functional>
 
 class Window
 {
@@ -125,10 +127,10 @@ private:
 	void renderMotionHistory(const Debug& debug);
 	void renderText(const std::string text, uint32_t x, uint32_t y);
 	void renderZeroLine(const Camera& camera);
-	//void renderHUD(const Ship& ship, const Game& game);
 	void renderHUD();
 	void init();
 	TTF_Font* _font;
+	auto rnd_burner = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine{});
 public:
 	Renderer(uint32_t screen_width, uint32_t screen_height, uint32_t scaling, double world_width);
 	~Renderer();
@@ -145,10 +147,8 @@ public:
 	void toggleFullscreen(bool state);
 	void toggleGrid(bool state);
 	void toggleMotionHistory(bool state);
-
 	bool isRightOf(int32_t x, int32_t y);
 	bool isLeftOf(int32_t x, int32_t y);
-
 	const uint32_t width;
 };
 
@@ -160,18 +160,18 @@ private:
 	SDL_Texture* _taillight_texture;
 	SDL_Texture* _stripe_texture;
 	SDL_Texture* _burner_texture;
-	SDL_Texture* _burner_rev_texture;
+	//SDL_Texture* _burner_rev_texture;
 	SDL_Texture* _wheels_texture;
 	SDL_Rect _ship_texture_rect;
 	SDL_Rect _taillight_texture_rect;
 	SDL_Rect _stripe_texture_rect;
 	SDL_Rect _burner_texture_rect;
-	SDL_Rect _burner_rev_texture_rect;
+	//SDL_Rect _burner_rev_texture_rect;
 	SDL_Rect _wheels_texture_rect;
 
 	Point2Di _stripe_offset;
 	Point2Di _burner_offset;
-	Point2Di _burner_rev_offset;
+	//Point2Di _burner_rev_offset;
 	Point2Di _wheels_offset;
 public:
 	ShipSprite(Renderer* renderer, Ship* ship);

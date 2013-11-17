@@ -368,18 +368,18 @@ ShipSprite::ShipSprite(Renderer* renderer, Ship* ship) : Sprite()
 	this->_ship = std::shared_ptr<Ship>(ship);
 	this->_stripe_texture_rect = { 0, 0, 32, 1 };
 	this->_burner_texture_rect = { 0, 0, 8, 5 };
-	this->_burner_rev_texture_rect = { 0, 0, 4, 4 };
+	//this->_burner_rev_texture_rect = { 0, 0, 4, 4 };
 
 	this->_ship_texture = renderer->loadTextureFromFile("img\\ship.tga", &this->_ship_texture_rect);
 	this->_stripe_texture = renderer->loadTextureFromFile("img\\shipstripe.tga", nullptr);
 	this->_taillight_texture = renderer->loadTextureFromFile("img\\shiptaillight.tga", &this->_taillight_texture_rect);
 	this->_burner_texture = renderer->loadTextureFromFile("img\\shipburner.tga", nullptr);
-	this->_burner_rev_texture = renderer->loadTextureFromFile("img\\shipburner_rev.tga", nullptr);
+	//this->_burner_rev_texture = renderer->loadTextureFromFile("img\\shipburner_rev.tga", nullptr);
 	this->_wheels_texture = renderer->loadTextureFromFile("img\\shipwheels.tga", &this->_wheels_texture_rect);
 
 	this->_stripe_offset = { 0, 6 * (int32_t)_scaling };
 	this->_burner_offset = { -_burner_texture_rect.w  * (int32_t)_scaling, (_ship_texture_rect.h - 5)  * (int32_t)_scaling };
-	this->_burner_rev_offset = { 17 * (int32_t)_scaling, 4 * (int32_t)_scaling };
+	//this->_burner_rev_offset = { 17 * (int32_t)_scaling, 4 * (int32_t)_scaling };
 	this->_wheels_offset = { 0, _ship_texture_rect.h * (int32_t)_scaling };
 
 	this->smooth_animation = false;
@@ -415,20 +415,25 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_Rect burner_rect = {};
 	SDL_Texture* burner_texture = nullptr; // may be either forward or reverse
 	SDL_Rect burner_texture_rect = {};
+	debug->set("max thrust / abs(thrust)", std::to_string(_ship->max_thrust.x) + " / " + std::to_string(std::abs(_ship->current_state.thrust.x)));
 	if (_ship->current_state.thrust.x != 0.0)
 	{
-		_burner_texture_rect.x = std::min((int)((_ship->max_thrust.x / abs(_ship->current_state.thrust.x))) - 1, 3) * 8;
-		_burner_rev_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 8.0), 1) * 4;
-		if ((_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right) || (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left))
+		debug->set("temp X", std::lround(4 * std::abs(_ship->current_state.thrust.x) / _ship->max_thrust.x));
+		//_burner_texture_rect.x = std::min((int)(std::lround(_ship->max_thrust.x / std::abs(_ship->current_state.thrust.x))), 3) * 8;
+		_burner_texture_rect.x = std::min(std::lround(4 * std::abs(_ship->current_state.thrust.x) / _ship->max_thrust.x) * 8, 24L);
+		debug->set("burner_texture X", _burner_texture_rect.x);
+		//_burner_rev_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 8.0), 1) * 4;
+		//if ((_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right) || (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left))
+		if (_ship->current_state.thrust.x != 0.0)
 		{
 			burner_texture = _burner_texture;
 			burner_texture_rect = _burner_texture_rect;
 		}
-		else
+		/*else
 		{
 			burner_texture = _burner_rev_texture;
 			burner_texture_rect = _burner_rev_texture_rect;
-		}
+		}*/
 
 		if (_ship->current_state.thrust.x != 0.0 && _ship->direction == ShipDirection::right)
 		{

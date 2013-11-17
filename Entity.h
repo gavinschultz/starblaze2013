@@ -21,11 +21,12 @@ public:
 	int radar{ 100 };
 	int fuel{ 10000 };
 	bool isGearDown();
+	const double reverse_thrust_factor{ 1.6 };
 	const double takeoff_speed{ 250.0 };
-	const Vector2D max_thrust{ 400.0, 16.0 };
+	const Vector2D max_thrust{ 400.0, 14.0 };
 	const double weight{ 1.0 };
 	const double max_velocity{ 20000.0 };
-	const double max_lift{ 800.0 };
+	const double max_lift{ 700.0 };
 };
 
 class Hill

@@ -140,8 +140,8 @@ void Input::handleJoystickState(Ship* ship) const
 	//debug->set("Controller L-Axis Y (raw)", left_y_raw);
 	int16_t left_x = util::getsign(left_x_raw)*std::max(0, (std::abs(left_x_raw) - tolerance));
 	int16_t left_y = util::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance));
-	debug->set("Controller L-Axis X", left_x);
-	debug->set("Controller L-Axis Y", left_y);
+	//debug->set("Controller L-Axis X", left_x);
+	//debug->set("Controller L-Axis Y", left_y);
 	if (std::abs(left_x) > 0)
 	{
 		ship->current_state.thrust.x = left_x * x_modifier;

@@ -44,8 +44,8 @@ int main(int argc, char* args[])
 	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4, world->w)};
 	debug = std::unique_ptr<Debug>{new Debug()};
 #ifdef _DEBUG
-	renderer->toggleGrid(true);
-	renderer->toggleMotionHistory(true);
+	//renderer->toggleGrid(true);
+	//renderer->toggleMotionHistory(true);
 #endif
 
 	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
@@ -98,16 +98,11 @@ int main(int argc, char* args[])
 		if (game->quit)
 			break;
 
-		// Calculate X thrust
-		double thrust_multiplier;
-		if ((ship->current_state.vel.x > 0.0 && ship->current_state.thrust.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.thrust.x < 0.0))
-		{
-			thrust_multiplier = 1.0;
-		}
-		else
-		{
-			thrust_multiplier = 2.0;
-		}
+		// Apply additional reverse thrust if required
+		double thrust_multiplier = 1.0;
+		if ((ship->current_state.vel.x > 0.0 && ship->current_state.thrust.x < 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.thrust.x > 0.0))
+			thrust_multiplier = ship->reverse_thrust_factor;
+
 		ship->current_state.thrust.x *= thrust_multiplier;
 
 		debug->setMotionRecordMaxThresholds(ship->max_thrust.x, ship->max_thrust.y);
