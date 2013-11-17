@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "Entity.h"
-#include "Renderer.h"
+#include "Render.h"
 
 class Game
 {
@@ -13,6 +13,7 @@ public:
 	bool is_paused{ false };
 	void advanceFrameByFrame();
 	bool is_frame_by_frame{ false };
+	bool quit{ false };
 	EntityRegister entity_register;
 	SDL_Rect ship_limits;
 	float mouse_sensitivity{ 1.0 };

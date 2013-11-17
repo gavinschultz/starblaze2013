@@ -63,6 +63,6 @@ void Debug::addMotionRecord(double x, double y)
 		motion_history_counter = 0;
 	else
 		motion_history_counter++;
-	console_debug({ "motion history[", std::to_string(motion_history_counter), "] = (", std::to_string(x), ", ", std::to_string(y), ")" });
+	//console_debug({ "motion history[", std::to_string(motion_history_counter), "] = (", std::to_string(x), ", ", std::to_string(y), ")" });
 	motion_history[motion_history_counter] = Vector2D{ x, y };
 }

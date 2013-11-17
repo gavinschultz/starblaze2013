@@ -16,9 +16,8 @@ public:
 
 class Debug
 {
-private:
-	const unsigned int motion_history_limit{ 1024 };
 public:
+	const unsigned int motion_history_limit{ 1024 };
 	std::vector<std::unique_ptr<DebugItem>> items;
 	std::vector<Vector2D> motion_history;
 	unsigned int motion_history_counter{ 0 };

@@ -18,13 +18,12 @@
 #include "Game.h"
 #include <algorithm>
 #include "Debug.h"
-#include "Renderer.h"
+#include "Render.h"
 #include "Phys.h"
 #include <math.h>
 #include "Util.h"
+#include "Input.h"
 
-bool handleEvent(SDL_Event*);
-void handleState();
 void integrate(double delta_time, double dt);
 void integrateAlpha(double alpha);
 
@@ -38,13 +37,14 @@ int main(int argc, char* args[])
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
+	Input input = Input();
 	world = std::unique_ptr<World>{new World(100)};
 	game = std::unique_ptr<Game>{new Game()};
 	timer = std::unique_ptr<Timer>{new Timer()};
 	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4, world->w)};
 	debug = std::unique_ptr<Debug>{new Debug()};
 #ifdef _DEBUG
-	//renderer->toggleGrid(true);
+	renderer->toggleGrid(true);
 	renderer->toggleMotionHistory(true);
 #endif
 
@@ -55,6 +55,8 @@ int main(int argc, char* args[])
 	BGSprite* bg_sprite = new BGSprite(renderer.get(), world.get());
 	renderer->sprite_register.registerSprite(bg_sprite);
 
+	renderer->sprite_register.registerSprite(new StationSprite(renderer.get()));
+
 	Ship* s = new Ship();
 	s->direction = ShipDirection::right;
 	s->bounding_box = { 0, 0, 32, 8 };	// TODO: scaling real-time
@@ -63,7 +65,6 @@ int main(int argc, char* args[])
 	renderer->sprite_register.registerSprite(shipSprite);
 
 	renderer->sprite_register.registerSprite(new RadarSprite(renderer.get()));
-
 	// end load assets
 
 	game->start();
@@ -74,12 +75,10 @@ int main(int argc, char* args[])
 	ship->current_state.pos.x = game->ship_limits.x;
 	ship->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - ship->bounding_box.h;
 
-	bool quit = false;
 	double accumulator = 0;
 	const double dt = 1.0 / 60.0;
-	SDL_Event pevent;
 
-	while (!quit)
+	while (true)
 	{
 		timer->startFrame();
 		double time_start_frame = timer->getTime();
@@ -94,20 +93,31 @@ int main(int argc, char* args[])
 		ship->current_state.thrust.x = 0.0;
 		ship->current_state.thrust.y = 0.0;
 
-		while (SDL_PollEvent(&pevent))
-		{
-			if (!handleEvent(&pevent))
-			{
-				quit = true;
-				break;
-			}
-		}
-		handleState();
-		if (quit)
+		input.handleInput();
+
+		if (game->quit)
 			break;
 
-		debug->setMotionRecordMaxThresholds(400, 80);
+		// Calculate X thrust
+		double thrust_multiplier;
+		if ((ship->current_state.vel.x > 0.0 && ship->current_state.thrust.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.thrust.x < 0.0))
+		{
+			thrust_multiplier = 1.0;
+		}
+		else
+		{
+			thrust_multiplier = 2.0;
+		}
+		ship->current_state.thrust.x *= thrust_multiplier;
+
+		debug->setMotionRecordMaxThresholds(ship->max_thrust.x, ship->max_thrust.y);
 		debug->addMotionRecord(ship->current_state.thrust.x, ship->current_state.thrust.y);
+
+		if (ship->current_state.thrust.x > ship->max_thrust.x * thrust_multiplier)
+			ship->current_state.thrust.x = ship->max_thrust.x * thrust_multiplier;
+		else if (ship->current_state.thrust.x < -ship->max_thrust.x * thrust_multiplier)
+			ship->current_state.thrust.x = -ship->max_thrust.x * thrust_multiplier;
+		// end calculate thrust
 
 		if (!game->is_paused || game->is_frame_by_frame)
 		{
@@ -200,116 +210,9 @@ int main(int argc, char* args[])
 	return 0;
 }
 
-bool handleEvent(SDL_Event* pevent)
-{
-	if (pevent == NULL)
-		return true;
-
-	Ship* ship = game->entity_register.getShip();
-
-	SDL_KeyboardEvent key;
-	SDL_MouseMotionEvent mousemotion;
-
-	double reverse_thrust_multiplier = 16.0;
-	double forward_thrust_multiplier = 8.0;
-	double thrust_multiplier;
-
-	switch (pevent->type)
-	{
-	case SDL_KEYDOWN:
-		key = pevent->key;
-		switch (pevent->key.keysym.sym)
-		{
-		case SDLK_ESCAPE:
-		case SDLK_q:
-			return false;
-		case SDLK_F6:
-			game->mouse_sensitivity = std::max(2.0f, game->mouse_sensitivity - 0.5f);
-			break;
-		case SDLK_F7:
-			game->mouse_sensitivity = std::min(6.0f, game->mouse_sensitivity + 0.5f);
-			break;
-		case SDLK_F10:
-			renderer->toggleMotionHistory(!renderer->is_motionhistory_visible);
-			break;
-		case SDLK_F11:
-			renderer->toggleGrid(!renderer->is_grid_visible);
-			break;
-		case SDLK_p:
-			game->togglePause(!game->is_paused);
-			break;
-		case SDLK_f:
-			game->advanceFrameByFrame();
-			break;
-		case SDLK_RETURN:
-			if (pevent->key.keysym.mod & KMOD_ALT)
-				renderer->toggleFullscreen(!renderer->is_fullscreen);
-			break;
-		}
-		break;
-	case SDL_MOUSEMOTION:
-
-		if (!game->is_paused)
-		{
-			mousemotion = pevent->motion;
-			if ((ship->current_state.vel.x > 0.0 && ship->current_state.thrust.x > 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.thrust.x < 0.0))
-			{
-				thrust_multiplier = forward_thrust_multiplier;
-			}
-			else
-			{
-				thrust_multiplier = reverse_thrust_multiplier;
-			}
-
-			debug->set("thrust X (unmod)", mousemotion.xrel * game->mouse_sensitivity);
-			debug->set("thrust X (mod)", mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier);
-			ship->current_state.thrust.x = mousemotion.xrel * game->mouse_sensitivity * thrust_multiplier;
-			ship->current_state.thrust.y = mousemotion.yrel * game->mouse_sensitivity * 0.8;
-			if (mousemotion.xrel > 0)
-				ship->direction = ShipDirection::right;
-			else if (mousemotion.xrel < 0)
-				ship->direction = ShipDirection::left;
-		}
-		break;
-
-	default:
-		break;
-	}
-
-	return true;
-}
-
-void handleState()
-{
-	if (game->is_paused)
-		return;
-
-	auto* keystate = SDL_GetKeyboardState(NULL);
-	Ship* ship = game->entity_register.getShip();
-	if (keystate[SDL_SCANCODE_UP])
-		ship->current_state.thrust.y = -400.0 * 0.04;
-	if (keystate[SDL_SCANCODE_DOWN])
-		ship->current_state.thrust.y = 400 * 0.04;
-	if (keystate[SDL_SCANCODE_LEFT])
-	{
-		ship->current_state.thrust.x = -400.0;
-		ship->direction = ShipDirection::left;
-	}
-	if (keystate[SDL_SCANCODE_RIGHT])
-	{
-		ship->current_state.thrust.x = 400.0;
-		ship->direction = ShipDirection::right;
-	}
-}
-
 void integrate(double delta_time, double dt)
 {
 	Ship* ship = game->entity_register.getShip();
-
-	if (ship->current_state.thrust.x > ship->max_thrust)
-		ship->current_state.thrust.x = ship->max_thrust;
-	else if (ship->current_state.thrust.x < -ship->max_thrust)
-		ship->current_state.thrust.x = -ship->max_thrust;
 
 	double accel = ship->current_state.thrust.x / ship->weight;
 	double vel = ship->current_state.vel.x + accel * dt;

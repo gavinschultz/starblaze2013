@@ -11,6 +11,7 @@
 #include "Phys.h"
 #include <SDL_ttf.h>
 #include "Debug.h"
+#include "Game.h"
 
 class Window
 {
@@ -108,6 +109,14 @@ public:
 class Renderer
 {
 private:
+	enum GaugeType
+	{
+		Fuel = 0,
+		Bullets = 1,
+		Shields = 2,
+		Radar = 3
+	};
+
 	SDL_Window* sdlWindow;
 	SDL_Renderer* sdlRenderer;
 	void renderGrid();
@@ -116,6 +125,8 @@ private:
 	void renderMotionHistory(const Debug& debug);
 	void renderText(const std::string text, uint32_t x, uint32_t y);
 	void renderZeroLine(const Camera& camera);
+	//void renderHUD(const Ship& ship, const Game& game);
+	void renderHUD();
 	void init();
 	TTF_Font* _font;
 public:
@@ -200,6 +211,19 @@ private:
 	SDL_Color _point_color;
 public:
 	RadarSprite(Renderer* renderer);
+	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
+};
+
+class StationSprite : public Sprite
+{
+private:
+	std::shared_ptr<Station> station;	//TODO: would rather not store reference here, should pass in at render time
+	SDL_Texture* _station_texture;
+	SDL_Rect _station_texture_rect;
+	int station_type;	// 0 = fuel, 1 = repair
+public:
+	StationSprite(Renderer* renderer);
+	~StationSprite();
 	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
 };
 

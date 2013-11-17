@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "Render.h"
 #include "Entity.h"
 #include "Debug.h"
 #include <SDL.h>
@@ -94,8 +94,8 @@ bool Renderer::isRightOf(int32_t x, int32_t y)
 		return ((y - x) % width) > width / 2;
 }
 
-bool Renderer::isLeftOf(int32_t x, int32_t y) { 
-	return !isRightOf(x, y); 
+bool Renderer::isLeftOf(int32_t x, int32_t y) {
+	return !isRightOf(x, y);
 }
 
 SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect)
@@ -128,6 +128,8 @@ void Renderer::render(Camera* camera)
 	{
 		sprite->render(this->sdlRenderer, *camera);
 	}
+
+	renderHUD();
 
 	if (is_grid_visible)
 	{
@@ -172,7 +174,7 @@ void Renderer::renderGrid()
 			line_height = x % 32;
 		SDL_RenderDrawLine(sdlRenderer, x, y1, x, y1 + line_height);
 	}
-	
+
 	glLineWidth(2.0f);
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(1, 0x0101);
@@ -240,6 +242,25 @@ void Renderer::renderDebug(const Debug& debug)
 	}
 }
 
+//void Renderer::renderHUD(const Ship& ship, const Game& game)
+void Renderer::renderHUD()
+{
+	// Fuel, bullets, shields, radar
+	SDL_Rect fuel_rect = { 4 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
+	SDL_Rect bullets_rect = { 20 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
+	SDL_Rect shields_rect = { 36 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
+	SDL_Rect radar_rect = { 52 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
+	std::array<SDL_Rect, 4> gauge_rects = { { fuel_rect, bullets_rect, shields_rect, radar_rect } };
+	SDL_Color gauge_color = coco_palette.getColor(CoCoPaletteEnum::blue);
+	SDL_SetRenderDrawColor(sdlRenderer, gauge_color.r, gauge_color.g, gauge_color.b, 255);
+	SDL_RenderFillRects(sdlRenderer, gauge_rects.data(), 4);
+
+	// Ships remaining
+
+	// Score
+
+}
+
 void Renderer::renderMotionHistory(const Debug& debug)
 {
 	const int initial_y = (window.h / 2);
@@ -283,28 +304,32 @@ void Renderer::renderMotionHistory(const Debug& debug)
 			render_point_y = { initial_y - axis_line_offset - scaled_xmotion, initial_y + axis_line_offset + scaled_ymotion };
 			Vector2D prev_p = debug.motion_history[i - 1];
 
+			int r, g, b;
+			int frame_age = (int)debug.motion_history_counter - (int)i;
+			if (frame_age < 0)
+				frame_age += debug.motion_history_limit;
+			b = 255 - std::min(frame_age * 2, 255);
+			g = 155 + std::min(frame_age * 2, 255 - 155);
+			r = 64 + std::min(frame_age, 255 - 64);
+			//console_debug({ "frame_age: ", std::to_string(frame_age), "r, g, b: ", std::to_string(r), " , ", std::to_string(g), " , ", std::to_string(b) });
+
+			SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
+			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.x, i, render_point_y.x);
 			if (std::abs(scaled_xmotion) > threshold_line_offset)
 			{
 				SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
 				SDL_RenderDrawPoint(sdlRenderer, i, initial_y - axis_line_offset - (threshold_line_offset*util::getsign(scaled_xmotion)));
 			}
-			else
+
+			SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
+			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.y, i, render_point_y.y);
+			if (std::abs(scaled_ymotion) > threshold_line_offset)
 			{
-				int r, g, b;
-				int frame_age = (int)debug.motion_history_counter - (int)i;
-				if (frame_age < 0)
-					frame_age += 1024;	// TODO: make variable
-				b = 255 - std::min(frame_age * 2, 255);
-				g = 155 + std::min(frame_age * 2, 100);
-				r = 64 + std::min(frame_age, 191);
-				//console_debug({ "frame_age: ", std::to_string(frame_age), "r, g, b: ", std::to_string(r), " , ", std::to_string(g), " , ", std::to_string(b) });
-				SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
+				SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
+				SDL_RenderDrawPoint(sdlRenderer, i, initial_y + axis_line_offset + (threshold_line_offset*util::getsign(scaled_ymotion)));
 			}
 
-			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.x, i, render_point_y.x);
 
-			SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 0, 255);
-			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.y, i, render_point_y.y);
 			/*SDL_RenderDrawPoint(sdlRenderer, i, initial_y - axis_line_offset - scaled_xmotion);
 			SDL_RenderDrawPoint(sdlRenderer, i, initial_y + axis_line_offset + scaled_ymotion);*/
 		}
@@ -392,7 +417,7 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_Rect burner_texture_rect = {};
 	if (_ship->current_state.thrust.x != 0.0)
 	{
-		_burner_texture_rect.x = std::min((int)((_ship->max_thrust / abs(_ship->current_state.thrust.x))) - 1, 3) * 8;
+		_burner_texture_rect.x = std::min((int)((_ship->max_thrust.x / abs(_ship->current_state.thrust.x))) - 1, 3) * 8;
 		_burner_rev_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 8.0), 1) * 4;
 		if ((_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right) || (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left))
 		{
@@ -417,11 +442,11 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 		/* reverse texture - disabled for now
 		else if (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::right)
 		{
-			burner_rect = { ship_rect.x + _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w  * _scaling, _burner_rev_texture_rect.h  * _scaling };
+		burner_rect = { ship_rect.x + _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w  * _scaling, _burner_rev_texture_rect.h  * _scaling };
 		}
 		else if (_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::left)
 		{
-			burner_rect = { ship_rect.x + ship_rect.w - (_burner_rev_texture_rect.w  * _scaling) - _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w  * _scaling, _burner_rev_texture_rect.h  * _scaling };
+		burner_rect = { ship_rect.x + ship_rect.w - (_burner_rev_texture_rect.w  * _scaling) - _burner_rev_offset.x, ship_rect.y + _burner_rev_offset.y, _burner_rev_texture_rect.w  * _scaling, _burner_rev_texture_rect.h  * _scaling };
 		}
 		*/
 	}
@@ -511,6 +536,28 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 		SDL_Rect point_rect = { _radar_rect.x + vp.x, _radar_rect.y + vp.y, 2 * _scaling, 2 * _scaling };
 		SDL_RenderFillRect(sdl_renderer, &point_rect);
 	}
+}
+
+StationSprite::StationSprite(Renderer* renderer)
+{
+	_scaling = renderer->scaling;
+	station = std::shared_ptr<Station>{ new Station };
+	_station_texture_rect = { 0, 0, 32, 16 };
+	station->station_type = 1;
+	station->pos = { 50, 0 };
+	_station_texture = renderer->loadTextureFromFile("img\\fuel_repair.tga", nullptr);
+}
+
+StationSprite::~StationSprite()
+{
+
+}
+
+void StationSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
+{
+	double station_x = render::getScreenXForEntityByCameraAndDistance(station->pos.x*_scaling, _station_texture_rect.w*_scaling, world->w*_scaling, camera, 1.0);
+	SDL_Rect station_rect = { station_x, (game->ship_limits.h * _scaling - _station_texture_rect.h * _scaling), _station_texture_rect.w*_scaling, _station_texture_rect.h*_scaling };
+	SDL_RenderCopy(sdl_renderer, _station_texture, &_station_texture_rect, &station_rect);
 }
 
 int32_t render::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, uint32_t entity_sprite_width, uint32_t world_width, const Camera& camera, double distance_factor)

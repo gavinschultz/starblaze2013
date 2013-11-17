@@ -1,8 +1,6 @@
 #include "Util.h"
 #include <math.h>
-//#include "Renderer.h"
 #include <cmath>
-
 
 int util::getsign(int value)
 {
