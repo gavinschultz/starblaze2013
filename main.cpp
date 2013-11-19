@@ -211,23 +211,30 @@ void integrate(double delta_time, double dt)
 
 	double accel = ship->current_state.thrust.x / ship->weight;
 	double vel = ship->current_state.vel.x + accel * dt;
-	
-	// decceleration X
-	if (std::abs(ship->current_state.vel.x) > 200 || std::abs(ship->current_state.thrust.x) > 0)
-		vel -= ship->current_state.vel.x * (0.4 * dt);
-	else
-		vel -= ship->current_state.vel.x * (1.3 * dt);
 
+	// decceleration X
+	double deccelleration_factor;
+	if (std::abs(ship->current_state.vel.x) > 200 || std::abs(ship->current_state.thrust.x) > 0)
+		deccelleration_factor = 0.4;
+	else if (std::abs(ship->current_state.vel.x) > 50) // slow more when already slow and no thrust
+		deccelleration_factor = 1.1;
+	else
+		deccelleration_factor = 2.3;
+	debug->set("deccel factor", deccelleration_factor);
+	vel -= ship->current_state.vel.x * (deccelleration_factor * dt);
 	// decceleration Y
 	ship->current_state.vel.y -= ship->current_state.vel.y * (4.0 * dt);
 
 	double dist = (ship->current_state.vel.x * dt) + (accel * 0.5 * dt * dt);
+
 
 	ship->current_state.acc.x = accel;
 	ship->current_state.vel.x = vel;
 	ship->current_state.vel.y += ship->current_state.thrust.y;
 	ship->current_state.pos.x += dist;
 	ship->current_state.pos.y += ship->current_state.vel.y * dt;
+
+	debug->set("vel", ship->current_state.vel.x);
 
 	if (ship->current_state.vel.y > ship->max_lift) ship->current_state.vel.y = ship->max_lift;
 	if (ship->current_state.vel.y < -ship->max_lift) ship->current_state.vel.y = -ship->max_lift;

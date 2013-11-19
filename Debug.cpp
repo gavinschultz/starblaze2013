@@ -38,8 +38,7 @@ void Debug::set(std::string label, std::string value)
 		}
 	}
 
-	auto item = new DebugItem{ label, value };
-	items.push_back(std::unique_ptr<DebugItem>{item});
+	items.push_back(std::unique_ptr<DebugItem>{new DebugItem{ label, value }});
 }
 
 void Debug::set(std::string label, double value)
@@ -63,6 +62,5 @@ void Debug::addMotionRecord(double x, double y)
 		motion_history_counter = 0;
 	else
 		motion_history_counter++;
-	//console_debug({ "motion history[", std::to_string(motion_history_counter), "] = (", std::to_string(x), ", ", std::to_string(y), ")" });
 	motion_history[motion_history_counter] = Vector2D{ x, y };
 }

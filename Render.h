@@ -130,7 +130,7 @@ private:
 	void renderHUD();
 	void init();
 	TTF_Font* _font;
-	auto rnd_burner = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine{});
+	//auto rnd_burner = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine{});
 public:
 	Renderer(uint32_t screen_width, uint32_t screen_height, uint32_t scaling, double world_width);
 	~Renderer();
