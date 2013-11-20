@@ -67,6 +67,16 @@ int main(int argc, char* args[])
 	renderer->sprite_register.registerSprite(new RadarSprite(renderer.get()));
 	// end load assets
 
+	auto title_plate = std::shared_ptr<TextPlate>{ new TextPlate{ {
+		{ "STAR BLAZE", { 48 * 4, 0 } },
+		{ "BY GREG ZUMWALT", { 8 * 4, 16 * 4 } },
+		{ "COPYRIGHT 1983", { 18 * 4, 40 * 4 } },
+		{ "LICENSED TO", { 42 * 4, 52 * 4 } },
+		{ "TANDY CORP", { 50 * 4, 64 * 4 } },
+		{ "ALL RIGHTS", { 50 * 4, 76 * 4 } },
+		{ "RESERVED", { 66 * 4, 88 * 4 } }
+	} } };
+
 	game->start();
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -187,6 +197,9 @@ int main(int argc, char* args[])
 
 		double time_before_render = timer->getTime();
 		double usage_game = util::round(((time_before_render - time_start_frame) / delta_time), 3) * 100.0;
+
+		renderer->renderTextPlate(title_plate);
+
 		renderer->render(&camera);
 
 		double time_after_render = timer->getTime();
