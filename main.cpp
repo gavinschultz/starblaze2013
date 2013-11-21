@@ -44,7 +44,7 @@ int main(int argc, char* args[])
 	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4, world->w)};
 	debug = std::unique_ptr<Debug>{new Debug()};
 #ifdef _DEBUG
-	//renderer->toggleGrid(true);
+	renderer->toggleGrid(true);
 	//renderer->toggleMotionHistory(true);
 #endif
 
@@ -198,7 +198,7 @@ int main(int argc, char* args[])
 		double time_before_render = timer->getTime();
 		double usage_game = util::round(((time_before_render - time_start_frame) / delta_time), 3) * 100.0;
 
-		renderer->renderTextPlate(title_plate);
+		//renderer->renderTextPlate(title_plate);
 
 		renderer->render(&camera);
 
@@ -233,7 +233,6 @@ void integrate(double delta_time, double dt)
 		deccelleration_factor = 1.1;
 	else
 		deccelleration_factor = 2.3;
-	debug->set("deccel factor", deccelleration_factor);
 	vel -= ship->current_state.vel.x * (deccelleration_factor * dt);
 	// decceleration Y
 	ship->current_state.vel.y -= ship->current_state.vel.y * (4.0 * dt);
@@ -246,8 +245,6 @@ void integrate(double delta_time, double dt)
 	ship->current_state.vel.y += ship->current_state.thrust.y;
 	ship->current_state.pos.x += dist;
 	ship->current_state.pos.y += ship->current_state.vel.y * dt;
-
-	debug->set("vel", ship->current_state.vel.x);
 
 	if (ship->current_state.vel.y > ship->max_lift) ship->current_state.vel.y = ship->max_lift;
 	if (ship->current_state.vel.y < -ship->max_lift) ship->current_state.vel.y = -ship->max_lift;

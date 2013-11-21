@@ -240,6 +240,7 @@ public:
 class RadarSprite : public Sprite
 {
 private:
+	const int _point_size{ 2 };
 	SDL_Rect _radar_rect;
 	std::array<Point2Di, 4> _view_points;
 	SDL_Color _radar_color;

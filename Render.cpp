@@ -413,9 +413,12 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_RendererFlip flip = _ship->direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
-	int32_t entity_x = render::getScreenXForEntityByCameraAndDistance(_ship->alpha_pos.x*(double)_scaling, _ship_texture_rect.w*_scaling, renderer->width, camera, 1.0);
-
-	SDL_Rect ship_rect = { entity_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+	int32_t entity_x = render::getScreenXForEntityByCameraAndDistance(_ship->alpha_pos.x*_scaling, _ship_texture_rect.w*_scaling, renderer->width, camera, 1.0);
+	int32_t entity_y = std::lround(_ship->alpha_pos.y * _scaling - camera.view_rect.y);
+	//SDL_Rect ship_rect = { entity_x, std::lround(_ship->alpha_pos.y * _scaling) - camera.view_rect.y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+	SDL_Rect ship_rect = { entity_x, entity_y, _ship_texture_rect.w  * _scaling, _ship_texture_rect.h  * _scaling };
+	debug->set("_ship->alpha_pos.x", std::lround(_ship->alpha_pos.x*_scaling) - (double)(camera.view_rect.x * 1.0));
+	debug->set("ship_rect.x", ship_rect.x);
 	if (smooth_animation)
 		_stripe_texture_rect.y = (timer->getTotalFrames() - 1) % 32;				// smooth scrolling stripe
 	else
@@ -433,13 +436,10 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera)
 	SDL_Rect burner_rect = {};
 	SDL_Texture* burner_texture = nullptr; // may be either forward or reverse
 	SDL_Rect burner_texture_rect = {};
-	debug->set("max thrust / abs(thrust)", std::to_string(_ship->max_thrust.x) + " / " + std::to_string(std::abs(_ship->current_state.thrust.x)));
 	if (_ship->current_state.thrust.x != 0.0)
 	{
-		debug->set("temp X", std::lround(4 * std::abs(_ship->current_state.thrust.x) / _ship->max_thrust.x));
 		//_burner_texture_rect.x = std::min((int)(std::lround(_ship->max_thrust.x / std::abs(_ship->current_state.thrust.x))), 3) * 8;
 		_burner_texture_rect.x = std::min(std::lround(4 * std::abs(_ship->current_state.thrust.x) / _ship->max_thrust.x) * 8, 24L);
-		debug->set("burner_texture X", _burner_texture_rect.x);
 		//_burner_rev_texture_rect.x = std::min((int)(abs(_ship->current_state.thrust.x) / 8.0), 1) * 4;
 		//if ((_ship->current_state.thrust.x > 0.0 && _ship->direction == ShipDirection::right) || (_ship->current_state.thrust.x < 0.0 && _ship->direction == ShipDirection::left))
 		if (_ship->current_state.thrust.x != 0.0)
@@ -539,10 +539,10 @@ RadarSprite::RadarSprite(Renderer* renderer)
 	_scaling = renderer->scaling;
 	_radar_rect = { 64 * (int32_t)_scaling, 156 * (int32_t)_scaling, 128 * (int32_t)_scaling, 36 * (int32_t)_scaling };
 	_view_points = { {
-		{ 56 * (int32_t)_scaling, 0 * (int32_t)_scaling },
-		{ 70 * (int32_t)_scaling, 0 * (int32_t)_scaling },
-		{ 56 * (int32_t)_scaling, 34 * (int32_t)_scaling },
-		{ 70 * (int32_t)_scaling, 34 * (int32_t)_scaling }
+		{ 59 * (int32_t)_scaling, 0 * (int32_t)_scaling },
+		{ 66 * (int32_t)_scaling, 0 * (int32_t)_scaling },
+		{ 59 * (int32_t)_scaling, (36 - _point_size) * (int32_t)_scaling },
+		{ 66 * (int32_t)_scaling, (36 - _point_size) * (int32_t)_scaling }
 	} };
 	_radar_color = renderer->coco_palette.getColor(red);
 	_point_color = renderer->coco_palette.getColor(yellow);
@@ -553,10 +553,29 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 	SDL_SetRenderDrawColor(sdl_renderer, _radar_color.r, _radar_color.g, _radar_color.b, _radar_color.a);
 	SDL_RenderFillRect(sdl_renderer, &_radar_rect);
 
+	double radar_scaling_x = 128.0 / world->w;
+	double radar_scaling_y = (36.0 * _scaling) / camera.focus_rect.h;
+	/*debug->set("camera.focus_rect.h", camera.focus_rect.h);
+	debug->set("radar scaling (x)", radar_scaling_x);
+	debug->set("radar scaling (y)", radar_scaling_y);
+	debug->set("world->w", world->w);*/
+
 	SDL_SetRenderDrawColor(sdl_renderer, _point_color.r, _point_color.g, _point_color.b, _radar_color.a);
 	for (auto& vp : _view_points)
 	{
-		SDL_Rect point_rect = { _radar_rect.x + vp.x, _radar_rect.y + vp.y, 2 * _scaling, 2 * _scaling };
+		SDL_Rect point_rect = { _radar_rect.x + vp.x, _radar_rect.y + vp.y, _point_size * _scaling, _point_size * _scaling };
+		SDL_RenderFillRect(sdl_renderer, &point_rect);
+	}
+
+	Ship* ship = game->entity_register.getShip();
+	if (ship)
+	{	
+		int ship_x_radar = std::lround((((ship->alpha_pos.x*_scaling) - camera.view_rect.x) * radar_scaling_x));
+		int ship_y_radar = std::lround(((ship->alpha_pos.y*_scaling) - camera.view_rect.y) * radar_scaling_y);
+		SDL_Rect point_rect = { _view_points[0].x + ship_x_radar, _view_points[0].y + ship_y_radar, _point_size * _scaling, _point_size * _scaling };
+		point_rect.x += _radar_rect.x;
+		point_rect.y += _radar_rect.y;
+		SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(sdl_renderer, &point_rect);
 	}
 }
@@ -598,7 +617,7 @@ int32_t render::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, 
 	if (entity_x_at_camera_x + entity_sprite_width > world_width * distance_factor)
 		entity_x_at_camera_x -= world_width * distance_factor;
 
-	return (int32_t)entity_x_at_camera_x;
+	return std::lround(entity_x_at_camera_x);
 }
 
 const std::unordered_map<char, Point2Di> TextRenderer::_char_offsets{
