@@ -174,6 +174,8 @@ public:
 	void renderTextPlate(std::shared_ptr<TextPlate> text_plate);
 	SDL_Texture* loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect);
 
+	SDL_GLContext gl_context;
+
 	Window window;
 	const uint32_t scaling;
 	bool is_fullscreen{ false };

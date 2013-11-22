@@ -41,6 +41,7 @@ Renderer::~Renderer()
 
 void Renderer::init()
 {
+	//SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 	sdlWindow = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL);
 	if (!sdlWindow)
 	{
@@ -57,10 +58,20 @@ void Renderer::init()
 	}
 	
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+
+	if (SDL_GetWindowFlags(sdlWindow) & SDL_WINDOW_OPENGL)
+	{
+		console_debug({ "using open GL" });
+	}
+
+	SDL_RendererInfo renderer_info;
+	SDL_GetRendererInfo(sdlRenderer, &renderer_info);
+	console_debug({ "Flags: ", std::to_string(renderer_info.flags), "\nName: ", renderer_info.name });
+
 	SDL_RenderSetLogicalSize(sdlRenderer, 1024, 768);
 
-	SDL_GLContext gl_context = SDL_GL_CreateContext(sdlWindow);
-	if (!gl_context)
+	this->gl_context = SDL_GL_CreateContext(sdlWindow);
+	if (!this->gl_context)
 	{
 		console_debug({ SDL_GetError() });
 		exit(6);
@@ -74,6 +85,8 @@ void Renderer::init()
 		console_debug({ "GLEW initialization error: ", glew_error });
 		exit(1);
 	}
+
+	console_debug({ "GL version: ", (char*)glGetString(GL_VERSION) });
 
 	if (TTF_Init() == -1) {
 		console_debug({ "TTF_Init: %s\n", TTF_GetError() });
@@ -169,6 +182,7 @@ void Renderer::render(Camera* camera)
 	if (is_motionhistory_visible)
 		renderMotionHistory(*debug.get());
 
+	//SDL_GL_SwapWindow(this->sdlWindow);
 	SDL_RenderPresent(sdlRenderer);
 }
 
@@ -187,6 +201,7 @@ void Renderer::renderZeroLine(const Camera& camera)
 
 void Renderer::renderGrid()
 {
+	
 	glLineWidth(2.0f);
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	for (uint32_t x = 0; x <= this->window.w; x += 8)
@@ -299,6 +314,9 @@ void Renderer::renderMotionHistory(const Debug& debug)
 	const int threshold_line_offset = 75;
 	const int axis_line_offset = 100;
 
+	auto renderer_gl_context = this->gl_context;
+	auto current_gl_context = SDL_GL_GetCurrentContext();
+
 	glLineWidth(1.0f);
 
 	// background
@@ -306,7 +324,7 @@ void Renderer::renderMotionHistory(const Debug& debug)
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 176);
 	auto bgrect = SDL_Rect{ 0, initial_y - axis_line_offset - threshold_line_offset - 50, window.w, (axis_line_offset + threshold_line_offset + 50) * 2 };
 	SDL_RenderFillRect(sdlRenderer, &bgrect);
-	return;
+	
 	// base lines
 	SDL_SetRenderDrawColor(sdlRenderer, 128, 128, 128, 255);
 	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset, window.w, initial_y - axis_line_offset);
@@ -345,19 +363,19 @@ void Renderer::renderMotionHistory(const Debug& debug)
 			r = 64 + std::min(frame_age, 255 - 64);
 			//console_debug({ "frame_age: ", std::to_string(frame_age), "r, g, b: ", std::to_string(r), " , ", std::to_string(g), " , ", std::to_string(b) });
 
-			SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
+			//SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
 			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.x, i, render_point_y.x);
 			if (std::abs(scaled_xmotion) > threshold_line_offset)
 			{
-				SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
+				//SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
 				SDL_RenderDrawPoint(sdlRenderer, i, initial_y - axis_line_offset - (threshold_line_offset*util::getsign(scaled_xmotion)));
 			}
 
-			SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
+			//SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
 			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.y, i, render_point_y.y);
 			if (std::abs(scaled_ymotion) > threshold_line_offset)
 			{
-				SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
+				//SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
 				SDL_RenderDrawPoint(sdlRenderer, i, initial_y + axis_line_offset + (threshold_line_offset*util::getsign(scaled_ymotion)));
 			}
 
