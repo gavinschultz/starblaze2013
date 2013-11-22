@@ -42,10 +42,29 @@ Renderer::~Renderer()
 void Renderer::init()
 {
 	sdlWindow = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL);
+	if (!sdlWindow)
+	{
+		console_debug({ SDL_GetError() });
+		exit(4);
+	}
+
 	toggleFullscreen(is_fullscreen);
 	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+	if (!sdlRenderer)
+	{
+		console_debug({ SDL_GetError() });
+		exit(5);
+	}
+	
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	SDL_RenderSetLogicalSize(sdlRenderer, 1024, 768);
+
+	SDL_GLContext gl_context = SDL_GL_CreateContext(sdlWindow);
+	if (!gl_context)
+	{
+		console_debug({ SDL_GetError() });
+		exit(6);
+	}
 
 	GLenum glew_init = glewInit();
 	if (GLEW_OK != glew_init)
@@ -182,7 +201,7 @@ void Renderer::renderGrid()
 			line_height = x % 32;
 		SDL_RenderDrawLine(sdlRenderer, x, y1, x, y1 + line_height);
 	}
-
+	
 	glLineWidth(2.0f);
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(1, 0x0101);
@@ -287,7 +306,7 @@ void Renderer::renderMotionHistory(const Debug& debug)
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 176);
 	auto bgrect = SDL_Rect{ 0, initial_y - axis_line_offset - threshold_line_offset - 50, window.w, (axis_line_offset + threshold_line_offset + 50) * 2 };
 	SDL_RenderFillRect(sdlRenderer, &bgrect);
-
+	return;
 	// base lines
 	SDL_SetRenderDrawColor(sdlRenderer, 128, 128, 128, 255);
 	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset, window.w, initial_y - axis_line_offset);
@@ -555,10 +574,9 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 
 	double radar_scaling_x = 128.0 / world->w;
 	double radar_scaling_y = (36.0 * _scaling) / camera.focus_rect.h;
-	/*debug->set("camera.focus_rect.h", camera.focus_rect.h);
-	debug->set("radar scaling (x)", radar_scaling_x);
-	debug->set("radar scaling (y)", radar_scaling_y);
-	debug->set("world->w", world->w);*/
+	//debug->set("radar scaling (x)", radar_scaling_x);
+	//debug->set("radar scaling (y)", radar_scaling_y);
+	//debug->set("world->w", world->w);
 
 	SDL_SetRenderDrawColor(sdl_renderer, _point_color.r, _point_color.g, _point_color.b, _radar_color.a);
 	for (auto& vp : _view_points)
@@ -567,10 +585,19 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 		SDL_RenderFillRect(sdl_renderer, &point_rect);
 	}
 
+	int radar_left = (int)world->w*_scaling - camera.view_rect.x;
+	debug->set("radar_left", radar_left);
+
 	Ship* ship = game->entity_register.getShip();
 	if (ship)
-	{	
+	{
+		debug->set("camera.view_rect.x", camera.view_rect.x);
+		debug->set("ship.alpha_pos.x", ship->alpha_pos.x*_scaling);
+
 		int ship_x_radar = std::lround((((ship->alpha_pos.x*_scaling) - camera.view_rect.x) * radar_scaling_x));
+		debug->set("ship_x_radar (1)", ship_x_radar);
+		ship_x_radar = util::abswrap(ship_x_radar, (int)world->w*_scaling);
+		debug->set("ship_x_radar (2)", ship_x_radar);
 		int ship_y_radar = std::lround(((ship->alpha_pos.y*_scaling) - camera.view_rect.y) * radar_scaling_y);
 		SDL_Rect point_rect = { _view_points[0].x + ship_x_radar, _view_points[0].y + ship_y_radar, _point_size * _scaling, _point_size * _scaling };
 		point_rect.x += _radar_rect.x;

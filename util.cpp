@@ -26,3 +26,23 @@ double util::round(double value, int sf)
 {
 	return std::floor((value*std::pow(10, sf)) + 0.5) / std::pow(10, sf);
 }
+
+double util::abswrap(double n, double limit)
+{
+	if (n < 0)
+		return std::fabs(std::fmod(n, limit));
+	else if (n > limit)
+		return std::fmod(n, limit);
+	else
+		return n;
+}
+
+int util::abswrap(int n, int limit)
+{
+	if (n < 0)
+		return std::abs(n % limit);
+	else if (n > limit)
+		return n % limit;
+	else
+		return n;
+}
