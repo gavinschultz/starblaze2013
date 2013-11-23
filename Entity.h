@@ -12,7 +12,6 @@ public:
 	State2D current_state;
 	State2D prev_state;
 	Point2D alpha_pos;
-	int alpha_loop_count;
 	SDL_Rect bounding_box;
 	ShipDirection direction;
 	double altitude{ 0.0 };
@@ -23,10 +22,20 @@ public:
 	bool isGearDown();
 	const double reverse_thrust_factor{ 1.6 };
 	const double takeoff_speed{ 250.0 };
-	const Vector2D max_thrust{ 400.0, 14.0 };
+	const Vector2D max_thrust{ 400.0, 12.0 };
 	const double weight{ 1.0 };
 	const double max_velocity{ 20000.0 };
 	const double max_lift{ 700.0 };
+};
+
+class Alien
+{
+public:
+	State2D current_state;
+	State2D prev_state;
+	Point2D alpha_state;
+	SDL_Rect bounding_box;
+	double altitude{ 0.0 };
 };
 
 class Hill
@@ -36,6 +45,13 @@ public:
 	int y_channel{ 0 };
 	double x{ 0.0 };
 	double distance_factor{ 0.0 };
+};
+
+class Station
+{
+public:
+	int station_type{ 0 };
+	Point2D pos{ 0.0, 0.0 };
 };
 
 class World
@@ -50,20 +66,17 @@ class EntityRegister
 {
 public:
 	Ship* getShip();
+	Alien* getAlien();
 	const int getShipCount();
 	void registerEntity(Ship* ship);
+	std::shared_ptr<Alien> registerEntity(Alien* alien);
+	std::shared_ptr<Station> registerEntity(Station* station);
 	EntityRegister();
 	~EntityRegister();
 private:
 	std::shared_ptr<Ship> _ship;
+	std::vector<std::shared_ptr<Alien>> _aliens;
 	int _ship_count = 3;
-};
-
-class Station
-{
-public:
-	int station_type{ 0 };
-	Point2D pos{ 0.0, 0.0 };
 };
 
 extern std::unique_ptr<World> world;

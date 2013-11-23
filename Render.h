@@ -41,9 +41,10 @@ public:
 class Sprite
 {
 protected:
-	uint32_t _scaling;
+	unsigned int _scaling;
 public:
 	Sprite();
+	Sprite(unsigned int scaling);
 	~Sprite();
 	virtual void render(SDL_Renderer* sdlRenderer, const Camera& camera) = 0;
 };
@@ -186,7 +187,7 @@ public:
 	void toggleMotionHistory(bool state);
 	bool isRightOf(int32_t x, int32_t y);
 	bool isLeftOf(int32_t x, int32_t y);
-	const uint32_t width;
+	const unsigned int width;
 };
 
 class ShipSprite : public Sprite
@@ -217,6 +218,18 @@ public:
 	bool smooth_animation;
 };
 
+class AlienSprite : public Sprite
+{
+private:
+	std::shared_ptr<Alien> _alien;
+	SDL_Texture* _alien_texture;
+	SDL_Rect _alien_texture_rect;
+public:
+	AlienSprite(Renderer* renderer, std::shared_ptr<Alien> alien);
+	~AlienSprite();
+	void render(SDL_Renderer* sdl_renderer, const Camera &camera);
+};
+
 class BGSprite : public Sprite
 {
 private:
@@ -243,10 +256,15 @@ class RadarSprite : public Sprite
 {
 private:
 	const int _point_size{ 2 };
+	double _radar_scaling_x;
+	double _radar_scaling_y;
 	SDL_Rect _radar_rect;
 	std::array<Point2Di, 4> _view_points;
 	SDL_Color _radar_color;
 	SDL_Color _point_color;
+	int _radar_left;	// rendered world position at the left-most point of the radar
+	int calculateRadarLeft(const Camera& camera);
+	SDL_Rect transformToRadarView(double entity_x, double entity_y, int entity_width, int entity_height);
 public:
 	RadarSprite(Renderer* renderer);
 	void render(SDL_Renderer* sdlRenderer, const Camera& camera);

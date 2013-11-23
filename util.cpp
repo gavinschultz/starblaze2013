@@ -30,7 +30,7 @@ double util::round(double value, int sf)
 double util::abswrap(double n, double limit)
 {
 	if (n < 0)
-		return std::fabs(std::fmod(n, limit));
+		return limit + std::fmod(n, limit);
 	else if (n > limit)
 		return std::fmod(n, limit);
 	else
@@ -40,7 +40,7 @@ double util::abswrap(double n, double limit)
 int util::abswrap(int n, int limit)
 {
 	if (n < 0)
-		return std::abs(n % limit);
+		return limit + (n % limit);
 	else if (n > limit)
 		return n % limit;
 	else

@@ -48,8 +48,11 @@ int main(int argc, char* args[])
 	//renderer->toggleMotionHistory(true);
 #endif
 
-	Camera camera = Camera(SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, SDL_Rect{ 48 * renderer->scaling, 0, 160 * renderer->scaling, 144 * renderer->scaling });
-	game->ship_limits = { 48 * renderer->scaling, 0 * renderer->scaling, 160 * renderer->scaling, 144 };
+	game->ship_limits = { 48, 0, 160, 144 };
+	Camera camera = Camera(
+		SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, 
+		SDL_Rect{ game->ship_limits.x * renderer->scaling, 0, game->ship_limits.w * renderer->scaling, game->ship_limits.h * renderer->scaling }
+	);
 
 	// Load assets
 	BGSprite* bg_sprite = new BGSprite(renderer.get(), world.get());
@@ -63,6 +66,12 @@ int main(int argc, char* args[])
 	game->entity_register.registerEntity(s);
 	ShipSprite* shipSprite = new ShipSprite(renderer.get(), s);
 	renderer->sprite_register.registerSprite(shipSprite);
+
+	auto a = new Alien();
+	a->bounding_box = { 0, 0, 16, 12 };
+	auto alien = game->entity_register.registerEntity(a);
+	AlienSprite* alienSprite = new AlienSprite(renderer.get(), alien);
+	renderer->sprite_register.registerSprite(alienSprite);
 
 	renderer->sprite_register.registerSprite(new RadarSprite(renderer.get()));
 	// end load assets
@@ -84,6 +93,9 @@ int main(int argc, char* args[])
 	Ship* ship = game->entity_register.getShip();
 	ship->current_state.pos.x = game->ship_limits.x;
 	ship->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - ship->bounding_box.h;
+
+	alien->current_state.pos.x = ship->current_state.pos.x + 50;
+	alien->current_state.pos.y = ship->current_state.pos.y - 100;
 
 	double accumulator = 0;
 	const double dt = 1.0 / 60.0;
@@ -150,9 +162,9 @@ int main(int argc, char* args[])
 
 			int32_t turn_speed;
 			if ((camera.focus_point_vel.x < 0 && ship->direction == ShipDirection::right) || (camera.focus_point_vel.x > 0 && ship->direction == ShipDirection::left))
-				turn_speed = 4L;
+				turn_speed = 6L;
 			else
-				turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.2)), 6L);
+				turn_speed = (int32_t)std::max(std::abs(lround(camera.focus_point_vel.x * 0.4)), 8L);
 			int32_t max_velocity;
 			if (ship->direction == ShipDirection::right)
 				max_velocity = camera.focus_point_vel.x + turn_speed;
@@ -291,4 +303,7 @@ void integrateAlpha(double alpha)
 		ship->alpha_pos.x = ship->current_state.pos.x*alpha + ship->prev_state.pos.x*(1.0 - alpha);
 	}
 	ship->alpha_pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
+
+	Alien* alien = game->entity_register.getAlien();
+	alien->alpha_state = alien->current_state.pos;
 }

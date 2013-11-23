@@ -20,6 +20,18 @@ void EntityRegister::registerEntity(Ship* ship)
 	_ship = std::shared_ptr<Ship>{ship};
 }
 
+std::shared_ptr<Alien> EntityRegister::registerEntity(Alien* alien)
+{
+	auto p_alien = std::make_shared<Alien>(*alien);
+	_aliens.push_back(p_alien);
+	return p_alien;
+}
+
+Alien* EntityRegister::getAlien()
+{
+	return _aliens[0].get();
+}
+
 EntityRegister::EntityRegister()
 {
 
