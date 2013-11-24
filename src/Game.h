@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "Entity.h"
-#include "Render.h"
+#include "Render\Renderer.h"
 
 class Game
 {

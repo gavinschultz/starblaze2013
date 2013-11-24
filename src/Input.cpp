@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include <SDL.h>
 #include "Game.h"
-#include "Render.h"
+#include "Render\Renderer.h"
 #include "Input.h"
 #include "Util.h"
-#include <limits>
+#include <algorithm>
 
 Input::Input()
 {

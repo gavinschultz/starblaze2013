@@ -42,20 +42,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>$(ProjectDir)lib\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include;$(ProjectDir)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)include</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\$(PlatformTarget)\;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -64,6 +63,9 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>$(ProjectDir)\copy_binaries.bat $(Configuration) $(PlatformTarget)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -82,15 +84,29 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>$(ProjectDir)\copy_binaries.bat $(Configuration) $(PlatformTarget)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="src\Render\AlienSprite.h" />
+    <ClInclude Include="src\Render\BGSprite.h" />
+    <ClInclude Include="src\Render\Camera.h" />
+    <ClInclude Include="src\Render\CoCoPalette.h" />
+    <ClInclude Include="src\Render\RadarSprite.h" />
+    <ClInclude Include="src\Render\Renderer.h" />
+    <ClInclude Include="src\Render\RenderUtil.h" />
+    <ClInclude Include="src\Render\ShipSprite.h" />
+    <ClInclude Include="src\Render\Sprite.h" />
+    <ClInclude Include="src\Render\SpriteRegister.h" />
+    <ClInclude Include="src\Render\StationSprite.h" />
+    <ClInclude Include="src\Render\TextRenderer.h" />
+    <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Phys.h" />
-    <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\Timer.h" />
     <ClInclude Include="src\Util.h" />
   </ItemGroup>
@@ -100,7 +116,18 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Render.cpp" />
+    <ClCompile Include="src\Render\AlienSprite.cpp" />
+    <ClCompile Include="src\Render\BGSprite.cpp" />
+    <ClCompile Include="src\Render\Camera.cpp" />
+    <ClCompile Include="src\Render\CoCoPalette.cpp" />
+    <ClCompile Include="src\Render\RadarSprite.cpp" />
+    <ClCompile Include="src\Render\Renderer.cpp" />
+    <ClCompile Include="src\Render\RenderUtil.cpp" />
+    <ClCompile Include="src\Render\ShipSprite.cpp" />
+    <ClCompile Include="src\Render\Sprite.cpp" />
+    <ClCompile Include="src\Render\SpriteRegister.cpp" />
+    <ClCompile Include="src\Render\StationSprite.cpp" />
+    <ClCompile Include="src\Render\TextRenderer.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>

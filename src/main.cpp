@@ -11,11 +11,18 @@
 #include "Game.h"
 #include <algorithm>
 #include "Debug.h"
-#include "Render.h"
+#include "Render\Renderer.h"
 #include "Phys.h"
 #include <math.h>
 #include "Util.h"
 #include "Input.h"
+#include "Render\AlienSprite.h"
+#include "Render\RadarSprite.h"
+#include "Render\StationSprite.h"
+#include "Render\ShipSprite.h"
+#include "Render\BGSprite.h"
+#include "Render\SpriteRegister.h"
+#include "Render\Renderer.h"
 
 void integrate(double delta_time, double dt);
 void integrateAlpha(double alpha);
@@ -54,7 +61,9 @@ int main(int argc, char* args[])
 	Station* station = new Station();
 	station->pos.y = game->ship_limits.h / 2;
 	game->entity_register.registerEntity(station);
-	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station));
+	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station), station);
+	renderer->sprite_register.unregisterSpriteForEntity(station);
+	//renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station));
 
 	Ship* s = new Ship();
 	s->direction = ShipDirection::right;

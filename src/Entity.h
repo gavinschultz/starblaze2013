@@ -6,7 +6,20 @@
 
 enum class ShipDirection { left, right };
 
-class Ship
+class Entity
+{
+
+};
+
+struct Entity_hash
+{
+	size_t operator()(const Entity& entity) const
+	{
+		return (size_t)(&entity);
+	}
+};
+
+class Ship : public Entity
 {
 public:
 	State2D current_state;
@@ -28,7 +41,7 @@ public:
 	const double max_lift{ 700.0 };
 };
 
-class Alien
+class Alien : public Entity
 {
 public:
 	State2D current_state;
@@ -47,12 +60,12 @@ public:
 	double distance_factor{ 0.0 };
 };
 
-class Station
+class Station : public Entity
 {
 public:
 	int station_type{ 0 };
 	Point2D pos{ 0.0, 0.0 };
-	SDL_Rect bounding_box;// {{ 0, 0, 32, 16 } };
+	SDL_Rect bounding_box {{ 0, 0, 32, 16 } };
 };
 
 class World
