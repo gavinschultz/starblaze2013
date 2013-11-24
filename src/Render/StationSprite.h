@@ -7,12 +7,11 @@
 class StationSprite : public Sprite
 {
 private:
-	std::shared_ptr<Station> station;	//TODO: would rather not store reference here, should pass in at render time
-	SDL_Texture* _station_texture;
-	SDL_Rect _station_texture_rect;
+	SpriteTexture _station_texture;
 	int station_type;	// 0 = fuel, 1 = repair
 public:
 	StationSprite(Renderer* renderer, Station* station);
 	~StationSprite();
-	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera);
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const Entity& entity);
 };

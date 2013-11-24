@@ -7,6 +7,7 @@
 #include "Timer.h"
 #include <limits>
 #include <array>
+#include "SpriteLoader.h"
 
 Renderer::Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width) : scaling(scaling), width((unsigned int)(world_width*scaling))
 {
@@ -30,7 +31,7 @@ void Renderer::init()
 		console_debug({ SDL_GetError() });
 		exit(4);
 	}
-
+	
 	toggleFullscreen(is_fullscreen);
 	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 	if (!sdlRenderer)
@@ -38,6 +39,8 @@ void Renderer::init()
 		console_debug({ SDL_GetError() });
 		exit(5);
 	}
+
+	sprite_loader.load(sdlRenderer, "resources\\spritesheet.json");
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 
@@ -100,27 +103,6 @@ bool Renderer::isRightOf(int32_t x, int32_t y)
 
 bool Renderer::isLeftOf(int32_t x, int32_t y) {
 	return !isRightOf(x, y);
-}
-
-SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect)
-{
-	SDL_Surface* sdlSurface = IMG_Load(imagePath.c_str());
-	if (!sdlSurface)
-	{
-		console_debug({ SDL_GetError() });
-		return nullptr;
-	}
-	SDL_Texture* sdlTexture = SDL_CreateTextureFromSurface(sdlRenderer, sdlSurface);
-	SDL_FreeSurface(sdlSurface);
-	SDL_SetTextureBlendMode(sdlTexture, SDL_BLENDMODE_BLEND);
-	if (texture_rect != nullptr)
-	{
-		texture_rect->x = 0;
-		texture_rect->y = 0;
-		texture_rect->w = sdlSurface->w;
-		texture_rect->h = sdlSurface->h;
-	};
-	return sdlTexture;
 }
 
 void Renderer::render(Camera* camera)
@@ -351,4 +333,26 @@ void Renderer::renderMotionHistory(const Debug& debug)
 void Renderer::renderTextPlate(std::shared_ptr<TextPlate> text_plate)
 {
 	this->_text_plate = text_plate;
+}
+
+SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect)
+{
+	console_debug({ "Renderer::loadTextureFromFile is obsolete, replace with renderutils::loadTextureFromFile" });
+	SDL_Surface* sdlSurface = IMG_Load(imagePath.c_str());
+	if (!sdlSurface)
+	{
+		console_debug({ SDL_GetError() });
+		return nullptr;
+	}
+	SDL_Texture* sdlTexture = SDL_CreateTextureFromSurface(sdlRenderer, sdlSurface);
+	SDL_FreeSurface(sdlSurface);
+	SDL_SetTextureBlendMode(sdlTexture, SDL_BLENDMODE_BLEND);
+	if (texture_rect != nullptr)
+	{
+		texture_rect->x = 0;
+		texture_rect->y = 0;
+		texture_rect->w = sdlSurface->w;
+		texture_rect->h = sdlSurface->h;
+	};
+	return sdlTexture;
 }

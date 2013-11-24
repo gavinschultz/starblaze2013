@@ -13,7 +13,12 @@ ShipSprite::ShipSprite(Renderer* renderer, Ship* ship) : Sprite()
 	this->_burner_texture_rect = { 0, 0, 8, 5 };
 	//this->_burner_rev_texture_rect = { 0, 0, 4, 4 };
 
-	this->_ship_texture = renderer->loadTextureFromFile("resources\\ship.tga", &this->_ship_texture_rect);
+	//this->_ship_texture = renderer->loadTextureFromFile("resources\\ship.tga", &this->_ship_texture_rect);
+
+	auto& sprite = renderer->sprite_loader.getSprite("ship");
+	this->_ship_texture = sprite.texture;
+	this->_ship_texture_rect = sprite.rect;
+
 	this->_stripe_texture = renderer->loadTextureFromFile("resources\\shipstripe.tga", nullptr);
 	this->_taillight_texture = renderer->loadTextureFromFile("resources\\shiptaillight.tga", &this->_taillight_texture_rect);
 	this->_burner_texture = renderer->loadTextureFromFile("resources\\shipburner.tga", nullptr);

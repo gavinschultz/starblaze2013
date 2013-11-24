@@ -7,6 +7,7 @@
 #include "RenderUtil.h"
 #include "CoCoPalette.h"
 #include "SpriteRegister.h"
+#include "SpriteLoader.h"
 
 class Window
 {
@@ -44,6 +45,7 @@ public:
 	Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width);
 	~Renderer();
 	SpriteRegister sprite_register;
+	SpriteLoader sprite_loader;
 	CoCoPalette coco_palette;
 	void render(Camera* camera);
 	void renderTextPlate(std::shared_ptr<TextPlate> text_plate);

@@ -38,7 +38,7 @@ void BGSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera)
 	{
 		_hills_texture_rect.y = _hills_texture_rect.h * hill.type;
 		_hills_texture_rect.x = (hill.y_channel == 0) ? 16 : 0;	// Blue version for ground, green version for horizon
-		int32_t entity_x_at_camera_x = renderutil::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, (int)world->w*_scaling, camera, hill.distance_factor);
+		int32_t entity_x_at_camera_x = renderutil::getScreenXForEntityByCameraAndDistance(hill.x*_scaling, _hills_texture_rect.w*_scaling, renderer->width, camera, hill.distance_factor);
 		SDL_Rect hill_rect = { entity_x_at_camera_x, _hills_rect.y + y_channel_coords[hill.y_channel], _hills_texture_rect.w * _scaling, _hills_texture_rect.h * _scaling };
 		SDL_RenderCopy(sdl_renderer, _hills_texture, &_hills_texture_rect, &hill_rect);
 	}

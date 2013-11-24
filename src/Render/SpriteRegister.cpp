@@ -14,12 +14,6 @@ void SpriteRegister::registerSprite(Sprite* sprite, Entity* entity)
 	this->_sprites_by_entity[entity] = sprite;
 }
 
-//bool IsSpriteEqual(Sprite* a, Sprite* b);
-//bool isSpriteEqual(Sprite* a, Sprite* b)
-//{
-//	return a == b;
-//}
-
 class IsSpriteEqual
 {
 public:
@@ -50,7 +44,7 @@ const Sprite& SpriteRegister::getSprite(Entity* entity) const
 	if (it == this->_sprites_by_entity.end())
 	{
 		console_debug({ "WARNING: Sprite not found for entity, cannot return." });
-		return;
+		return *(_sprites[0].get());	// TODO: definitely shouldn't be returning a random sprite if not found!
 	}
 	return *((*it).second);
 }

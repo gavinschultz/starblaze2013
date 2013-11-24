@@ -33,7 +33,28 @@ std::unique_ptr<Renderer> renderer;
 std::unique_ptr<World> world;
 std::unique_ptr<Debug> debug;
 
+void run();
+
 int main(int argc, char* args[])
+{
+	try
+	{
+		run();
+	}
+	catch (std::runtime_error re)
+	{
+		console_debug({ "Unhandled run-time error: ", re.what() });
+		exit(6);
+	}
+	catch (std::exception e)
+	{
+		console_debug({ "Unhandled unknown exception: ", e.what() });
+		exit(7);
+	}
+	return 0;
+}
+
+void run()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -62,7 +83,7 @@ int main(int argc, char* args[])
 	station->pos.y = game->ship_limits.h / 2;
 	game->entity_register.registerEntity(station);
 	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station), station);
-	renderer->sprite_register.unregisterSpriteForEntity(station);
+	//renderer->sprite_register.unregisterSpriteForEntity(station);
 	//renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station));
 
 	Ship* s = new Ship();
@@ -235,7 +256,6 @@ int main(int argc, char* args[])
 	}
 
 	SDL_Quit();
-	return 0;
 }
 
 void integrate(double delta_time, double dt)
