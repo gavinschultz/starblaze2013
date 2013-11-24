@@ -6,3 +6,5 @@ Release/
 starblaze2013.opensdf
 starblaze2013.sdf
 run_original_starblaze.bat
+ipch/
+Local.props
