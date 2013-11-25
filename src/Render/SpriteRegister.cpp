@@ -1,7 +1,20 @@
 #include "stdafx.h"
 #include <algorithm>
+#include <memory>
+#include "BGSprite.h"
+#include "ShipSprite.h"
 #include "SpriteRegister.h"
 #include "Debug.h"
+
+class SpriteRegister::impl
+{
+public:
+	std::unique_ptr<BGSprite> _background;
+	std::unique_ptr<ShipSprite> _ship_sprite;
+};
+
+SpriteRegister::SpriteRegister() : pimpl{ new impl{} } {}
+SpriteRegister::~SpriteRegister() {}
 
 void SpriteRegister::registerSprite(Sprite* sprite)
 {
@@ -49,7 +62,29 @@ const Sprite& SpriteRegister::getSprite(Entity* entity) const
 	return *((*it).second);
 }
 
-const std::vector<std::unique_ptr<Sprite>>& SpriteRegister::getSprites()
+void SpriteRegister::registerBackground(BGSprite* background)
+{
+	pimpl->_background = std::unique_ptr<BGSprite>{ background };
+}
+
+const BGSprite& SpriteRegister::getBackground() const
+{
+	auto& a = *(pimpl->_background.get());
+	return a;
+}
+
+void SpriteRegister::registerShipSprite(ShipSprite* ship_sprite)
+{
+	pimpl->_ship_sprite = std::unique_ptr<ShipSprite>{ ship_sprite };
+}
+
+const ShipSprite& SpriteRegister::getPlayerShip() const
+{
+	auto& x = *(pimpl->_ship_sprite.get());
+	return x;
+}
+
+const std::vector<std::unique_ptr<Sprite>>& SpriteRegister::getSprites() const
 {
 	return this->_sprites;
 }

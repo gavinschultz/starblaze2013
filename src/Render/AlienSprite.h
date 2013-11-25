@@ -1,14 +1,15 @@
 #pragma once
 #include "Sprite.h"
-#include "Renderer.h"
-#include "Entity.h"
+#include "Entity\Alien.h"
+
+class Camera;
+class Renderer;
 
 class AlienSprite : public Sprite
 {
 private:
+	SpriteTexture _alien_texture;
 	Alien* _alien;
-	SDL_Texture* _alien_texture;
-	SDL_Rect _alien_texture_rect;
 public:
 	AlienSprite(Renderer* renderer, Alien* alien);
 	~AlienSprite();

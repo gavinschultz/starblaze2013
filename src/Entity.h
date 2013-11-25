@@ -3,21 +3,18 @@
 #include <SDL.h>
 #include "Phys.h"
 #include <vector>
+#include "Entity\Entity.h"
+#include "Entity\Alien.h"
 
 enum class ShipDirection { left, right };
 
-class Entity
-{
-
-};
-
-struct Entity_hash
-{
-	size_t operator()(const Entity& entity) const
-	{
-		return (size_t)(&entity);
-	}
-};
+//struct Entity_hash
+//{
+//	size_t operator()(const Entity& entity) const
+//	{
+//		return (size_t)(&entity);
+//	}
+//};
 
 class Ship : public Entity
 {
@@ -41,16 +38,6 @@ public:
 	const double max_lift{ 700.0 };
 };
 
-class Alien : public Entity
-{
-public:
-	State2D current_state;
-	State2D prev_state;
-	Point2D alpha_pos;
-	SDL_Rect bounding_box;
-	double altitude{ 0.0 };
-};
-
 class Hill
 {
 public:
@@ -58,6 +45,12 @@ public:
 	int y_channel{ 0 };
 	double x{ 0.0 };
 	double distance_factor{ 0.0 };
+};
+
+enum StationType
+{
+	Fuel = 0,
+	Repair
 };
 
 class Station : public Entity

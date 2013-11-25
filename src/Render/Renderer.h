@@ -15,7 +15,8 @@ public:
 	uint32_t w;
 	uint32_t h;
 };
-
+class SpriteRegister;
+class SpriteLoader;
 class Renderer
 {
 private:

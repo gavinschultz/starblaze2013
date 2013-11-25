@@ -89,6 +89,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Entity\Alien.h" />
+    <ClInclude Include="src\Entity\Entity.h" />
     <ClInclude Include="src\FileLoader.h" />
     <ClInclude Include="src\Render\AlienSprite.h" />
     <ClInclude Include="src\Render\BGSprite.h" />

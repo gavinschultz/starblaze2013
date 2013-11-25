@@ -15,6 +15,13 @@ struct Point2Di
 	Point2Di(int32_t x = 0, int32_t y = 0) : x(x), y(y) {}
 };
 
+struct Point2Du
+{
+	unsigned int x;
+	unsigned int y;
+	Point2Du(unsigned int x = 0, unsigned int y = 0) : x(x), y(y) {}
+};
+
 struct Vector2D
 {
 	double x;
@@ -27,6 +34,13 @@ struct Vector2Di
 	int32_t x;
 	int32_t y;
 	Vector2Di(int32_t x = 0, int32_t y = 0) : x(x), y(y) {}
+};
+
+struct Vector2Du
+{
+	unsigned int x;
+	unsigned int y;
+	Vector2Du(unsigned int x = 0, unsigned int y = 0) : x(x), y(y) {}
 };
 
 struct Rect

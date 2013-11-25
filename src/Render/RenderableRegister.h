@@ -1,7 +1,7 @@
-//#pragma once
-//#include <SDL.h>
-//#include "Camera.h"
-//
+#pragma once
+#include <SDL.h>
+#include "Camera.h"
+
 //class SDLRenderable
 //{
 //protected:

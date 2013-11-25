@@ -1,9 +1,8 @@
 #pragma once
-#include "Sprite.h"
-#include "Renderer.h"
 #include <array>
-#include <SDL.h>
+#include "Sprite.h"
 
+class Renderer;
 class RadarSprite : public Sprite
 {
 private:

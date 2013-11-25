@@ -7,8 +7,6 @@ class SpriteTexture
 public:
 	SDL_Texture* texture;
 	SDL_Rect rect;
-	SDL_Rect srect;	// affine-transformed rect
-	void scaleRect(unsigned int scale);
 };
 
 class SpriteLoader

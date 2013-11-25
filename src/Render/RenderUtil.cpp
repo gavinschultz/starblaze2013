@@ -43,3 +43,8 @@ SDL_Texture* renderutil::loadTextureFromFile(SDL_Renderer* sdl_renderer, std::st
 	};
 	return sdlTexture;
 }
+
+SDL_Rect renderutil::scaleRect(const SDL_Rect& rect, unsigned int scaling)
+{
+	return SDL_Rect{ rect.x, rect.y, rect.w * scaling, rect.h * scaling };
+}

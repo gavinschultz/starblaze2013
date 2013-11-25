@@ -1,6 +1,13 @@
 #include "stdafx.h"
 #include "Renderer.h"
 #include "TextRenderer.h"
+#include "SpriteLoader.h"
+
+class TextRenderer::impl
+{
+public:
+	SpriteTexture charmap_texture;
+};
 
 const std::unordered_map<char, Point2Di> TextRenderer::_char_offsets{
 	{ 'A', { 0, 0 } }, { 'B', { 0x10, 0 } }, { 'C', { 0x20, 0 } }, { 'D', { 0x30, 0 } },
@@ -15,10 +22,12 @@ const std::unordered_map<char, Point2Di> TextRenderer::_char_offsets{
 	{ '?', { 0, 0110 } }
 };
 
-TextRenderer::TextRenderer(Renderer* renderer) : _scaling{ renderer->scaling }
+TextRenderer::TextRenderer(Renderer* renderer, const SpriteTexture& characters_texture) : _scaling{ renderer->scaling }, pimpl{ new impl{} }
 {
-	_charmap_texture = renderer->loadTextureFromFile("resources\\characters.tga", &_charmap_texture_rect);
+	pimpl->charmap_texture = characters_texture;
 }
+
+TextRenderer::~TextRenderer() {}
 
 void TextRenderer::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, bool red) const
 {
@@ -30,9 +39,9 @@ void TextRenderer::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, 
 	try
 	{
 		const Point2Di& char_offset = _char_offsets.at(c);
-		const SDL_Rect src_rect{ char_offset.x + (red ? 64 : 0), char_offset.y, 16, 8 };
+		const SDL_Rect src_rect{ pimpl->charmap_texture.rect.x + char_offset.x + (red ? 64 : 0), pimpl->charmap_texture.rect.y + char_offset.y, 16, 8 };
 		const SDL_Rect dst_rect{ pos.x, pos.y, 16 * _scaling, 8 * _scaling };
-		SDL_RenderCopy(sdl_renderer, _charmap_texture, &src_rect, &dst_rect);
+		SDL_RenderCopy(sdl_renderer, pimpl->charmap_texture.texture, &src_rect, &dst_rect);
 	}
 	catch (std::out_of_range)
 	{
@@ -58,10 +67,7 @@ void TextRenderer::RenderPlate(SDL_Renderer* sdl_renderer, const TextPlate& plat
 	}
 }
 
-TextLine::TextLine(const std::string& text, Point2Di offset) : text{ text }, offset{ offset }
-{
-
-}
+TextLine::TextLine(const std::string& text, Point2Di offset) : text{ text }, offset{ offset } {}
 
 TextPlate::TextPlate(std::initializer_list<TextLine> lines)
 {

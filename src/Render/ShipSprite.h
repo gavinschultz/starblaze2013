@@ -1,24 +1,23 @@
 #pragma once
 #include <SDL.h>
-#include "Entity.h"
 #include "Phys.h"
 #include "Sprite.h"
-#include "Renderer.h"
+
+class Renderer;
+class Camera;
+class Ship;
 
 class ShipSprite : public Sprite
 {
 private:
-	std::shared_ptr<Ship> _ship;	// TODO: weak_ptr / shared_ptr?
-	SDL_Texture* _ship_texture;
-	SDL_Texture* _taillight_texture;
-	SDL_Texture* _stripe_texture;
-	SDL_Texture* _burner_texture;
-	SDL_Texture* _wheels_texture;
-	SDL_Rect _ship_texture_rect;
-	SDL_Rect _taillight_texture_rect;
-	SDL_Rect _stripe_texture_rect;
-	SDL_Rect _burner_texture_rect;
-	SDL_Rect _wheels_texture_rect;
+	const int SHIPSTRIPE_WIDTH = 32;
+	const int BURNER_WIDTH = 8;
+
+	SpriteTexture _stripe_texture;
+	SpriteTexture _wheels_texture;
+	SpriteTexture _taillight_texture;
+	SpriteTexture _burner_texture;
+	SpriteTexture _ship_texture;
 
 	Point2Di _stripe_offset;
 	Point2Di _burner_offset;
@@ -26,6 +25,6 @@ private:
 public:
 	ShipSprite(Renderer* renderer, Ship* ship);
 	~ShipSprite();
-	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
+	void render(SDL_Renderer* sdlRenderer, const Camera& camera, const Ship& ship) const;
 	bool smooth_animation;
 };

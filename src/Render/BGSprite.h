@@ -1,16 +1,20 @@
 #pragma once
-#include <memory>
 #include "Sprite.h"
-#include "Entity.h"
-#include "Renderer.h"
+#include "SpriteLoader.h"
+
+class Renderer;
+class World;
+class Camera;
 
 class BGSprite : public Sprite
 {
 private:
-	std::shared_ptr<World> _world;
-	SDL_Texture* _hills_texture;
-	SDL_Rect _hills_texture_rect;
-	SDL_Rect _hills_rect;
+	const int HILL_HEIGHT = 4;
+	const int HILL_WIDTH = 16;
+	const int SKY_HEIGHT = 96;
+	const int GROUND_HEIGHT = 48;
+
+	SpriteTexture _hills_texture;
 
 	SDL_Rect _sky_rect;
 	SDL_Color _sky_color;
@@ -21,7 +25,7 @@ private:
 	SDL_Rect _bg_rect;
 	SDL_Color _bg_color;
 public:
-	BGSprite(Renderer* renderer, World* world);
+	BGSprite(Renderer* renderer);
 	~BGSprite();
-	void render(SDL_Renderer* sdlRenderer, const Camera& camera);
+	void render(SDL_Renderer* sdlRenderer, const Camera& camera, const World& world) const;
 };

@@ -110,7 +110,7 @@ void SpriteLoader::load(SDL_Renderer* sdl_renderer, const std::string& spriteshe
 		std::regex pattern{ "(.*)(.tga)" };
 		std::string replace{ "$1" };
 		std::string sprite_name_parsed = std::regex_replace(sprite_name, pattern, replace);
-		this->_sprites_by_name[sprite_name_parsed] = SpriteTexture{ _texture, SDL_Rect{ frame_x, frame_y, frame_w, frame_h }, SDL_Rect{ frame_x, frame_y, frame_w, frame_h } };
+		this->_sprites_by_name[sprite_name_parsed] = SpriteTexture{ _texture, SDL_Rect{ frame_x, frame_y, frame_w, frame_h } };
 
 		console_debug({ "Loaded sprite ", sprite_name, " x:", std::to_string(frame_x), " y:", std::to_string(frame_y), " w:", std::to_string(frame_w), " h:", std::to_string(frame_h) });
 	}
@@ -124,10 +124,4 @@ const SpriteTexture& SpriteLoader::getSprite(const std::string& name)
 		throw std::runtime_error("The sprite " + name + " was not found.");
 
 	return _sprites_by_name[name];
-}
-
-void SpriteTexture::scaleRect(unsigned int scaling)
-{
-	this->srect.w *= scaling;
-	this->srect.h *= scaling;
 }

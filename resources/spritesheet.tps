@@ -54,7 +54,7 @@
             </struct>
         </struct>
         <key>shapePadding</key>
-        <uint>0</uint>
+        <uint>1</uint>
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
@@ -64,7 +64,7 @@
         <key>textureFormat</key>
         <enum type="SettingsBase::TextureFormat">tga</enum>
         <key>borderPadding</key>
-        <uint>0</uint>
+        <uint>1</uint>
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
@@ -170,7 +170,7 @@
             <key>trimThreshold</key>
             <uint>1</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">Trim</enum>
+            <enum type="SpriteSettings::TrimMode">None</enum>
             <key>heuristicMask</key>
             <false/>
         </struct>
@@ -179,143 +179,115 @@
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>coco_8col_palette.tga</filename>
-            <filename>ground.tga</filename>
             <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
-            <filename>sky.tga</filename>
             <filename>shipstripe_line.tga</filename>
             <filename>fuel.tga</filename>
             <filename>repair.tga</filename>

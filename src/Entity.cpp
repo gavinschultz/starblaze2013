@@ -4,6 +4,7 @@
 #include <functional>
 #include <array>
 #include "Debug.h"
+#include "Entity\Alien.h"
 #include <ctime>
 
 void EntityRegister::registerEntity(Ship* ship)

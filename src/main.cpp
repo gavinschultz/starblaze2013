@@ -76,13 +76,14 @@ void run()
 	);
 
 	// Load assets
-	BGSprite* bg_sprite = new BGSprite(renderer.get(), world.get());
-	renderer->sprite_register.registerSprite(bg_sprite);
+	BGSprite* bg_sprite = new BGSprite(renderer.get());
+	//renderer->sprite_register.registerSprite(bg_sprite);
+	renderer->sprite_register.registerBackground(bg_sprite);
 
 	Station* station = new Station();
 	station->pos.y = game->ship_limits.h / 2;
 	game->entity_register.registerEntity(station);
-	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station), station);
+	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), *station), station);
 	//renderer->sprite_register.unregisterSpriteForEntity(station);
 	//renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station));
 
@@ -91,7 +92,8 @@ void run()
 	s->bounding_box = { 0, 0, 32, 8 };
 	game->entity_register.registerEntity(s);
 	ShipSprite* shipSprite = new ShipSprite(renderer.get(), s);
-	renderer->sprite_register.registerSprite(shipSprite);
+	//renderer->sprite_register.registerSprite(shipSprite);
+	renderer->sprite_register.registerShipSprite(shipSprite);
 
 	auto alien = new Alien();
 	alien->bounding_box = { 0, 0, 16, 12 };

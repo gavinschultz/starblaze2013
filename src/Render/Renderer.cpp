@@ -8,6 +8,10 @@
 #include <limits>
 #include <array>
 #include "SpriteLoader.h"
+#include "Game.h"
+#include "StationSprite.h"
+#include "BGSprite.h"
+#include "ShipSprite.h"
 
 Renderer::Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width) : scaling(scaling), width((unsigned int)(world_width*scaling))
 {
@@ -70,7 +74,7 @@ void Renderer::init()
 		console_debug({ "TTF_OpenFont: %s\n", TTF_GetError() });
 		exit(3);
 	}
-	_text_renderer = std::unique_ptr<TextRenderer>{new TextRenderer{ this }};
+	_text_renderer = std::unique_ptr<TextRenderer>{new TextRenderer{ this, sprite_loader.getSprite("characters") }};
 }
 
 void Renderer::toggleFullscreen(bool state)
@@ -110,9 +114,25 @@ void Renderer::render(Camera* camera)
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 31, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(sdlRenderer);
 
+	sprite_register.getBackground().render(sdlRenderer, *camera, *world);
+
 	for (auto& sprite : sprite_register.getSprites())
 	{
 		sprite->render(this->sdlRenderer, *camera);
+	}
+
+	auto ship = game->entity_register.getShip();
+	if (ship)
+	{
+		const auto& ship_sprite = (ShipSprite&)sprite_register.getPlayerShip();
+		ship_sprite.render(sdlRenderer, *camera, *ship);
+	}
+
+	auto station = game->entity_register.getStation();
+	if (station)
+	{
+		const auto& station_sprite = (StationSprite&)sprite_register.getSprite(station);
+		station_sprite.render(sdlRenderer, *camera, *station);
 	}
 
 	renderHUD();

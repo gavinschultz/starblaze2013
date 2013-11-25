@@ -1,20 +1,27 @@
 #pragma once
-//#include <vector>
-#include <unordered_set>
-//#include <list>
-#include <unordered_map>
-#include "Entity.h"
-#include "Sprite.h"
+
+class Sprite;
+class Entity;
+class BGSprite;
+class ShipSprite;
 
 class SpriteRegister
 {
 private:
 	std::vector<std::unique_ptr<Sprite>> _sprites;
 	std::unordered_map<Entity*, Sprite*> _sprites_by_entity;
+	class impl;
+	std::unique_ptr<impl> pimpl;
 public:
+	SpriteRegister();
+	~SpriteRegister();
 	void registerSprite(Sprite* sprite);
+	void registerBackground(BGSprite* background);
+	void registerShipSprite(ShipSprite* ship_sprite);
 	void registerSprite(Sprite* sprite, Entity* entity);
 	void unregisterSpriteForEntity(Entity* entity);
 	const Sprite& getSprite(Entity* entity) const;
-	const std::vector<std::unique_ptr<Sprite>>& getSprites();
+	const BGSprite& getBackground() const;
+	const ShipSprite& getPlayerShip() const;
+	const std::vector<std::unique_ptr<Sprite>>& getSprites() const;
 };

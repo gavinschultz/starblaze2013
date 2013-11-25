@@ -4,7 +4,7 @@
 class Input
 {
 private:
-	SDL_GameController* _controller;
+	SDL_GameController* _controller = nullptr;
 	void handleKeyboardEvent(const SDL_KeyboardEvent& e) const;
 	void handleKeyboardState(Ship* ship) const;
 	void handleMouseMotionEvent(const SDL_MouseMotionEvent& e, Ship* ship) const;
