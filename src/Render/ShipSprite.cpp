@@ -5,7 +5,7 @@
 #include "Entity\Ship.h"
 #include "Timer.h"
 
-ShipSprite::ShipSprite(Renderer* renderer, Ship* ship) : Sprite(renderer->scaling)
+ShipSprite::ShipSprite(Renderer* renderer) : Sprite(renderer->scaling)
 {
 	this->_stripe_texture = renderer->sprite_loader.getSprite("shipstripe_line");
 	this->_wheels_texture = renderer->sprite_loader.getSprite("shipwheels");

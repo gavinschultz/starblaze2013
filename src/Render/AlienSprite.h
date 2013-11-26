@@ -9,9 +9,8 @@ class AlienSprite : public Sprite
 {
 private:
 	SpriteTexture _alien_texture;
-	Alien* _alien;
 public:
-	AlienSprite(Renderer* renderer, Alien* alien);
+	AlienSprite(Renderer* renderer);
 	~AlienSprite();
-	void render(SDL_Renderer* sdl_renderer, const Camera &camera);
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const Alien& alien);
 };

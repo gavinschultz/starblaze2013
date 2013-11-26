@@ -3,7 +3,10 @@
 #include <memory>
 #include "BGSprite.h"
 #include "ShipSprite.h"
+#include "AlienSprite.h"
 #include "SpriteRegister.h"
+#include "HUDRend.h"
+#include "RadarSprite.h"
 #include "Debug.h"
 
 class SpriteRegister::impl
@@ -11,6 +14,8 @@ class SpriteRegister::impl
 public:
 	std::unique_ptr<BGSprite> _background;
 	std::unique_ptr<ShipSprite> _ship_sprite;
+	std::unique_ptr<HUDRend> _hud_rend;
+	std::unique_ptr<RadarSprite> _radar_sprite;
 };
 
 SpriteRegister::SpriteRegister() : pimpl{ new impl{} } {}
@@ -87,4 +92,24 @@ const ShipSprite& SpriteRegister::getPlayerShip() const
 const std::vector<std::unique_ptr<Sprite>>& SpriteRegister::getSprites() const
 {
 	return this->_sprites;
+}
+
+void SpriteRegister::registerHUD(HUDRend* hud)
+{
+	pimpl->_hud_rend = std::unique_ptr<HUDRend>{hud};
+}
+
+const HUDRend& SpriteRegister::getHUD() const
+{
+	return *(pimpl->_hud_rend.get());
+}
+
+void SpriteRegister::registerRadar(RadarSprite* radar)
+{
+	pimpl->_radar_sprite = std::unique_ptr<RadarSprite>{radar};
+}
+
+const RadarSprite& SpriteRegister::getRadar() const
+{
+	return *(pimpl->_radar_sprite.get());
 }

@@ -12,8 +12,12 @@
 #include "StationSprite.h"
 #include "BGSprite.h"
 #include "ShipSprite.h"
+#include "AlienSprite.h"
+#include "RadarSprite.h"
+#include "HUDRend.h"
 #include "Entity\Station.h"
 #include "Entity\World.h"
+#include "Entity\Alien.h"
 
 Renderer::Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width) : scaling(scaling), width((unsigned int)(world_width*scaling))
 {
@@ -118,9 +122,10 @@ void Renderer::render(Camera* camera)
 
 	sprite_register.getBackground().render(sdlRenderer, *camera, *world);
 
-	for (auto& sprite : sprite_register.getSprites())
+	for (auto& alien : game->entity_register.getAliens())
 	{
-		sprite->render(this->sdlRenderer, *camera);
+		auto& enemySprite = (AlienSprite&)sprite_register.getSprite((Entity*)alien.get());
+		enemySprite.render(sdlRenderer, *camera, *alien);
 	}
 
 	auto ship = game->entity_register.getShip();
@@ -137,7 +142,11 @@ void Renderer::render(Camera* camera)
 		station_sprite.render(sdlRenderer, *camera, *station);
 	}
 
-	renderHUD();
+	auto& hud_rend = sprite_register.getHUD();
+	hud_rend.render(sdlRenderer, *(_text_renderer.get()), *ship, 0, 0); // TODO: lives, score
+
+	auto& radar_rend = sprite_register.getRadar();
+	radar_rend.render(sdlRenderer, *camera);
 
 	if (_text_plate)
 	{
@@ -256,30 +265,6 @@ void Renderer::renderDebug(const Debug& debug)
 		this->renderText(i->value, max_text_w + 50, y);
 		y += font_height + 4;
 	}
-}
-
-//void Renderer::renderHUD(const Ship& ship, const Game& game)
-void Renderer::renderHUD()
-{
-	// Fuel, bullets, shields, radar
-	SDL_Rect fuel_rect = { 4 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
-	SDL_Rect bullets_rect = { 20 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
-	SDL_Rect shields_rect = { 36 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
-	SDL_Rect radar_rect = { 52 * scaling, 157 * scaling, 8 * scaling, 24 * scaling };
-	std::array<SDL_Rect, 4> gauge_rects = { { fuel_rect, bullets_rect, shields_rect, radar_rect } };
-	SDL_Color gauge_color = coco_palette.getColor(CoCoPaletteEnum::blue);
-	SDL_SetRenderDrawColor(sdlRenderer, gauge_color.r, gauge_color.g, gauge_color.b, 255);
-	SDL_RenderFillRects(sdlRenderer, gauge_rects.data(), 4);
-
-	_text_renderer->RenderChar(sdlRenderer, 'F', { 2 * (int32_t)scaling, 184 * (int32_t)scaling }, true);
-	_text_renderer->RenderChar(sdlRenderer, 'T', { 18 * (int32_t)scaling, 184 * (int32_t)scaling }, true);
-	_text_renderer->RenderChar(sdlRenderer, 'S', { 34 * (int32_t)scaling, 184 * (int32_t)scaling }, true);
-	_text_renderer->RenderChar(sdlRenderer, 'R', { 50 * (int32_t)scaling, 184 * (int32_t)scaling }, true);
-
-	// Ships remaining
-
-	// Score
-
 }
 
 void Renderer::renderMotionHistory(const Debug& debug)

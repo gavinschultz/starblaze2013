@@ -4,6 +4,9 @@ class Sprite;
 class Entity;
 class BGSprite;
 class ShipSprite;
+class AlienSprite;
+class HUDRend;
+class RadarSprite;
 
 class SpriteRegister
 {
@@ -19,9 +22,13 @@ public:
 	void registerBackground(BGSprite* background);
 	void registerShipSprite(ShipSprite* ship_sprite);
 	void registerSprite(Sprite* sprite, Entity* entity);
+	void registerHUD(HUDRend* hud);
+	void registerRadar(RadarSprite* radar);
 	void unregisterSpriteForEntity(Entity* entity);
 	const Sprite& getSprite(Entity* entity) const;
 	const BGSprite& getBackground() const;
 	const ShipSprite& getPlayerShip() const;
+	const HUDRend& getHUD() const;
+	const RadarSprite& getRadar() const;
 	const std::vector<std::unique_ptr<Sprite>>& getSprites() const;
 };

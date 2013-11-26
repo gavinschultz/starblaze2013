@@ -12,8 +12,7 @@ void EntityRegister::registerEntity(Ship* ship)
 
 void EntityRegister::registerEntity(Alien* alien)
 {
-	auto p_alien = std::make_shared<Alien>(*alien);
-	_aliens.push_back(p_alien);
+	_aliens.push_back(std::unique_ptr<Alien>{alien});
 }
 
 void EntityRegister::registerEntity(Station* station)
@@ -21,22 +20,17 @@ void EntityRegister::registerEntity(Station* station)
 	_station = std::unique_ptr<Station>{station};
 }
 
-Ship* EntityRegister::getShip()
+Ship* EntityRegister::getShip() const
 {
 	return _ship.get();
 }
 
-const int EntityRegister::getShipCount()
+const std::vector<std::unique_ptr<Alien>>& EntityRegister::getAliens() const
 {
-	return _ship_count;
+	return _aliens;
 }
 
-Alien* EntityRegister::getAlien()
-{
-	return _aliens[0].get();
-}
-
-Station* EntityRegister::getStation()
+Station* EntityRegister::getStation() const
 {
 	return _station.get();
 }

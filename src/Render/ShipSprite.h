@@ -23,7 +23,7 @@ private:
 	Point2Di _burner_offset;
 	Point2Di _wheels_offset;
 public:
-	ShipSprite(Renderer* renderer, Ship* ship);
+	ShipSprite(Renderer* renderer);
 	~ShipSprite();
 	void render(SDL_Renderer* sdlRenderer, const Camera& camera, const Ship& ship) const;
 	bool smooth_animation;

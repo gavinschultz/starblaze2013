@@ -20,6 +20,7 @@
 #include "Render\StationSprite.h"
 #include "Render\ShipSprite.h"
 #include "Render\BGSprite.h"
+#include "Render\HUDRend.h"
 #include "Render\SpriteRegister.h"
 #include "Render\Renderer.h"
 #include "Entity\World.h"
@@ -79,32 +80,21 @@ void run()
 	);
 
 	// Load assets
-	BGSprite* bg_sprite = new BGSprite(renderer.get());
-	//renderer->sprite_register.registerSprite(bg_sprite);
-	renderer->sprite_register.registerBackground(bg_sprite);
-
-	Station* station = new Station();
-	station->pos.y = game->ship_limits.h / 2;
-	game->entity_register.registerEntity(station);
-	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), *station), station);
-	//renderer->sprite_register.unregisterSpriteForEntity(station);
-	//renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), station));
-
 	Ship* s = new Ship();
-	s->direction = ShipDirection::right;
-	s->bounding_box = { 0, 0, 32, 8 };
+	Alien* alien = new Alien();
+	Station* station = new Station();
+
 	game->entity_register.registerEntity(s);
-	ShipSprite* shipSprite = new ShipSprite(renderer.get(), s);
-	//renderer->sprite_register.registerSprite(shipSprite);
-	renderer->sprite_register.registerShipSprite(shipSprite);
-
-	auto alien = new Alien();
-	alien->bounding_box = { 0, 0, 16, 12 };
 	game->entity_register.registerEntity(alien);
-	AlienSprite* alienSprite = new AlienSprite(renderer.get(), alien);
-	renderer->sprite_register.registerSprite(alienSprite);
+	game->entity_register.registerEntity(station);
 
+	renderer->sprite_register.registerBackground(new BGSprite(renderer.get()));
+	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), *station), station);
+	renderer->sprite_register.registerShipSprite(new ShipSprite(renderer.get()));
+	renderer->sprite_register.registerSprite(new AlienSprite(renderer.get()), alien);
 	renderer->sprite_register.registerSprite(new RadarSprite(renderer.get()));
+	renderer->sprite_register.registerHUD(new HUDRend(renderer.get()));
+	renderer->sprite_register.registerRadar(new RadarSprite(renderer.get()));
 	// end load assets
 
 	auto title_plate = std::shared_ptr<TextPlate>{ new TextPlate{ {
@@ -337,6 +327,9 @@ void integrateAlpha(double alpha)
 	}
 	ship->alpha_pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
 
-	Alien* alien = game->entity_register.getAlien();
-	alien->alpha_pos = alien->current_state.pos;
+	auto& aliens = game->entity_register.getAliens();
+	for (auto& alien : aliens)
+	{
+		alien->alpha_pos = alien->current_state.pos;
+	}
 }

@@ -36,7 +36,6 @@ private:
 	void renderMotionHistory(const Debug& debug);
 	void renderText(const std::string text, uint32_t x, uint32_t y);
 	void renderZeroLine(const Camera& camera);
-	void renderHUD();
 	void init();
 	TTF_Font* _font;
 	std::unique_ptr<TextRenderer> _text_renderer;

@@ -11,8 +11,8 @@ public:
 	State2D current_state;
 	State2D prev_state;
 	Point2D alpha_pos;
-	SDL_Rect bounding_box;
-	ShipDirection direction;
+	SDL_Rect bounding_box{ { 0, 0, 32, 8 } };
+	ShipDirection direction{ ShipDirection::right };
 	double altitude{ 0.0 };
 	unsigned int bullets{ 128 };
 	int shields{ 100 };
