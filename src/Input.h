@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL.h>
+#include "Entity\Ship.h"
 
 class Input
 {

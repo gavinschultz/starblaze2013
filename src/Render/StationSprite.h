@@ -1,8 +1,10 @@
 #pragma once
-#include "Sprite.h"
-#include "Entity.h"
-#include "Renderer.h"
+#include <SDL.h>
 #include <memory>
+#include "Sprite.h"
+
+class Station;
+class Camera;
 
 class StationSprite : public Sprite
 {

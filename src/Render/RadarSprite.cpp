@@ -4,6 +4,9 @@
 #include "CoCoPalette.h"
 #include "RadarSprite.h"
 #include "Game.h"
+#include "Entity\Ship.h"
+#include "Entity\Alien.h"
+#include "Entity\Station.h"
 
 RadarSprite::RadarSprite(Renderer* renderer) : Sprite(renderer->scaling)
 {

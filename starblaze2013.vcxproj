@@ -91,6 +91,11 @@
   <ItemGroup>
     <ClInclude Include="src\Entity\Alien.h" />
     <ClInclude Include="src\Entity\Entity.h" />
+    <ClInclude Include="src\Entity\EntityRegister.h" />
+    <ClInclude Include="src\Entity\Hill.h" />
+    <ClInclude Include="src\Entity\Ship.h" />
+    <ClInclude Include="src\Entity\Station.h" />
+    <ClInclude Include="src\Entity\World.h" />
     <ClInclude Include="src\FileLoader.h" />
     <ClInclude Include="src\Render\AlienSprite.h" />
     <ClInclude Include="src\Render\BGSprite.h" />
@@ -108,7 +113,6 @@
     <ClInclude Include="src\Render\TextRenderer.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\Debug.h" />
-    <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Phys.h" />
@@ -117,7 +121,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Debug.cpp" />
-    <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\Entity\EntityRegister.cpp" />
+    <ClCompile Include="src\Entity\World.cpp" />
     <ClCompile Include="src\FileLoader.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Input.cpp" />

@@ -7,7 +7,6 @@
 #include "timer.h"
 #include <SDL_image.h>
 #include <vector>
-#include "Entity.h"
 #include "Game.h"
 #include <algorithm>
 #include "Debug.h"
@@ -23,6 +22,10 @@
 #include "Render\BGSprite.h"
 #include "Render\SpriteRegister.h"
 #include "Render\Renderer.h"
+#include "Entity\World.h"
+#include "Entity\Ship.h"
+#include "Entity\Station.h"
+#include "Entity\EntityRegister.h"
 
 void integrate(double delta_time, double dt);
 void integrateAlpha(double alpha);

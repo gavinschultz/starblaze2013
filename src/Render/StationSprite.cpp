@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Game.h"
 #include "StationSprite.h"
+#include "Entity\Station.h"
 
 StationSprite::StationSprite(Renderer* renderer, const Station& station) : Sprite(renderer->scaling)
 {

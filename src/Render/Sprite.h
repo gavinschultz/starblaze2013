@@ -1,7 +1,8 @@
 #pragma once
 #include <SDL.h>
-#include "Camera.h"
-#include "Entity.h"
+
+class Camera;
+class Entity;
 
 class Sprite
 {

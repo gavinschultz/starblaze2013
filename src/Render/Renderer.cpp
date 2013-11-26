@@ -12,6 +12,8 @@
 #include "StationSprite.h"
 #include "BGSprite.h"
 #include "ShipSprite.h"
+#include "Entity\Station.h"
+#include "Entity\World.h"
 
 Renderer::Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width) : scaling(scaling), width((unsigned int)(world_width*scaling))
 {

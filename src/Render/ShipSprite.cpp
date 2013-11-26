@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "Renderer.h"
 #include "ShipSprite.h"
+#include "Entity\Ship.h"
 #include "Timer.h"
 
 ShipSprite::ShipSprite(Renderer* renderer, Ship* ship) : Sprite(renderer->scaling)

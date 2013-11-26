@@ -3,6 +3,8 @@
 #include "CoCoPalette.h"
 #include "Renderer.h"
 #include "BGSprite.h"
+#include "Entity\Hill.h"
+#include "Entity\World.h"
 
 BGSprite::BGSprite(Renderer* renderer) : Sprite(renderer->scaling)
 {

@@ -1,57 +1,9 @@
 #include "stdafx.h"
-#include "Entity.h"
+#include <array>
 #include <random>
 #include <functional>
-#include <array>
-#include "Debug.h"
-#include "Entity\Alien.h"
 #include <ctime>
-
-void EntityRegister::registerEntity(Ship* ship)
-{
-	_ship = std::shared_ptr<Ship>{ship};
-}
-
-void EntityRegister::registerEntity(Alien* alien)
-{
-	auto p_alien = std::make_shared<Alien>(*alien);
-	_aliens.push_back(p_alien);
-}
-
-void EntityRegister::registerEntity(Station* station)
-{
-	_station = std::unique_ptr<Station>{station};
-}
-
-Ship* EntityRegister::getShip()
-{
-	return _ship.get();
-}
-
-const int EntityRegister::getShipCount()
-{
-	return _ship_count;
-}
-
-Alien* EntityRegister::getAlien()
-{
-	return _aliens[0].get();
-}
-
-Station* EntityRegister::getStation()
-{
-	return _station.get();
-}
-
-EntityRegister::EntityRegister()
-{
-
-}
-
-EntityRegister::~EntityRegister()
-{
-
-}
+#include "World.h"
 
 World::World(int hill_count)
 {
