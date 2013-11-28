@@ -1,13 +1,21 @@
 #pragma once
-#include "Entity.h"
 #include "Phys.h"
+#include "Entity.h"
+
+class EntityRegister;
 
 class Alien : public Entity
 {
 public:
-	State2D current_state;
-	State2D prev_state;
+	Alien();
 	Point2D alpha_pos;
-	SDL_Rect bounding_box{ { 0, 0, 16, 12 } };
 	double altitude{ 0.0 };
+	Vector2D attack_vector_n;
+
+	// The AI may consist of:
+	// a) selecting a new target
+	// b) setting the thrust required to move towards that target
+	// c) firing
+	// The target may be null, in which case it's up to the alien to work out what to do while "twiddling its thumbs"
+	void runAI(const Entity* target);
 };

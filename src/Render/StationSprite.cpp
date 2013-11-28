@@ -18,7 +18,7 @@ void StationSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, con
 {
 	SDL_Rect station_rect = 
 	{ 
-		renderutil::getScreenXForEntityByCameraAndDistance(station.pos.x*_scaling, _station_texture.rect.w*_scaling, renderer->width, camera, 1.0), 
+		renderutil::getScreenXForEntityByCameraAndDistance(station.current_state.pos.x*_scaling, _station_texture.rect.w*_scaling, renderer->width, camera, 1.0), 
 		game->ship_limits.h * _scaling - _station_texture.rect.h * _scaling,
 		_station_texture.rect.w*_scaling,
 		_station_texture.rect.h*_scaling

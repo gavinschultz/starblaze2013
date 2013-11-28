@@ -11,9 +11,9 @@ BGSprite::BGSprite(Renderer* renderer) : Sprite(renderer->scaling)
 	_sky_rect = { 0, 0, renderer->window.w, SKY_HEIGHT * _scaling };
 	_ground_rect = { 0, _sky_rect.h, renderer->window.w, GROUND_HEIGHT * _scaling };
 	_bg_rect = { 0, 0, renderer->window.w, renderer->window.h };
-	_sky_color = renderer->coco_palette.getColor(blue);
-	_ground_color = renderer->coco_palette.getColor(green);
-	_bg_color = renderer->coco_palette.getColor(green);
+	_sky_color = renderer->palette->colors[CoCoPaletteEnum::blue];// renderer->coco_palette.color[CoCoPaletteEnum::blue];
+	_ground_color = renderer->palette->colors[CoCoPaletteEnum::green];
+	_bg_color = renderer->palette->colors[CoCoPaletteEnum::green];
 
 	_hills_texture = renderer->sprite_loader.getSprite("hills");
 }

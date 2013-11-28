@@ -28,8 +28,11 @@ Renderer::Renderer(unsigned int screen_width, unsigned int screen_height, unsign
 
 Renderer::~Renderer()
 {
-	TTF_CloseFont(_font);
-	TTF_Quit();
+	//SDL_FreePalette(palette);
+	//TTF_CloseFont(_font);
+	//TTF_Quit();
+	//SDL_DestroyRenderer(sdlRenderer);
+	//SDL_DestroyWindow(sdlWindow);
 }
 
 void Renderer::init()
@@ -41,7 +44,7 @@ void Renderer::init()
 		console_debug({ SDL_GetError() });
 		exit(4);
 	}
-	
+
 	toggleFullscreen(is_fullscreen);
 	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 	if (!sdlRenderer)
@@ -80,6 +83,10 @@ void Renderer::init()
 		console_debug({ "TTF_OpenFont: %s\n", TTF_GetError() });
 		exit(3);
 	}
+
+	palette = SDL_AllocPalette(11);
+	SDL_SetPaletteColors(palette, CoCoPalette::colors.data(), 0, 11);
+
 	_text_renderer = std::unique_ptr<TextRenderer>{new TextRenderer{ this, sprite_loader.getSprite("characters") }};
 }
 
@@ -122,6 +129,13 @@ void Renderer::render(Camera* camera)
 
 	sprite_register.getBackground().render(sdlRenderer, *camera, *world);
 
+	auto station = game->entity_register.getStation();
+	if (station)
+	{
+		const auto& station_sprite = (StationSprite&)sprite_register.getSprite(station);
+		station_sprite.render(sdlRenderer, *camera, *station);
+	}
+
 	for (auto& alien : game->entity_register.getAliens())
 	{
 		auto& enemySprite = (AlienSprite&)sprite_register.getSprite((Entity*)alien.get());
@@ -133,13 +147,6 @@ void Renderer::render(Camera* camera)
 	{
 		const auto& ship_sprite = (ShipSprite&)sprite_register.getPlayerShip();
 		ship_sprite.render(sdlRenderer, *camera, *ship);
-	}
-
-	auto station = game->entity_register.getStation();
-	if (station)
-	{
-		const auto& station_sprite = (StationSprite&)sprite_register.getSprite(station);
-		station_sprite.render(sdlRenderer, *camera, *station);
 	}
 
 	auto& hud_rend = sprite_register.getHUD();
@@ -165,7 +172,6 @@ void Renderer::render(Camera* camera)
 	if (is_motionhistory_visible)
 		renderMotionHistory(*debug.get());
 
-	//SDL_GL_SwapWindow(this->sdlWindow);
 	SDL_RenderPresent(sdlRenderer);
 }
 
@@ -184,7 +190,7 @@ void Renderer::renderZeroLine(const Camera& camera)
 
 void Renderer::renderGrid()
 {
-
+	glPointSize(1.0f);
 	glLineWidth(2.0f);
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	for (uint32_t x = 0; x <= this->window.w; x += 8)
@@ -362,4 +368,13 @@ SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* text
 		texture_rect->h = sdlSurface->h;
 	};
 	return sdlTexture;
+}
+
+void Renderer::renderNormalVector(const Point2Di& src, const Vector2D& v) const
+{
+	int dest_x = (int)(src.x + v.x * 32);
+	int dest_y = (int)(src.y + v.y * 32);
+	SDL_RenderDrawLine(sdlRenderer, src.x, src.y, dest_x, dest_y);
+	glPointSize(6.0f);
+	SDL_RenderDrawPoint(sdlRenderer, dest_x, dest_y);
 }

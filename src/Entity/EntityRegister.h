@@ -5,6 +5,7 @@
 class Ship;
 class Alien;
 class Station;
+class Entity;
 
 class EntityRegister
 {
@@ -12,6 +13,7 @@ public:
 	Ship* getShip() const;
 	const std::vector<std::unique_ptr<Alien>>& getAliens() const;
 	Station* getStation() const;
+	const std::vector<Entity*> getAll() const;
 	void registerEntity(Ship* ship);
 	void registerEntity(Alien* alien);
 	void registerEntity(Station* station);

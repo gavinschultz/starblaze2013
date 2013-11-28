@@ -41,6 +41,7 @@ void run();
 
 int main(int argc, char* args[])
 {
+	int retcode = 0;
 	try
 	{
 		run();
@@ -48,14 +49,15 @@ int main(int argc, char* args[])
 	catch (std::runtime_error re)
 	{
 		console_debug({ "Unhandled run-time error: ", re.what() });
-		exit(6);
+		retcode = 6;
 	}
 	catch (std::exception e)
 	{
 		console_debug({ "Unhandled unknown exception: ", e.what() });
-		exit(7);
+		retcode = 7;
 	}
-	return 0;
+	SDL_Quit();
+	return retcode;
 }
 
 void run()
@@ -118,7 +120,7 @@ void run()
 	alien->current_state.pos.x = ship->current_state.pos.x + 50;
 	alien->current_state.pos.y = ship->current_state.pos.y - 100;
 
-	station->pos.y = game->ship_limits.y + game->ship_limits.h - station->bounding_box.h;
+	station->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - station->bounding_box.h;
 
 	double accumulator = 0;
 	const double dt = 1.0 / 60.0;
@@ -159,6 +161,10 @@ void run()
 			ship->current_state.thrust.x = -ship->max_thrust.x * thrust_multiplier;
 		// end calculate thrust
 
+		// alien AI
+		alien->runAI(ship);
+		// end alien AI
+
 		if (!game->is_paused || game->is_frame_by_frame)
 		{
 			if (game->is_frame_by_frame)
@@ -167,7 +173,7 @@ void run()
 			accumulator += delta_time;
 			while (accumulator >= dt)
 			{
-				ship->prev_state = ship->current_state;
+				//ship->prev_state = ship->current_state;
 				accumulator -= dt;
 				integrate(delta_time, dt);
 			}
@@ -234,8 +240,6 @@ void run()
 		double usage_game = util::round(((time_before_render - time_start_frame) / delta_time), 3) * 100.0;
 
 		//renderer->renderTextPlate(title_plate);
-		debug->set("station.y", station->pos.y);
-		debug->set("ship.y", ship->alpha_pos.y);
 		renderer->render(&camera);
 
 		double time_after_render = timer->getTime();
@@ -255,37 +259,27 @@ void run()
 
 void integrate(double delta_time, double dt)
 {
+	for (auto& entity : game->entity_register.getAll())
+	{
+		entity->prev_state = entity->current_state;
+		entity->current_state.acc.x = entity->current_state.thrust.x / entity->weight;
+		entity->current_state.vel.x += entity->current_state.acc.x * dt;
+		entity->current_state.vel.y += entity->current_state.thrust.y;	// TODO: acceleration
+
+		// decceleration
+		entity->current_state.vel.x -= entity->current_state.vel.x * (entity->getDecelerationFactorX() * dt);
+		entity->current_state.vel.y -= entity->current_state.vel.y * (entity->getDecelerationFactorY() * dt);
+
+		entity->current_state.pos.x += (entity->current_state.vel.x * dt) + (entity->current_state.acc.x * 0.5 * dt * dt);
+		entity->current_state.pos.y += entity->current_state.vel.y * dt; // TODO: acceleration
+	}
+
 	Ship* ship = game->entity_register.getShip();
-
-	double accel = ship->current_state.thrust.x / ship->weight;
-	double vel = ship->current_state.vel.x + accel * dt;
-
-	// decceleration X
-	double deccelleration_factor;
-	if (std::abs(ship->current_state.vel.x) > 200 || std::abs(ship->current_state.thrust.x) > 0)
-		deccelleration_factor = 0.4;
-	else if (std::abs(ship->current_state.vel.x) > 50) // slow more when already slow and no thrust
-		deccelleration_factor = 1.1;
-	else
-		deccelleration_factor = 2.3;
-	vel -= ship->current_state.vel.x * (deccelleration_factor * dt);
-	// decceleration Y
-	ship->current_state.vel.y -= ship->current_state.vel.y * (4.0 * dt);
-
-	double dist = (ship->current_state.vel.x * dt) + (accel * 0.5 * dt * dt);
-
-
-	ship->current_state.acc.x = accel;
-	ship->current_state.vel.x = vel;
-	ship->current_state.vel.y += ship->current_state.thrust.y;
-	ship->current_state.pos.x += dist;
-	ship->current_state.pos.y += ship->current_state.vel.y * dt;
 
 	if (ship->current_state.vel.y > ship->max_lift) ship->current_state.vel.y = ship->max_lift;
 	if (ship->current_state.vel.y < -ship->max_lift) ship->current_state.vel.y = -ship->max_lift;
 
 	ship->altitude = std::max(0.0, game->ship_limits.y + game->ship_limits.h - ship->current_state.pos.y - ship->bounding_box.h);
-	//debug({ "Altitude:", std::to_string(ship->altitude) });
 
 	if (ship->current_state.pos.y < game->ship_limits.y)
 	{
@@ -298,15 +292,18 @@ void integrate(double delta_time, double dt)
 		ship->current_state.vel.y = 0.0;
 	}
 
-	if (ship->current_state.pos.x > world->w)
+	for (auto& entity : game->entity_register.getAll())
 	{
-		ship->current_state.pos.x -= world->w;
-		ship->current_state.loop_count++;
-	}
-	else if (ship->current_state.pos.x < 0.0)
-	{
-		ship->current_state.pos.x += world->w;
-		ship->current_state.loop_count--;
+		if (entity->current_state.pos.x > world->w)
+		{
+			entity->current_state.pos.x -= world->w;
+			entity->current_state.loop_count++;
+		}
+		else if (entity->current_state.pos.x < 0.0)
+		{
+			entity->current_state.pos.x += world->w;
+			entity->current_state.loop_count--;
+		}
 	}
 }
 
@@ -330,6 +327,7 @@ void integrateAlpha(double alpha)
 	auto& aliens = game->entity_register.getAliens();
 	for (auto& alien : aliens)
 	{
-		alien->alpha_pos = alien->current_state.pos;
+		alien->alpha_pos.x = alien->current_state.pos.x*alpha + alien->prev_state.pos.x*(1.0 - alpha);
+		alien->alpha_pos.y = alien->current_state.pos.y*alpha + alien->prev_state.pos.y*(1.0 - alpha);
 	}
 }

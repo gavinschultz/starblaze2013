@@ -29,7 +29,6 @@ private:
 	};
 
 	SDL_Window* sdlWindow;
-	SDL_Renderer* sdlRenderer;
 	void renderGrid();
 	void renderFPS(int fps);
 	void renderDebug(const Debug& debug);
@@ -40,15 +39,16 @@ private:
 	TTF_Font* _font;
 	std::unique_ptr<TextRenderer> _text_renderer;
 	std::shared_ptr<TextPlate> _text_plate;
-	//auto rnd_burner = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine{});
 public:
+	SDL_Renderer* sdlRenderer; // TODO: temporary, make private once done being useful here
 	Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width);
 	~Renderer();
 	SpriteRegister sprite_register;
 	SpriteLoader sprite_loader;
-	CoCoPalette coco_palette;
+	SDL_Palette* palette;
 	void render(Camera* camera);
 	void renderTextPlate(std::shared_ptr<TextPlate> text_plate);
+	void renderNormalVector(const Point2Di& src, const Vector2D& v) const;
 	SDL_Texture* loadTextureFromFile(std::string imagePath, SDL_Rect* texture_rect);
 
 	Window window;

@@ -1,5 +1,6 @@
 #pragma once
 #include "Phys.h"
+#include "CoCoPalette.h"
 
 class Renderer;
 class SpriteTexture;
@@ -23,8 +24,8 @@ class TextRenderer
 public:
 	TextRenderer(Renderer* renderer, const SpriteTexture& characters_texture);
 	~TextRenderer();
-	void RenderChar(SDL_Renderer* sdl_renderer, char letter, Point2Di pos, bool red = false) const;
-	void RenderString(SDL_Renderer* sdl_renderer, const std::string& text, Point2Di pos, bool red = false) const;
+	void RenderChar(SDL_Renderer* sdl_renderer, char letter, Point2Di pos, CoCoPaletteEnum palette_color) const;
+	void RenderString(SDL_Renderer* sdl_renderer, const std::string& text, Point2Di pos, CoCoPaletteEnum palette_color) const;
 	void RenderPlate(SDL_Renderer* sdl_renderer, const TextPlate& plate) const;
 private:
 	class impl;

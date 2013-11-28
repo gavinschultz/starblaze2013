@@ -12,7 +12,6 @@ enum StationType
 class Station : public Entity
 {
 public:
-	int station_type{ 0 };
-	Point2D pos{ 0.0, 0.0 };
-	SDL_Rect bounding_box{ { 0, 0, 32, 16 } };
+	Station();
+	StationType station_type;
 };

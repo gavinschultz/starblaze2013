@@ -27,8 +27,8 @@ RadarSprite::RadarSprite(Renderer* renderer) : Sprite(renderer->scaling)
 		{ viewport_radar_left, _radar_rect.h - (_point_size * (int)renderer->scaling) },
 		{ viewport_radar_right, _radar_rect.h - (_point_size * (int)renderer->scaling) }
 	} };
-	_radar_color = renderer->coco_palette.getColor(red);
-	_point_color = renderer->coco_palette.getColor(yellow);
+	_radar_color = renderer->palette->colors[CoCoPaletteEnum::red];
+	_point_color = renderer->palette->colors[CoCoPaletteEnum::yellow];
 }
 
 void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera) const
@@ -63,7 +63,7 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera) const
 	Station* station = game->entity_register.getStation();
 	if (station)
 	{
-		SDL_Rect point_rect = transformToRadarView(station->pos.x, station->pos.y, station->bounding_box.w, station->bounding_box.h, radar_left);
+		SDL_Rect point_rect = transformToRadarView(station->current_state.pos.x, station->current_state.pos.y, station->bounding_box.w, station->bounding_box.h, radar_left);
 		SDL_SetRenderDrawColor(sdl_renderer, 56, 205, 212, 255);
 		SDL_RenderFillRect(sdl_renderer, &point_rect);
 	}

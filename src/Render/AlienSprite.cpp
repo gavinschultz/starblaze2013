@@ -17,4 +17,6 @@ void AlienSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const
 		_alien_texture.rect.h*_scaling
 	};
 	SDL_RenderCopy(sdl_renderer, _alien_texture.texture, &_alien_texture.rect, &dstrect);
+
+	renderer->renderNormalVector({ dstrect.x + ((alien.bounding_box.w * (int)_scaling) / 2), dstrect.y + ((alien.bounding_box.h * (int)_scaling) / 2) }, alien.attack_vector_n);
 }

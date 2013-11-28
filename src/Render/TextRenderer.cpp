@@ -29,7 +29,7 @@ TextRenderer::TextRenderer(Renderer* renderer, const SpriteTexture& characters_t
 
 TextRenderer::~TextRenderer() {}
 
-void TextRenderer::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, bool red) const
+void TextRenderer::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, CoCoPaletteEnum palette_color) const
 {
 	if (c >= 'a' && c <= 'z')
 		c -= 0x20;
@@ -38,10 +38,14 @@ void TextRenderer::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, 
 
 	try
 	{
+		const SDL_Color& color = renderer->palette->colors[palette_color];
+		SDL_SetTextureColorMod(pimpl->charmap_texture.texture, color.r, color.g, color.b);
 		const Point2Di& char_offset = _char_offsets.at(c);
-		const SDL_Rect src_rect{ pimpl->charmap_texture.rect.x + char_offset.x + (red ? 64 : 0), pimpl->charmap_texture.rect.y + char_offset.y, 16, 8 };
+		const SDL_Rect src_rect{ pimpl->charmap_texture.rect.x + char_offset.x, pimpl->charmap_texture.rect.y + char_offset.y, 16, 8 };
 		const SDL_Rect dst_rect{ pos.x, pos.y, 16 * _scaling, 8 * _scaling };
 		SDL_RenderCopy(sdl_renderer, pimpl->charmap_texture.texture, &src_rect, &dst_rect);
+
+		SDL_SetTextureColorMod(pimpl->charmap_texture.texture, 255, 255, 255); // shared texture, so reset to defaults
 	}
 	catch (std::out_of_range)
 	{
@@ -50,11 +54,11 @@ void TextRenderer::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, 
 	}
 }
 
-void TextRenderer::RenderString(SDL_Renderer* sdl_renderer, const std::string& text, Point2Di pos, bool red) const
+void TextRenderer::RenderString(SDL_Renderer* sdl_renderer, const std::string& text, Point2Di pos, CoCoPaletteEnum palette_color) const
 {
 	for (auto c : text)
 	{
-		this->RenderChar(sdl_renderer, c, { pos.x, pos.y }, red);
+		this->RenderChar(sdl_renderer, c, { pos.x, pos.y }, palette_color);
 		pos.x += (16 + _spacing) * _scaling;
 	}
 }
@@ -63,7 +67,7 @@ void TextRenderer::RenderPlate(SDL_Renderer* sdl_renderer, const TextPlate& plat
 {
 	for (auto& line : plate.lines)
 	{
-		this->RenderString(sdl_renderer, line.text, line.offset);
+		this->RenderString(sdl_renderer, line.text, line.offset, CoCoPaletteEnum::yellow);
 	}
 }
 

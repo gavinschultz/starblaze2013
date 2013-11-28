@@ -35,6 +35,19 @@ Station* EntityRegister::getStation() const
 	return _station.get();
 }
 
+const std::vector<Entity*> EntityRegister::getAll() const
+{
+	// probably more efficient ways of doing this
+	std::vector<Entity*> all;
+	all.push_back(_ship.get());
+	all.push_back(_station.get());
+	for (auto& alien : _aliens)
+	{
+		all.push_back(alien.get());
+	}
+	return all;
+}
+
 EntityRegister::EntityRegister()
 {
 
