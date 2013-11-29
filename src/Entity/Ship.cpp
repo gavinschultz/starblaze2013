@@ -6,6 +6,7 @@ Ship::Ship()
 {
 	bounding_box = { 0, 0, 32, 8 };
 	weight = 1.0;
+	max_lift = 700.0;
 }
 
 double Ship::getDecelerationFactorX() const

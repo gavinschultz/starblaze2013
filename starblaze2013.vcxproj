@@ -89,7 +89,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Attacks\AttackAlgorithm.h" />
     <ClInclude Include="src\Entity\Alien.h" />
+    <ClInclude Include="src\Entity\Bullet.h" />
     <ClInclude Include="src\Entity\Entity.h" />
     <ClInclude Include="src\Entity\EntityRegister.h" />
     <ClInclude Include="src\Entity\Hill.h" />
@@ -97,6 +99,7 @@
     <ClInclude Include="src\Entity\Station.h" />
     <ClInclude Include="src\Entity\World.h" />
     <ClInclude Include="src\FileLoader.h" />
+    <ClInclude Include="src\MathUtil.h" />
     <ClInclude Include="src\Render\AlienSprite.h" />
     <ClInclude Include="src\Render\BGSprite.h" />
     <ClInclude Include="src\Render\Camera.h" />
@@ -121,8 +124,11 @@
     <ClInclude Include="src\Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Attacks\DirectAttack.cpp" />
+    <ClCompile Include="src\Attacks\WaveAttack.cpp" />
     <ClCompile Include="src\Debug.cpp" />
     <ClCompile Include="src\Entity\Alien.cpp" />
+    <ClCompile Include="src\Entity\Bullet.cpp" />
     <ClCompile Include="src\Entity\EntityRegister.cpp" />
     <ClCompile Include="src\Entity\Ship.cpp" />
     <ClCompile Include="src\Entity\Station.cpp" />
@@ -131,6 +137,7 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MathUtil.cpp" />
     <ClCompile Include="src\Render\AlienSprite.cpp" />
     <ClCompile Include="src\Render\BGSprite.cpp" />
     <ClCompile Include="src\Render\Camera.cpp" />

@@ -83,17 +83,22 @@ void run()
 
 	// Load assets
 	Ship* s = new Ship();
-	Alien* alien = new Alien();
 	Station* station = new Station();
 
 	game->entity_register.registerEntity(s);
-	game->entity_register.registerEntity(alien);
+	for (int i = 0; i < 100; i++)
+	{
+		Alien* alien = new Alien();
+		alien->current_state.pos.x = 100.0;
+		alien->current_state.pos.y = 200.0;
+		game->entity_register.registerEntity(alien);
+		renderer->sprite_register.registerSprite(new AlienSprite(renderer.get()), alien);
+	}
 	game->entity_register.registerEntity(station);
 
 	renderer->sprite_register.registerBackground(new BGSprite(renderer.get()));
 	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), *station), station);
 	renderer->sprite_register.registerShipSprite(new ShipSprite(renderer.get()));
-	renderer->sprite_register.registerSprite(new AlienSprite(renderer.get()), alien);
 	renderer->sprite_register.registerSprite(new RadarSprite(renderer.get()));
 	renderer->sprite_register.registerHUD(new HUDRend(renderer.get()));
 	renderer->sprite_register.registerRadar(new RadarSprite(renderer.get()));
@@ -116,9 +121,6 @@ void run()
 	Ship* ship = game->entity_register.getShip();
 	ship->current_state.pos.x = game->ship_limits.x;
 	ship->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - ship->bounding_box.h;
-
-	alien->current_state.pos.x = ship->current_state.pos.x + 50;
-	alien->current_state.pos.y = ship->current_state.pos.y - 100;
 
 	station->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - station->bounding_box.h;
 
@@ -151,6 +153,7 @@ void run()
 			thrust_multiplier = ship->reverse_thrust_factor;
 
 		ship->current_state.thrust.x *= thrust_multiplier;
+		debug->set("thrust_multiplier", thrust_multiplier);
 
 		debug->setMotionRecordMaxThresholds(ship->max_thrust.x, ship->max_thrust.y);
 		debug->addMotionRecord(ship->current_state.thrust.x, ship->current_state.thrust.y);
@@ -162,7 +165,10 @@ void run()
 		// end calculate thrust
 
 		// alien AI
-		alien->runAI(ship);
+		for (auto& alien : game->entity_register.getAliens())
+		{
+			alien->runAI(ship, dt);
+		}
 		// end alien AI
 
 		if (!game->is_paused || game->is_frame_by_frame)
@@ -270,25 +276,25 @@ void integrate(double delta_time, double dt)
 		entity->current_state.vel.x -= entity->current_state.vel.x * (entity->getDecelerationFactorX() * dt);
 		entity->current_state.vel.y -= entity->current_state.vel.y * (entity->getDecelerationFactorY() * dt);
 
+		if (entity->current_state.vel.y > entity->max_lift) entity->current_state.vel.y = entity->max_lift;
+		if (entity->current_state.vel.y < -entity->max_lift) entity->current_state.vel.y = -entity->max_lift;
+
 		entity->current_state.pos.x += (entity->current_state.vel.x * dt) + (entity->current_state.acc.x * 0.5 * dt * dt);
 		entity->current_state.pos.y += entity->current_state.vel.y * dt; // TODO: acceleration
+
+		entity->altitude = std::max(0.0, game->ship_limits.y + game->ship_limits.h - entity->current_state.pos.y - entity->bounding_box.h);
+		if (entity->altitude == 0.0)
+		{
+			entity->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - entity->bounding_box.h;
+			entity->current_state.vel.y = 0.0;
+		}
 	}
 
 	Ship* ship = game->entity_register.getShip();
 
-	if (ship->current_state.vel.y > ship->max_lift) ship->current_state.vel.y = ship->max_lift;
-	if (ship->current_state.vel.y < -ship->max_lift) ship->current_state.vel.y = -ship->max_lift;
-
-	ship->altitude = std::max(0.0, game->ship_limits.y + game->ship_limits.h - ship->current_state.pos.y - ship->bounding_box.h);
-
 	if (ship->current_state.pos.y < game->ship_limits.y)
 	{
 		ship->current_state.pos.y = game->ship_limits.y;
-		ship->current_state.vel.y = 0.0;
-	}
-	else if (ship->altitude == 0.0)
-	{
-		ship->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - ship->bounding_box.h;
 		ship->current_state.vel.y = 0.0;
 	}
 
@@ -309,25 +315,19 @@ void integrate(double delta_time, double dt)
 
 void integrateAlpha(double alpha)
 {
-	Ship* ship = game->entity_register.getShip();
-
-	if (ship->current_state.loop_count != ship->prev_state.loop_count)
+	for (auto& entity : game->entity_register.getAll())
 	{
-		double wrap_factor = ((ship->current_state.loop_count - ship->prev_state.loop_count)*world->w);
-		double currentX = ship->current_state.pos.x*alpha;
-		double prevX = (ship->prev_state.pos.x - wrap_factor)*(1.0 - alpha);
-		ship->alpha_pos.x = currentX + prevX;
-	}
-	else
-	{
-		ship->alpha_pos.x = ship->current_state.pos.x*alpha + ship->prev_state.pos.x*(1.0 - alpha);
-	}
-	ship->alpha_pos.y = ship->current_state.pos.y*alpha + ship->prev_state.pos.y*(1.0 - alpha);
-
-	auto& aliens = game->entity_register.getAliens();
-	for (auto& alien : aliens)
-	{
-		alien->alpha_pos.x = alien->current_state.pos.x*alpha + alien->prev_state.pos.x*(1.0 - alpha);
-		alien->alpha_pos.y = alien->current_state.pos.y*alpha + alien->prev_state.pos.y*(1.0 - alpha);
+		if (entity->current_state.loop_count != entity->prev_state.loop_count)
+		{
+			double wrap_factor = ((entity->current_state.loop_count - entity->prev_state.loop_count)*world->w);
+			double currentX = entity->current_state.pos.x*alpha;
+			double prevX = (entity->prev_state.pos.x - wrap_factor)*(1.0 - alpha);
+			entity->alpha_pos.x = currentX + prevX;
+		}
+		else
+		{
+			entity->alpha_pos.x = entity->current_state.pos.x*alpha + entity->prev_state.pos.x*(1.0 - alpha);
+		}
+		entity->alpha_pos.y = entity->current_state.pos.y*alpha + entity->prev_state.pos.y*(1.0 - alpha);
 	}
 }

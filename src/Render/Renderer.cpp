@@ -372,6 +372,7 @@ SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* text
 
 void Renderer::renderNormalVector(const Point2Di& src, const Vector2D& v) const
 {
+	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
 	int dest_x = (int)(src.x + v.x * 32);
 	int dest_y = (int)(src.y + v.y * 32);
 	SDL_RenderDrawLine(sdlRenderer, src.x, src.y, dest_x, dest_y);
