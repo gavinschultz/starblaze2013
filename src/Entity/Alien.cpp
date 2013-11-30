@@ -25,8 +25,8 @@ Alien::Alien() : pimpl{ new impl{} }
 	this->current_state.pos.y = rnd_ypos();
 	weight = 1.0;
 	max_lift = 60.0;
-	pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new DirectAttack{}};
-	//pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new WaveAttack{}};
+	//pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new DirectAttack{}};
+	pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new WaveAttack{}};
 }
 Alien::~Alien(){}
 

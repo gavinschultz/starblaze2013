@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <SDL.h>
 #include "Entity.h"
 #include "Phys.h"
@@ -7,8 +8,12 @@ enum class ShipDirection { left, right };
 
 class Ship : public Entity
 {
+private:
+	class impl; std::unique_ptr<impl> pimpl;
 public:
 	Ship();
+	~Ship();
+	void fire();
 	ShipDirection direction{ ShipDirection::right };
 	unsigned int bullets{ 128 };
 	int shields{ 100 };

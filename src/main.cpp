@@ -21,12 +21,14 @@
 #include "Render\ShipSprite.h"
 #include "Render\BGSprite.h"
 #include "Render\HUDRend.h"
+#include "Render\BulletSprite.h"
 #include "Render\SpriteRegister.h"
 #include "Render\Renderer.h"
 #include "Entity\World.h"
 #include "Entity\Ship.h"
 #include "Entity\Station.h"
 #include "Entity\EntityRegister.h"
+#include "Entity\Bullet.h"
 
 void integrate(double delta_time, double dt);
 void integrateAlpha(double alpha);
@@ -85,14 +87,19 @@ void run()
 	Station* station = new Station();
 
 	game->entity_register.registerEntity(s);
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		Alien* alien = new Alien();
-		console_debug({ "alien.x", std::to_string(alien->current_state.pos.x) });
 		game->entity_register.registerEntity(alien);
 		renderer->sprite_register.registerSprite(new AlienSprite(renderer.get()), alien);
 	}
 	game->entity_register.registerEntity(station);
+	for (int i = 0; i < 20; i++)
+	{
+		Bullet* bullet = new Bullet();
+		game->entity_register.registerEntity(bullet);
+		renderer->sprite_register.registerSprite(new BulletSprite(renderer.get()), bullet);
+	}
 
 	renderer->sprite_register.registerBackground(new BGSprite(renderer.get()));
 	renderer->sprite_register.registerSprite(new StationSprite(renderer.get(), *station), station);
@@ -265,6 +272,9 @@ void integrate(double delta_time, double dt)
 {
 	for (auto& entity : game->entity_register.getAll())
 	{
+		if (!entity->is_active)
+			continue;
+
 		entity->prev_state = entity->current_state;
 		entity->current_state.acc.x = entity->current_state.thrust.x / entity->weight;
 		entity->current_state.vel.x += entity->current_state.acc.x * dt;
@@ -302,6 +312,11 @@ void integrate(double delta_time, double dt)
 		{
 			entity->current_state.pos.x += world->w;
 			entity->current_state.loop_count--;
+		}
+
+		if (entity->weight == 0.5)
+		{
+			console_debug({ "bullet.x: ", std::to_string(entity->current_state.pos.x) });
 		}
 	}
 }

@@ -15,9 +15,11 @@
 #include "AlienSprite.h"
 #include "RadarSprite.h"
 #include "HUDRend.h"
+#include "BulletSprite.h"
 #include "Entity\Station.h"
 #include "Entity\World.h"
 #include "Entity\Alien.h"
+#include "Entity\Bullet.h"
 
 Renderer::Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width) : scaling(scaling), width((unsigned int)(world_width*scaling))
 {
@@ -147,6 +149,15 @@ void Renderer::render(Camera* camera)
 	{
 		const auto& ship_sprite = (ShipSprite&)sprite_register.getPlayerShip();
 		ship_sprite.render(sdlRenderer, *camera, *ship);
+	}
+
+	auto& bullets = game->entity_register.getBullets();
+	for (auto& bullet : bullets)
+	{
+		if (!bullet->is_active)
+			continue;
+		const auto& bullet_sprite = (BulletSprite&)sprite_register.getSprite((Entity*)bullet.get());
+		bullet_sprite.render(sdlRenderer, *camera, *bullet);
 	}
 
 	auto& hud_rend = sprite_register.getHUD();

@@ -41,7 +41,7 @@ void Input::handleInput()
 		switch (pevent.type)
 		{
 		case SDL_KEYDOWN:
-			this->handleKeyboardEvent(pevent.key);
+			this->handleKeyboardEvent(pevent.key, ship);
 			break;
 		case SDL_MOUSEMOTION:
 			this->handleMouseMotionEvent(pevent.motion, ship);
@@ -58,7 +58,7 @@ void Input::handleInput()
 	this->handleKeyboardState(ship);
 }
 
-void Input::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
+void Input::handleKeyboardEvent(const SDL_KeyboardEvent& e, Ship* ship) const
 {
 	switch (e.keysym.sym)
 	{
@@ -83,6 +83,12 @@ void Input::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 		break;
 	case SDLK_f:
 		game->advanceFrameByFrame();
+		break;
+	case SDLK_SPACE:
+		if (ship)
+		{
+			ship->fire();
+		}
 		break;
 	case SDLK_RETURN:
 		if (e.keysym.mod & KMOD_ALT)
@@ -147,6 +153,10 @@ void Input::handleJoystickState(Ship* ship) const
 	if (std::abs(left_y) > 0)
 	{
 		ship->current_state.thrust.y = left_y * y_modifier;
+	}
+	if (SDL_GameControllerGetButton(_controller, SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X))
+	{
+		ship->fire();
 	}
 }
 
