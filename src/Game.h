@@ -15,7 +15,6 @@ public:
 	bool is_frame_by_frame{ false };
 	bool quit{ false };
 	EntityRegister entity_register;
-	SDL_Rect ship_limits;
 	float mouse_sensitivity{ 1.0 };
 };
 

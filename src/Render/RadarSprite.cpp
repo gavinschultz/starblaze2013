@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "Renderer.h"
 #include "Util.h"
+#include "Game.h"
 #include "CoCoPalette.h"
 #include "RadarSprite.h"
-#include "Game.h"
+#include "Entity\World.h"
 #include "Entity\Ship.h"
 #include "Entity\Alien.h"
 #include "Entity\Station.h"
@@ -17,7 +18,7 @@ RadarSprite::RadarSprite(Renderer* renderer) : Sprite(renderer->scaling)
 		36 * (int32_t)renderer->scaling
 	};
 	_radar_scaling_x = _radar_rect.w / (double)renderer->width;
-	_radar_scaling_y = _radar_rect.h / (double)(game->ship_limits.h*renderer->scaling);
+	_radar_scaling_y = _radar_rect.h / (double)(world->ship_limits.h*renderer->scaling);
 	int viewport_width_radar = _radar_rect.w / (renderer->width / renderer->window.w);
 	int viewport_radar_left = (_radar_rect.w / 2) - viewport_width_radar / 2 - (_point_size * (int)_scaling) / 2;
 	int viewport_radar_right = (_radar_rect.w / 2) + viewport_width_radar / 2 - (_point_size * (int)_scaling) / 2;
@@ -86,7 +87,7 @@ SDL_Rect RadarSprite::transformToRadarView(double entity_x, double entity_y, int
 
 	// Y
 	//int entity_y_midpoint = std::lround(entity_y * renderer->scaling) + ((entity_height * (int)renderer->scaling));
-	//int entity_y_midpoint_on_radar_unscaled = entity_y_midpoint - game->ship_limits.y*renderer->scaling;
+	//int entity_y_midpoint_on_radar_unscaled = entity_y_midpoint - world->ship_limits.y*renderer->scaling;
 	//int entity_y_midpoint_on_radar_scaled = entity_y_midpoint_on_radar_unscaled * _radar_scaling_y - (_point_size * _scaling) / 2;
 	int entity_y_unscaled = std::lround(entity_y * renderer->scaling + entity_height * renderer->scaling);
 	int entity_y_on_radar_scaled = std::lround(entity_y_unscaled * _radar_scaling_y - (_point_size * _scaling));

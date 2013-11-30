@@ -5,14 +5,17 @@
 #include "AttackAlgorithm.h"
 #include "Entity\Entity.h"
 #include "Entity\Alien.h"
+#include "Entity\World.h"
 #include "MathUtil.h"
+#include "Util.h"
 #include "Debug.h"
 
 class DirectAttack::impl
 {
 private:
+	static int rndseed;
 	double reaction_time_sec{ 1.0 };	// time in seconds before being able to react to a thrust reversal
-	std::function<double()> rnd_reaction_time{ std::bind(std::uniform_real_distribution<double>{0.04, 0.7}, std::default_random_engine{ (uint32_t)time(0) }) };
+	std::function<double()> rnd_reaction_time{ std::bind(std::uniform_real_distribution<double>{0.04, 0.7}, std::default_random_engine{ (uint32_t)(std::time(0) + rndseed++) }) };
 public:
 	double thrust_changed_without_reaction_sec{ 0.0 };
 	void resetReactionTime()
@@ -22,6 +25,7 @@ public:
 		//debug->set("reaction_time_sec", reaction_time_sec);
 	};
 };
+int DirectAttack::impl::rndseed{ 0 };
 
 DirectAttack::DirectAttack() : pimpl{ new impl{} }{}
 DirectAttack::~DirectAttack(){}
@@ -29,11 +33,13 @@ void DirectAttack::run(Alien& alien, const Entity* target, double dt)
 {
 	Vector2D vec_alien = { alien.current_state.pos.x + (alien.bounding_box.w / 2), alien.current_state.pos.y + (alien.bounding_box.h / 2) };
 	Vector2D vec_target = { target->current_state.vel.x, target->current_state.vel.y };
-	Vector2D vec_a_to_t = { target->current_state.pos.x - alien.current_state.pos.x, target->current_state.pos.y - alien.current_state.pos.y };
+	double rel_x = util::relativeX(alien.current_state.pos.x, target->current_state.pos.x, world->w);
+	Vector2D vec_a_to_t = { rel_x, target->current_state.pos.y - alien.current_state.pos.y };
 
 	double magnitude = 0.0;
 	Vector2D vec_a_to_t_norm = mathutil::normaliseVector(vec_a_to_t, &magnitude);
 	debug->set("a_to_t magnitude", magnitude);
+	debug->set("rel_x", rel_x);
 	//debug->set("vec_a_to_t.x", vec_a_to_t.x);
 	//debug->set("vec_a_to_t.y", vec_a_to_t.y);
 
@@ -44,7 +50,8 @@ void DirectAttack::run(Alien& alien, const Entity* target, double dt)
 	double dot_product = vec_a_to_t_norm.x * vec_alien_norm.x + vec_a_to_t_norm.y * vec_alien_norm.y;
 	debug->set("dot_product", dot_product);*/
 
-	if (target->current_state.vel.y != 0.0 && std::copysign(1.0, alien.current_state.thrust.y) != std::copysign(1.0, target->current_state.thrust.y))
+	if ((target->current_state.vel.y != 0.0 || std::copysign(1.0, alien.current_state.thrust.y) != std::copysign(1.0, alien.prev_state.thrust.y))
+		&& (std::copysign(1.0, alien.current_state.thrust.y) != std::copysign(1.0, target->current_state.thrust.y)))
 	{
 		if (pimpl->thrust_changed_without_reaction_sec <= 0.0)
 			pimpl->resetReactionTime();

@@ -28,3 +28,13 @@ World::World(int hill_count)
 		hills.push_back(hill);
 	}
 }
+
+SDL_Rect World::getPlayArea(const SDL_Rect& entity_bounding_box)
+{
+	return{
+		0,
+		this->ship_limits.y,
+		(int)this->w,
+		this->ship_limits.h - entity_bounding_box.h
+	};
+}

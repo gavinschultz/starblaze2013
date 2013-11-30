@@ -9,10 +9,12 @@ class EntityRegister;
 class Alien : public Entity
 {
 private:
-	std::unique_ptr<AttackAlgorithm> attack_algorithm;
+	class impl; std::unique_ptr<impl> pimpl;
 public:
 	Alien();
+	~Alien();
 	double altitude{ 0.0 };
+	double max_thrust{ 380.0 };
 	Vector2D attack_vector_n;
 
 	// The AI may consist of:

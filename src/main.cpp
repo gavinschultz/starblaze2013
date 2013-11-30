@@ -75,10 +75,9 @@ void run()
 	//renderer->toggleMotionHistory(true);
 #endif
 
-	game->ship_limits = { 48, 0, 160, 144 };
 	Camera camera = Camera(
 		SDL_Rect{ 0, 0, renderer->window.w, renderer->window.h }, 
-		SDL_Rect{ game->ship_limits.x * renderer->scaling, 0, game->ship_limits.w * renderer->scaling, game->ship_limits.h * renderer->scaling }
+		SDL_Rect{ world->ship_limits.x * renderer->scaling, 0, world->ship_limits.w * renderer->scaling, world->ship_limits.h * renderer->scaling }
 	);
 
 	// Load assets
@@ -86,11 +85,10 @@ void run()
 	Station* station = new Station();
 
 	game->entity_register.registerEntity(s);
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		Alien* alien = new Alien();
-		alien->current_state.pos.x = 100.0;
-		alien->current_state.pos.y = 200.0;
+		console_debug({ "alien.x", std::to_string(alien->current_state.pos.x) });
 		game->entity_register.registerEntity(alien);
 		renderer->sprite_register.registerSprite(new AlienSprite(renderer.get()), alien);
 	}
@@ -119,10 +117,10 @@ void run()
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	Ship* ship = game->entity_register.getShip();
-	ship->current_state.pos.x = game->ship_limits.x;
-	ship->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - ship->bounding_box.h;
+	ship->current_state.pos.x = world->ship_limits.x;
+	ship->current_state.pos.y = world->ship_limits.y + world->ship_limits.h - ship->bounding_box.h;
 
-	station->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - station->bounding_box.h;
+	station->current_state.pos.y = world->ship_limits.y + world->ship_limits.h - station->bounding_box.h;
 
 	double accumulator = 0;
 	const double dt = 1.0 / 60.0;
@@ -282,24 +280,19 @@ void integrate(double delta_time, double dt)
 		entity->current_state.pos.x += (entity->current_state.vel.x * dt) + (entity->current_state.acc.x * 0.5 * dt * dt);
 		entity->current_state.pos.y += entity->current_state.vel.y * dt; // TODO: acceleration
 
-		entity->altitude = std::max(0.0, game->ship_limits.y + game->ship_limits.h - entity->current_state.pos.y - entity->bounding_box.h);
+		entity->altitude = std::max(0.0, world->ship_limits.y + world->ship_limits.h - entity->current_state.pos.y - entity->bounding_box.h);
 		if (entity->altitude == 0.0)
 		{
-			entity->current_state.pos.y = game->ship_limits.y + game->ship_limits.h - entity->bounding_box.h;
+			entity->current_state.pos.y = world->ship_limits.y + world->ship_limits.h - entity->bounding_box.h;
 			entity->current_state.vel.y = 0.0;
 		}
-	}
 
-	Ship* ship = game->entity_register.getShip();
+		if (entity->current_state.pos.y < world->ship_limits.y)
+		{
+			entity->current_state.pos.y = world->ship_limits.y;
+			entity->current_state.vel.y = 0.0;
+		}
 
-	if (ship->current_state.pos.y < game->ship_limits.y)
-	{
-		ship->current_state.pos.y = game->ship_limits.y;
-		ship->current_state.vel.y = 0.0;
-	}
-
-	for (auto& entity : game->entity_register.getAll())
-	{
 		if (entity->current_state.pos.x > world->w)
 		{
 			entity->current_state.pos.x -= world->w;

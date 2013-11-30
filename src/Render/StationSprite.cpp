@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Renderer.h"
-#include "Game.h"
+#include "Entity\World.h"
 #include "StationSprite.h"
 #include "Entity\Station.h"
 
@@ -19,7 +19,7 @@ void StationSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, con
 	SDL_Rect station_rect = 
 	{ 
 		renderutil::getScreenXForEntityByCameraAndDistance(station.current_state.pos.x*_scaling, _station_texture.rect.w*_scaling, renderer->width, camera, 1.0), 
-		game->ship_limits.h * _scaling - _station_texture.rect.h * _scaling,
+		world->ship_limits.h * _scaling - _station_texture.rect.h * _scaling,
 		_station_texture.rect.w*_scaling,
 		_station_texture.rect.h*_scaling
 	};
