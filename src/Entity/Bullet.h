@@ -6,7 +6,7 @@ class Bullet : public Entity
 private:
 	class impl; std::unique_ptr<impl> pimpl;
 protected:
-	const std::vector<SDL_Rect>* Bullet::getBaseCollisionBoxes() const;
+	const std::vector<Rect>* Bullet::getBaseCollisionBoxes() const;
 public:
 	Bullet();
 	~Bullet();

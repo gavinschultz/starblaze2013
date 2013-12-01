@@ -62,9 +62,35 @@ bool util::isLeftOf(double x, double y, double width) {
 
 double util::relativeX(double reference_x, double target_x, double width)
 {
-	//return target_x - reference_x;
 	if (isLeftOf(reference_x, target_x, width))
 		return util::abswrap(target_x - reference_x, width);
 	else
 		return -util::abswrap(reference_x - target_x, width);
+}
+
+//TODO: make templates
+bool util::areRectanglesIntersecting(const Rect& a, const Rect& b)
+{
+	if (a.x + a.w < b.x)
+		return false;
+	if (b.x + b.w < a.x)
+		return false;
+	if (a.y + a.h < b.y)
+		return false;
+	if (b.y + b.h < a.y)
+		return false;
+	return true;
+}
+bool util::areRectanglesIntersecting(const SDL_Rect& a, const SDL_Rect& b)
+{
+	if (a.x + a.w < b.x)
+		return false;
+	if (b.x + b.w < a.x)
+		return false;
+	if (a.y + a.h < b.y)
+		return false;
+	if (b.y + b.h < a.y)
+		return false;
+	return true;
+	//return SDL_HasIntersection(&a, &b);
 }

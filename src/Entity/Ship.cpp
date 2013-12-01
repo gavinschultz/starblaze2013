@@ -11,10 +11,10 @@ class Ship::impl
 {
 public:
 	static int bullet_counter;
-	static const std::vector<SDL_Rect> base_collision_boxes;
+	static const std::vector<Rect> base_collision_boxes;
 };
 int Ship::impl::bullet_counter{ 0 };
-const std::vector<SDL_Rect> Ship::impl::base_collision_boxes{
+const std::vector<Rect> Ship::impl::base_collision_boxes{
 	{ 0, 1, 4, 7 },
 	{ 4, 2, 2, 6 },
 	{ 6, 3, 2, 5 },
@@ -27,7 +27,7 @@ Ship::Ship() : pimpl{ new impl{} }
 	bounding_box = { 0, 0, 32, 8 };
 	weight = 1.0;
 	max_lift = 700.0;
-	collision_boxes = std::vector<SDL_Rect>{ *getBaseCollisionBoxes() };
+	collision_boxes = std::vector<Rect>{ *getBaseCollisionBoxes() };
 }
 Ship::~Ship() {}
 
@@ -60,7 +60,24 @@ double Ship::getDecelerationFactorY() const
 	return 4.0;
 }
 
-const std::vector<SDL_Rect>* Ship::getBaseCollisionBoxes() const
+const std::vector<Rect>* Ship::getBaseCollisionBoxes() const
 {
 	return &(pimpl->base_collision_boxes);
+}
+
+void Ship::updateCollisionBoxes()
+{
+	if (direction == ShipDirection::right)
+	{
+		Entity::updateCollisionBoxes();
+	}
+	else
+	{
+		auto base_rects = getBaseCollisionBoxes();
+		for (unsigned int i = 0; i < base_rects->size(); i++)
+		{
+			collision_boxes[i].x = current_state.pos.x + (bounding_box.w - (base_rects->at(i).x + base_rects->at(i).w));
+			collision_boxes[i].y = current_state.pos.y + (*base_rects)[i].y;
+		}
+	}
 }

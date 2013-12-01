@@ -4,15 +4,16 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "timer.h"
 #include <SDL_image.h>
-#include <vector>
-#include "Game.h"
 #include <algorithm>
+#include <vector>
+#include <math.h>
+#include "Timer.h"
+#include "Game.h"
 #include "Debug.h"
 #include "Render\Renderer.h"
 #include "Phys.h"
-#include <math.h>
+#include "Physics.h"
 #include "Util.h"
 #include "Input.h"
 #include "Render\AlienSprite.h"
@@ -29,9 +30,6 @@
 #include "Entity\Station.h"
 #include "Entity\EntityRegister.h"
 #include "Entity\Bullet.h"
-
-void integrate(double delta_time, double dt);
-void integrateAlpha(double alpha);
 
 std::unique_ptr<Game> game;
 std::unique_ptr<Timer> timer;
@@ -186,11 +184,12 @@ void run()
 			{
 				//ship->prev_state = ship->current_state;
 				accumulator -= dt;
-				integrate(delta_time, dt);
+				physics::integrate(delta_time, dt);
+				physics::collisionDetection();
 			}
 
 			const double alpha = accumulator / dt;
-			integrateAlpha(alpha);
+			physics::interpolate(alpha);
 
 			camera.prev_focus_point = camera.focus_point;
 			camera.prev_focus_loop_count = camera.focus_loop_count;
@@ -266,90 +265,4 @@ void run()
 	}
 
 	SDL_Quit();
-}
-
-void integrate(double delta_time, double dt)
-{
-	for (auto& entity : game->entity_register.getAll())
-	{
-		if (!entity->is_active)
-			continue;
-
-		entity->prev_state = entity->current_state;
-		entity->current_state.acc.x = entity->current_state.thrust.x / entity->weight;
-		entity->current_state.vel.x += entity->current_state.acc.x * dt;
-		entity->current_state.vel.y += entity->current_state.thrust.y;	// TODO: acceleration
-
-		// decceleration
-		entity->current_state.vel.x -= entity->current_state.vel.x * (entity->getDecelerationFactorX() * dt);
-		entity->current_state.vel.y -= entity->current_state.vel.y * (entity->getDecelerationFactorY() * dt);
-
-		if (entity->current_state.vel.y > entity->max_lift) entity->current_state.vel.y = entity->max_lift;
-		if (entity->current_state.vel.y < -entity->max_lift) entity->current_state.vel.y = -entity->max_lift;
-
-		entity->current_state.pos.x += (entity->current_state.vel.x * dt) + (entity->current_state.acc.x * 0.5 * dt * dt);
-		entity->current_state.pos.y += entity->current_state.vel.y * dt; // TODO: acceleration
-
-		entity->altitude = std::max(0.0, world->ship_limits.y + world->ship_limits.h - entity->current_state.pos.y - entity->bounding_box.h);
-		if (entity->altitude == 0.0)
-		{
-			entity->current_state.pos.y = world->ship_limits.y + world->ship_limits.h - entity->bounding_box.h;
-			entity->current_state.vel.y = 0.0;
-		}
-
-		if (entity->current_state.pos.y < world->ship_limits.y)
-		{
-			entity->current_state.pos.y = world->ship_limits.y;
-			entity->current_state.vel.y = 0.0;
-		}
-
-		if (entity->current_state.pos.x > world->w)
-		{
-			entity->current_state.pos.x -= world->w;
-			entity->current_state.loop_count++;
-		}
-		else if (entity->current_state.pos.x < 0.0)
-		{
-			entity->current_state.pos.x += world->w;
-			entity->current_state.loop_count--;
-		}
-
-		entity->updateCollisionBoxes();
-
-		if (entity->weight == 0.5)
-		{
-			console_debug({ "bullet.x: ", std::to_string(entity->current_state.pos.x) });
-		}
-
-		entity->tick(dt);
-	}
-
-	auto ship = game->entity_register.getShip();
-	for (auto& bullet : game->entity_register.getBullets())
-	{
-		if (bullet->is_active)
-		{
-			debug->set("bullet->current_state.vel.x", bullet->current_state.vel.x);
-		}
-	}
-}
-
-void integrateAlpha(double alpha)
-{
-	for (auto& entity : game->entity_register.getAll())
-	{
-		if (entity->current_state.loop_count != entity->prev_state.loop_count)
-		{
-			double wrap_factor = ((entity->current_state.loop_count - entity->prev_state.loop_count)*world->w);
-			double currentX = entity->current_state.pos.x*alpha;
-			double prevX = (entity->prev_state.pos.x - wrap_factor)*(1.0 - alpha);
-			entity->alpha_pos.x = currentX + prevX;
-		}
-		else
-		{
-			entity->alpha_pos.x = entity->current_state.pos.x*alpha + entity->prev_state.pos.x*(1.0 - alpha);
-		}
-		entity->alpha_pos.y = entity->current_state.pos.y*alpha + entity->prev_state.pos.y*(1.0 - alpha);
-		entity->updateCollisionBoxes();
-	}
 }

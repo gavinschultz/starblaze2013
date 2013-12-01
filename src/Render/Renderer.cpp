@@ -203,9 +203,8 @@ void Renderer::renderZeroLine(const Camera& camera)
 
 void Renderer::renderCollisionBoxes(const Camera& camera)
 {
-	glLineWidth(1.0f);
-	SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
 	std::vector<SDL_Rect> transformed_rects;
+	std::vector<SDL_Rect> transformed_collided_rects;
 	for (auto& entity : game->entity_register.getAll())
 	{
 		for (auto& collision_box : entity->collision_boxes)
@@ -218,6 +217,8 @@ void Renderer::renderCollisionBoxes(const Camera& camera)
 			transformed_rects.push_back(transformed_rect);
 		}
 	}
+	glLineWidth(1.0f);
+	SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
 	SDL_RenderDrawRects(sdlRenderer, transformed_rects.data(), transformed_rects.size());
 }
 

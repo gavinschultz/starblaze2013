@@ -100,6 +100,7 @@
     <ClInclude Include="src\Entity\World.h" />
     <ClInclude Include="src\FileLoader.h" />
     <ClInclude Include="src\MathUtil.h" />
+    <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\Render\AlienSprite.h" />
     <ClInclude Include="src\Render\BGSprite.h" />
     <ClInclude Include="src\Render\BulletSprite.h" />
@@ -140,6 +141,7 @@
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MathUtil.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Render\AlienSprite.cpp" />
     <ClCompile Include="src\Render\BGSprite.cpp" />
     <ClCompile Include="src\Render\BulletSprite.cpp" />

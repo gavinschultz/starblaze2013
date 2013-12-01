@@ -4,9 +4,9 @@
 class Bullet::impl
 {
 public:
-	static const std::vector<SDL_Rect> base_collision_boxes;
+	static const std::vector<Rect> base_collision_boxes;
 };
-const std::vector<SDL_Rect> Bullet::impl::base_collision_boxes{
+const std::vector<Rect> Bullet::impl::base_collision_boxes{
 	{ 0, 0, 4, 2 }
 };
 
@@ -17,7 +17,7 @@ Bullet::Bullet() : pimpl{ new impl{} }
 	this->health = 1;
 	this->weight = 0.5;
 	this->max_lift = 0.0;
-	collision_boxes = std::vector<SDL_Rect>{ *getBaseCollisionBoxes() };
+	collision_boxes = std::vector<Rect>{ *getBaseCollisionBoxes() };
 }
 
 Bullet::~Bullet() {}
@@ -34,7 +34,7 @@ void Bullet::tick(double dt)
 		this->is_active = false;
 }
 
-const std::vector<SDL_Rect>* Bullet::getBaseCollisionBoxes() const
+const std::vector<Rect>* Bullet::getBaseCollisionBoxes() const
 {
 	return &(pimpl->base_collision_boxes);
 }

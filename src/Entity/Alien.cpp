@@ -12,10 +12,10 @@ class Alien::impl
 public:
 	static int rndseed;
 	std::unique_ptr<AttackAlgorithm> attack_algorithm;
-	static const std::vector<SDL_Rect> Alien::impl::base_collision_boxes;
+	static const std::vector<Rect> Alien::impl::base_collision_boxes;
 };
 int Alien::impl::rndseed{ 0 };
-const std::vector<SDL_Rect> Alien::impl::base_collision_boxes{
+const std::vector<Rect> Alien::impl::base_collision_boxes{
 	{ 6, 0, 4, 9 },
 	{ 2, 2, 12, 3 },
 	{ 4, 1, 8, 5 },
@@ -28,7 +28,7 @@ const std::vector<SDL_Rect> Alien::impl::base_collision_boxes{
 Alien::Alien() : pimpl{ new impl{} }
 {
 	bounding_box = { 0, 0, 16, 12 };
-	collision_boxes = std::vector<SDL_Rect>{ *getBaseCollisionBoxes() };
+	collision_boxes = std::vector<Rect>{ *getBaseCollisionBoxes() };
 	SDL_Rect play_area = world->getPlayArea(bounding_box);
 	auto rnd_xpos = std::bind(std::uniform_real_distribution<double>{(double)play_area.x, (double)(play_area.x + play_area.w)}, std::default_random_engine((uint32_t)(std::time(0) + pimpl->rndseed++)));
 	auto rnd_ypos = std::bind(std::uniform_real_distribution<double>{(double)play_area.y, (double)(play_area.y + play_area.h)}, std::default_random_engine((uint32_t)(std::time(0) + pimpl->rndseed++)));
@@ -58,7 +58,7 @@ double Alien::getDecelerationFactorX() const
 		return 0.4;
 }
 
-const std::vector<SDL_Rect>* Alien::getBaseCollisionBoxes() const
+const std::vector<Rect>* Alien::getBaseCollisionBoxes() const
 {
 	return &(pimpl->base_collision_boxes);
 }

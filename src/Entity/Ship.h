@@ -11,7 +11,7 @@ class Ship : public Entity
 private:
 	class impl; std::unique_ptr<impl> pimpl;
 protected:
-	const std::vector<SDL_Rect>* Ship::getBaseCollisionBoxes() const;
+	const std::vector<Rect>* Ship::getBaseCollisionBoxes() const;
 public:
 	Ship();
 	~Ship();
@@ -28,4 +28,5 @@ public:
 	const double max_velocity{ 20000.0 };
 	double getDecelerationFactorX() const;
 	double getDecelerationFactorY() const;
+	void updateCollisionBoxes();
 };
