@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL.h>
+#include <memory>
 #include "Entity.h"
 #include "Phys.h"
 
@@ -11,7 +12,12 @@ enum StationType
 
 class Station : public Entity
 {
+private:
+	class impl; std::unique_ptr<impl> pimpl;
+protected:
+	const std::vector<SDL_Rect>* Station::getBaseCollisionBoxes() const;
 public:
 	Station();
+	~Station();
 	StationType station_type;
 };

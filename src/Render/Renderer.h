@@ -35,6 +35,7 @@ private:
 	void renderMotionHistory(const Debug& debug);
 	void renderText(const std::string text, uint32_t x, uint32_t y);
 	void renderZeroLine(const Camera& camera);
+	void renderCollisionBoxes(const Camera& camera);
 	void init();
 	TTF_Font* _font;
 	std::unique_ptr<TextRenderer> _text_renderer;
@@ -56,6 +57,7 @@ public:
 	bool is_fullscreen{ false };
 	bool is_grid_visible{ false };
 	bool is_motionhistory_visible{ false };
+	bool are_collision_boxes_visible{ false };
 	void toggleFullscreen(bool state);
 	void toggleGrid(bool state);
 	void toggleMotionHistory(bool state);

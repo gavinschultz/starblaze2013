@@ -43,6 +43,12 @@ struct Vector2Du
 	Vector2Du(unsigned int x = 0, unsigned int y = 0) : x(x), y(y) {}
 };
 
+struct Rect
+{
+	double x, y;
+	double w, h;
+};
+
 struct State2D
 {
 	Point2D pos;

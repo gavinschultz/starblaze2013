@@ -10,6 +10,8 @@ class Ship : public Entity
 {
 private:
 	class impl; std::unique_ptr<impl> pimpl;
+protected:
+	const std::vector<SDL_Rect>* Ship::getBaseCollisionBoxes() const;
 public:
 	Ship();
 	~Ship();

@@ -87,7 +87,7 @@ void run()
 	Station* station = new Station();
 
 	game->entity_register.registerEntity(s);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		Alien* alien = new Alien();
 		game->entity_register.registerEntity(alien);
@@ -314,9 +314,22 @@ void integrate(double delta_time, double dt)
 			entity->current_state.loop_count--;
 		}
 
+		entity->updateCollisionBoxes();
+
 		if (entity->weight == 0.5)
 		{
 			console_debug({ "bullet.x: ", std::to_string(entity->current_state.pos.x) });
+		}
+
+		entity->tick(dt);
+	}
+
+	auto ship = game->entity_register.getShip();
+	for (auto& bullet : game->entity_register.getBullets())
+	{
+		if (bullet->is_active)
+		{
+			debug->set("bullet->current_state.vel.x", bullet->current_state.vel.x);
 		}
 	}
 }
@@ -337,5 +350,6 @@ void integrateAlpha(double alpha)
 			entity->alpha_pos.x = entity->current_state.pos.x*alpha + entity->prev_state.pos.x*(1.0 - alpha);
 		}
 		entity->alpha_pos.y = entity->current_state.pos.y*alpha + entity->prev_state.pos.y*(1.0 - alpha);
+		entity->updateCollisionBoxes();
 	}
 }
