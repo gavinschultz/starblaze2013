@@ -8,6 +8,9 @@ BulletSprite::~BulletSprite() {}
 
 void BulletSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const Bullet& bullet) const
 {
+	if (!bullet.is_active)
+		return;
+
 	SDL_Rect bullet_rect = {
 		renderutil::getScreenXForEntityByCameraAndDistance(bullet.alpha_pos.x * _scaling, bullet.bounding_box.w * _scaling, renderer->width, camera, 1.0),
 		std::lround(bullet.alpha_pos.y * _scaling - camera.view_rect.y),

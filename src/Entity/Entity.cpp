@@ -13,3 +13,8 @@ void Entity::updateCollisionBoxes()
 		collision_boxes[i].y = current_state.pos.y + (*base_rects)[i].y;
 	}
 }
+
+bool Entity::isInactive()
+{
+	return !this->is_active;
+}

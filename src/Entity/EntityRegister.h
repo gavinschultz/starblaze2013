@@ -20,6 +20,7 @@ public:
 	void registerEntity(Alien* alien);
 	void registerEntity(Station* station);
 	void registerEntity(Bullet* bullet);
+	void removeInactives();
 	EntityRegister();
 	~EntityRegister();
 private:

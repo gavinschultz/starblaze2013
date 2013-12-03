@@ -33,37 +33,38 @@ Renderer::~Renderer()
 	//SDL_FreePalette(palette);
 	//TTF_CloseFont(_font);
 	//TTF_Quit();
-	//SDL_DestroyRenderer(sdlRenderer);
-	//SDL_DestroyWindow(sdlWindow);
+	//SDL_DestroyRenderer(sdl_renderer);
+	//SDL_DestroyWindow(sdl_window);
 }
 
 void Renderer::init()
 {
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-	sdlWindow = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL);
-	if (!sdlWindow)
+	sdl_window = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL);
+	if (!sdl_window)
 	{
 		console_debug({ SDL_GetError() });
 		exit(4);
 	}
 
 	toggleFullscreen(is_fullscreen);
-	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-	if (!sdlRenderer)
+	sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+	if (!sdl_renderer)
 	{
 		console_debug({ SDL_GetError() });
 		exit(5);
 	}
 
-	sprite_loader.load(sdlRenderer, "resources\\spritesheet.json");
+	sprite_loader.load(sdl_renderer, "resources\\spritesheet.json");
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 
 	SDL_RendererInfo renderer_info;
-	SDL_GetRendererInfo(sdlRenderer, &renderer_info);
+	SDL_GetRendererInfo(sdl_renderer, &renderer_info);
 	console_debug({ "Flags: ", std::to_string(renderer_info.flags), "\nName: ", renderer_info.name });
 
-	SDL_RenderSetLogicalSize(sdlRenderer, 1024, 768);
+	SDL_RenderSetLogicalSize(sdl_renderer, 1366, 768);
+	//SDL_RenderSetScale(sdl_renderer, 0.25, 0.25);
 
 	GLenum glew_init = glewInit();
 	if (GLEW_OK != glew_init)
@@ -96,9 +97,9 @@ void Renderer::toggleFullscreen(bool state)
 {
 	is_fullscreen = state;
 	if (state)
-		SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_SetWindowFullscreen(sdl_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	else
-		SDL_SetWindowFullscreen(sdlWindow, 0);
+		SDL_SetWindowFullscreen(sdl_window, 0);
 }
 
 void Renderer::toggleGrid(bool state)
@@ -127,49 +128,47 @@ bool Renderer::isLeftOf(int32_t x, int32_t y) {
 
 void Renderer::render(Camera* camera)
 {
-	SDL_SetRenderDrawColor(sdlRenderer, 0, 31, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(sdlRenderer);
+	SDL_SetRenderDrawColor(sdl_renderer, 0, 31, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderClear(sdl_renderer);
 
-	sprite_register.getBackground().render(sdlRenderer, *camera, *world);
+	sprite_register.getBackground().render(sdl_renderer, *camera, *world);
 
 	auto station = game->entity_register.getStation();
 	if (station)
 	{
 		const auto& station_sprite = (StationSprite&)sprite_register.getSprite(station);
-		station_sprite.render(sdlRenderer, *camera, *station);
+		station_sprite.render(sdl_renderer, *camera, *station);
 	}
 
 	for (auto& alien : game->entity_register.getAliens())
 	{
 		auto& enemySprite = (AlienSprite&)sprite_register.getSprite((Entity*)alien.get());
-		enemySprite.render(sdlRenderer, *camera, *alien);
+		enemySprite.render(sdl_renderer, *camera, *alien);
 	}
 
 	auto ship = game->entity_register.getShip();
 	if (ship)
 	{
 		const auto& ship_sprite = (ShipSprite&)sprite_register.getPlayerShip();
-		ship_sprite.render(sdlRenderer, *camera, *ship);
+		ship_sprite.render(sdl_renderer, *camera, *ship);
 	}
 
 	auto& bullets = game->entity_register.getBullets();
 	for (auto& bullet : bullets)
 	{
-		if (!bullet->is_active)
-			continue;
 		const auto& bullet_sprite = (BulletSprite&)sprite_register.getSprite((Entity*)bullet.get());
-		bullet_sprite.render(sdlRenderer, *camera, *bullet);
+		bullet_sprite.render(sdl_renderer, *camera, *bullet);
 	}
 
 	auto& hud_rend = sprite_register.getHUD();
-	hud_rend.render(sdlRenderer, *(_text_renderer.get()), *ship, 0, 0); // TODO: lives, score
+	hud_rend.render(sdl_renderer, *(_text_renderer.get()), *ship, 0, 0); // TODO: lives, score
 
 	auto& radar_rend = sprite_register.getRadar();
-	radar_rend.render(sdlRenderer, *camera);
+	radar_rend.render(sdl_renderer, *camera);
 
 	if (_text_plate)
 	{
-		_text_renderer->RenderPlate(sdlRenderer, *_text_plate);
+		_text_renderer->RenderPlate(sdl_renderer, *_text_plate);
 		_text_plate.reset();	// release ownership when done
 	}
 
@@ -185,20 +184,20 @@ void Renderer::render(Camera* camera)
 	if (is_motionhistory_visible)
 		renderMotionHistory(*debug.get());
 
-	SDL_RenderPresent(sdlRenderer);
+	SDL_RenderPresent(sdl_renderer);
 }
 
 void Renderer::renderZeroLine(const Camera& camera)
 {
 	glLineWidth(2.0f);
-	SDL_SetRenderDrawColor(sdlRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	int view_rect_abs_x;
 	if (camera.view_rect.x < 0)
 		view_rect_abs_x = camera.view_rect.x + this->width;
 	else
 		view_rect_abs_x = camera.view_rect.x;
 	int zero_point_x = this->width - view_rect_abs_x;
-	SDL_RenderDrawLine(sdlRenderer, zero_point_x, 0, zero_point_x, window.h);
+	SDL_RenderDrawLine(sdl_renderer, zero_point_x, 0, zero_point_x, window.h);
 }
 
 void Renderer::renderCollisionBoxes(const Camera& camera)
@@ -218,15 +217,15 @@ void Renderer::renderCollisionBoxes(const Camera& camera)
 		}
 	}
 	glLineWidth(1.0f);
-	SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
-	SDL_RenderDrawRects(sdlRenderer, transformed_rects.data(), transformed_rects.size());
+	SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);
+	SDL_RenderDrawRects(sdl_renderer, transformed_rects.data(), transformed_rects.size());
 }
 
 void Renderer::renderGrid()
 {
 	glPointSize(1.0f);
 	glLineWidth(2.0f);
-	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	for (uint32_t x = 0; x <= this->window.w; x += 8)
 	{
 		int y1 = 8;
@@ -237,7 +236,7 @@ void Renderer::renderGrid()
 			line_height = 16;
 		else
 			line_height = x % 32;
-		SDL_RenderDrawLine(sdlRenderer, x, y1, x, y1 + line_height);
+		SDL_RenderDrawLine(sdl_renderer, x, y1, x, y1 + line_height);
 	}
 
 	glLineWidth(1.0f);
@@ -245,19 +244,19 @@ void Renderer::renderGrid()
 	glLineStipple(1, 0x0101);
 	for (uint32_t x = 0; x < this->window.w; x += 256)
 	{
-		SDL_RenderDrawLine(sdlRenderer, x, 0, x, window.h);
+		SDL_RenderDrawLine(sdl_renderer, x, 0, x, window.h);
 	}
-	SDL_RenderDrawLine(sdlRenderer, window.w - 1, 0, window.w - 1, window.h);
+	SDL_RenderDrawLine(sdl_renderer, window.w - 1, 0, window.w - 1, window.h);
 
 	for (uint32_t y = 0; y <= this->window.h; y += 256)
 	{
-		SDL_RenderDrawLine(sdlRenderer, 0, y, window.w - 1, y);
+		SDL_RenderDrawLine(sdl_renderer, 0, y, window.w - 1, y);
 	}
-	SDL_RenderDrawLine(sdlRenderer, 0, window.h - 1, window.w, window.h - 1);
+	SDL_RenderDrawLine(sdl_renderer, 0, window.h - 1, window.w, window.h - 1);
 
-	SDL_SetRenderDrawColor(sdlRenderer, 64, 64, 255, SDL_ALPHA_OPAQUE);
-	SDL_RenderDrawLine(sdlRenderer, 48 * scaling, 0, 48 * scaling, window.h);
-	SDL_RenderDrawLine(sdlRenderer, 208 * scaling, 0, 208 * scaling, window.h);
+	SDL_SetRenderDrawColor(sdl_renderer, 64, 64, 255, SDL_ALPHA_OPAQUE);
+	SDL_RenderDrawLine(sdl_renderer, world->ship_limits.x * scaling, 0, world->ship_limits.x * scaling, window.h);
+	SDL_RenderDrawLine(sdl_renderer, (world->ship_limits.x + world->ship_limits.w) * scaling, 0, (world->ship_limits.x + world->ship_limits.w) * scaling, window.h);
 	glDisable(GL_LINE_STIPPLE);
 }
 
@@ -267,9 +266,9 @@ void Renderer::renderText(const std::string text, uint32_t x, uint32_t y)
 	SDL_Surface* text_surface = TTF_RenderText_Blended(_font, text.c_str(), text_color);
 	SDL_Rect text_texture_rect = { 0, 0, text_surface->w, text_surface->h };
 	SDL_Rect text_rect = { x, y, text_surface->w, text_surface->h };
-	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(sdlRenderer, text_surface);
+	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(sdl_renderer, text_surface);
 	SDL_FreeSurface(text_surface);
-	SDL_RenderCopy(sdlRenderer, text_texture, &text_texture_rect, &text_rect);
+	SDL_RenderCopy(sdl_renderer, text_texture, &text_texture_rect, &text_rect);
 	SDL_DestroyTexture(text_texture);
 }
 
@@ -316,22 +315,22 @@ void Renderer::renderMotionHistory(const Debug& debug)
 	glLineWidth(1.0f);
 
 	// background
-	SDL_SetRenderDrawBlendMode(sdlRenderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 176);
+	SDL_SetRenderDrawBlendMode(sdl_renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, 176);
 	auto bgrect = SDL_Rect{ 0, initial_y - axis_line_offset - threshold_line_offset - 50, window.w, (axis_line_offset + threshold_line_offset + 50) * 2 };
-	SDL_RenderFillRect(sdlRenderer, &bgrect);
+	SDL_RenderFillRect(sdl_renderer, &bgrect);
 
 	// base lines
-	SDL_SetRenderDrawColor(sdlRenderer, 128, 128, 128, 255);
-	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset, window.w, initial_y - axis_line_offset);
-	SDL_RenderDrawLine(sdlRenderer, 0, initial_y + axis_line_offset, window.w, initial_y + axis_line_offset);
+	SDL_SetRenderDrawColor(sdl_renderer, 128, 128, 128, 255);
+	SDL_RenderDrawLine(sdl_renderer, 0, initial_y - axis_line_offset, window.w, initial_y - axis_line_offset);
+	SDL_RenderDrawLine(sdl_renderer, 0, initial_y + axis_line_offset, window.w, initial_y + axis_line_offset);
 
 	// threshold lines
-	SDL_SetRenderDrawColor(sdlRenderer, 64, 64, 64, 255);
-	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset - threshold_line_offset, window.w, initial_y - axis_line_offset - threshold_line_offset); // X motion - upper threshold
-	SDL_RenderDrawLine(sdlRenderer, 0, initial_y + axis_line_offset - threshold_line_offset, window.w, initial_y + axis_line_offset - threshold_line_offset); // X motion - lower threshold
-	SDL_RenderDrawLine(sdlRenderer, 0, initial_y - axis_line_offset + threshold_line_offset, window.w, initial_y - axis_line_offset + threshold_line_offset); // Y motion - upper threshold
-	SDL_RenderDrawLine(sdlRenderer, 0, initial_y + axis_line_offset + threshold_line_offset, window.w, initial_y + axis_line_offset + threshold_line_offset); // Y motion - lower threshold
+	SDL_SetRenderDrawColor(sdl_renderer, 64, 64, 64, 255);
+	SDL_RenderDrawLine(sdl_renderer, 0, initial_y - axis_line_offset - threshold_line_offset, window.w, initial_y - axis_line_offset - threshold_line_offset); // X motion - upper threshold
+	SDL_RenderDrawLine(sdl_renderer, 0, initial_y + axis_line_offset - threshold_line_offset, window.w, initial_y + axis_line_offset - threshold_line_offset); // X motion - lower threshold
+	SDL_RenderDrawLine(sdl_renderer, 0, initial_y - axis_line_offset + threshold_line_offset, window.w, initial_y - axis_line_offset + threshold_line_offset); // Y motion - upper threshold
+	SDL_RenderDrawLine(sdl_renderer, 0, initial_y + axis_line_offset + threshold_line_offset, window.w, initial_y + axis_line_offset + threshold_line_offset); // Y motion - lower threshold
 
 	// points
 	Vector2Di render_point_y{ 0, 0 };
@@ -358,20 +357,20 @@ void Renderer::renderMotionHistory(const Debug& debug)
 			g = 155 + std::min(frame_age * 2, 255 - 155);
 			r = 64 + std::min(frame_age, 255 - 64);
 
-			SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
-			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.x, i, render_point_y.x);
+			SDL_SetRenderDrawColor(sdl_renderer, r, g, b, 255);
+			SDL_RenderDrawLine(sdl_renderer, i - 1, prev_render_point_y.x, i, render_point_y.x);
 			if (std::abs(scaled_xmotion) > threshold_line_offset)
 			{
-				SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
-				SDL_RenderDrawPoint(sdlRenderer, i, initial_y - axis_line_offset - (threshold_line_offset*util::getsign(scaled_xmotion)));
+				SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);
+				SDL_RenderDrawPoint(sdl_renderer, i, initial_y - axis_line_offset - (threshold_line_offset*util::getsign(scaled_xmotion)));
 			}
 
-			SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
-			SDL_RenderDrawLine(sdlRenderer, i - 1, prev_render_point_y.y, i, render_point_y.y);
+			SDL_SetRenderDrawColor(sdl_renderer, r, g, b, 255);
+			SDL_RenderDrawLine(sdl_renderer, i - 1, prev_render_point_y.y, i, render_point_y.y);
 			if (std::abs(scaled_ymotion) > threshold_line_offset)
 			{
-				SDL_SetRenderDrawColor(sdlRenderer, 255, 0, 0, 255);
-				SDL_RenderDrawPoint(sdlRenderer, i, initial_y + axis_line_offset + (threshold_line_offset*util::getsign(scaled_ymotion)));
+				SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);
+				SDL_RenderDrawPoint(sdl_renderer, i, initial_y + axis_line_offset + (threshold_line_offset*util::getsign(scaled_ymotion)));
 			}
 		}
 	}
@@ -391,7 +390,7 @@ SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* text
 		console_debug({ SDL_GetError() });
 		return nullptr;
 	}
-	SDL_Texture* sdlTexture = SDL_CreateTextureFromSurface(sdlRenderer, sdlSurface);
+	SDL_Texture* sdlTexture = SDL_CreateTextureFromSurface(sdl_renderer, sdlSurface);
 	SDL_FreeSurface(sdlSurface);
 	SDL_SetTextureBlendMode(sdlTexture, SDL_BLENDMODE_BLEND);
 	if (texture_rect != nullptr)
@@ -406,10 +405,10 @@ SDL_Texture* Renderer::loadTextureFromFile(std::string imagePath, SDL_Rect* text
 
 void Renderer::renderNormalVector(const Point2Di& src, const Vector2D& v) const
 {
-	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, 255);
 	int dest_x = (int)(src.x + v.x * 32);
 	int dest_y = (int)(src.y + v.y * 32);
-	SDL_RenderDrawLine(sdlRenderer, src.x, src.y, dest_x, dest_y);
+	SDL_RenderDrawLine(sdl_renderer, src.x, src.y, dest_x, dest_y);
 	glPointSize(6.0f);
-	SDL_RenderDrawPoint(sdlRenderer, dest_x, dest_y);
+	SDL_RenderDrawPoint(sdl_renderer, dest_x, dest_y);
 }

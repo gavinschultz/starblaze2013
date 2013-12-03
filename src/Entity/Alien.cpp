@@ -37,7 +37,8 @@ Alien::Alien() : pimpl{ new impl{} }
 	weight = 1.0;
 	max_lift = 150.0;
 	//pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new DirectAttack{}};
-	pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new WaveAttack{}};
+	//pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new WaveAttack{}};
+	pimpl->attack_algorithm = std::unique_ptr<AttackAlgorithm>{new DoNothingAttack{}};
 }
 Alien::~Alien(){}
 

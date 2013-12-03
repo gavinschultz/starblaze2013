@@ -10,5 +10,5 @@ class BulletSprite : public Sprite
 public:
 	BulletSprite(Renderer* renderer);
 	~BulletSprite();
-	void render(SDL_Renderer* sdlRenderer, const Camera& camera, const Bullet& bullet) const;
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const Bullet& bullet) const;
 };

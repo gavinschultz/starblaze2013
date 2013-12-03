@@ -22,8 +22,11 @@ ShipSprite::ShipSprite(Renderer* renderer) : Sprite(renderer->scaling)
 
 ShipSprite::~ShipSprite() {}
 
-void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera, const Ship& ship) const
+void ShipSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const Ship& ship) const
 {
+	if (!ship.is_active)
+		return;
+
 	SDL_RendererFlip flip = ship.direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
@@ -79,14 +82,14 @@ void ShipSprite::render(SDL_Renderer* sdlRenderer, const Camera& camera, const S
 		SDL_SetTextureColorMod(_ship_texture.texture, 0, 0, 0);
 	else
 		SDL_SetTextureColorMod(_ship_texture.texture, 255, 255, 255);
-	SDL_RenderCopyEx(sdlRenderer, _ship_texture.texture, &_ship_texture.rect, &ship_rect, 0, NULL, flip);
+	SDL_RenderCopyEx(sdl_renderer, _ship_texture.texture, &_ship_texture.rect, &ship_rect, 0, NULL, flip);
 	SDL_SetTextureColorMod(_ship_texture.texture, 255, 255, 255); // shared texture, so reset to defaults
 
-	SDL_RenderCopyEx(sdlRenderer, _stripe_texture.texture, &stripe_texture_rect, &stripe_rect, 0, NULL, flipReverse);
+	SDL_RenderCopyEx(sdl_renderer, _stripe_texture.texture, &stripe_texture_rect, &stripe_rect, 0, NULL, flipReverse);
 	if (taillight_texture)
-		SDL_RenderCopyEx(sdlRenderer, taillight_texture, &_taillight_texture.rect, &taillight_rect, 0, NULL, flip);
+		SDL_RenderCopyEx(sdl_renderer, taillight_texture, &_taillight_texture.rect, &taillight_rect, 0, NULL, flip);
 	if (burner_texture)
-		SDL_RenderCopyEx(sdlRenderer, burner_texture, &burner_texture_rect, &burner_rect, 0, NULL, flip);
+		SDL_RenderCopyEx(sdl_renderer, burner_texture, &burner_texture_rect, &burner_rect, 0, NULL, flip);
 	if (wheels_texture)
-		SDL_RenderCopyEx(sdlRenderer, wheels_texture, &_wheels_texture.rect, &wheels_rect, 0, NULL, flip);
+		SDL_RenderCopyEx(sdl_renderer, wheels_texture, &_wheels_texture.rect, &wheels_rect, 0, NULL, flip);
 }

@@ -28,7 +28,7 @@ private:
 		Radar = 3
 	};
 
-	SDL_Window* sdlWindow;
+	SDL_Window* sdl_window;
 	void renderGrid();
 	void renderFPS(int fps);
 	void renderDebug(const Debug& debug);
@@ -41,7 +41,7 @@ private:
 	std::unique_ptr<TextRenderer> _text_renderer;
 	std::shared_ptr<TextPlate> _text_plate;
 public:
-	SDL_Renderer* sdlRenderer; // TODO: temporary, make private once done being useful here
+	SDL_Renderer* sdl_renderer; // TODO: temporary, make private once done being useful here
 	Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width);
 	~Renderer();
 	SpriteRegister sprite_register;

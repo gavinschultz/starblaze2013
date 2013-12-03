@@ -8,6 +8,7 @@
 #include "Entity\Ship.h"
 #include "Entity\Alien.h"
 #include "Entity\Bullet.h"
+#include "Entity\Station.h"
 
 void physics::integrate(double delta_time, double dt)
 {
@@ -89,17 +90,52 @@ void physics::interpolate(double alpha)
 	}
 }
 
+// TODO: this is still pretty inefficient, as we're comparing every object to every other, even if they're miles apart.
 void physics::collisionDetection()
 {
 	auto ship = game->entity_register.getShip();
 	ship->is_collided = false;
 	for (auto& alien : game->entity_register.getAliens())
 	{
+		if (!alien->is_active)
+			continue;
+		
 		alien->is_collided = false;
 		if (util::areRectanglesIntersecting(ship->bounding_box, alien->bounding_box))
 		{
 			alien->is_collided = true;
 			ship->is_collided = true;
 		}
+
+		for (auto& bullet : game->entity_register.getBullets())
+		{
+			if (!bullet->is_active)
+				continue;
+
+			// TODO: would probably be better in this case to intersect the alien->bounding_box to the line (bullet.prev_state.pos, bullet.current_state.pos)
+			if (util::areRectanglesIntersecting(bullet->bounding_box, alien->bounding_box))
+			{
+				alien->is_collided = true;
+				bullet->is_collided = true;
+				bullet->is_active = false;
+
+			}
+		}
+
+		alien->is_active = alien->is_active && !alien->is_collided;
 	}
+
+	game->entity_register.removeInactives();
+
+	auto station = game->entity_register.getStation();
+	if (station && station->is_active)
+	{
+		station->is_docked = false;
+		if (util::areRectanglesIntersecting(ship->bounding_box, station->bounding_box))
+		{
+			station->is_docked = true;
+		}
+	}
+
+	//ship->is_active = !ship->is_collided;
 }

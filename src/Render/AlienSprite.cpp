@@ -9,6 +9,9 @@ AlienSprite::AlienSprite(Renderer* renderer) : Sprite(renderer->scaling)
 
 void AlienSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const Alien& alien)
 {
+	if (!alien.is_active)
+		return;
+
 	SDL_Rect dstrect = 
 	{
 		renderutil::getScreenXForEntityByCameraAndDistance(alien.alpha_pos.x*_scaling, _alien_texture.rect.w*_scaling, renderer->width, camera, 1.0),

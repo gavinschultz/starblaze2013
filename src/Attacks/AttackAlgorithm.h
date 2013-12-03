@@ -29,3 +29,9 @@ public:
 	~WaveAttack();
 	void run(Alien& alien, const Entity* target, double dt);
 };
+
+class DoNothingAttack : public AttackAlgorithm
+{
+public:
+	void run(Alien& alien, const Entity* target, double dt);
+};

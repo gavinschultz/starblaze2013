@@ -25,4 +25,6 @@ public:
 	virtual double getDecelerationFactorY() const { return 1.0; }
 	virtual void tick(double dt) { if (is_active) age += dt; }
 	virtual void updateCollisionBoxes();
+
+	bool isInactive();
 };

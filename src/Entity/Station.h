@@ -20,4 +20,5 @@ public:
 	Station();
 	~Station();
 	StationType station_type;
+	bool is_docked{ false };
 };

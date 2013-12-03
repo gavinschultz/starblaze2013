@@ -23,5 +23,11 @@ void StationSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, con
 		_station_texture.rect.w*_scaling,
 		_station_texture.rect.h*_scaling
 	};
+
+	if (station.is_docked)
+		SDL_SetTextureColorMod(_station_texture.texture, 0, 0, 0);
+	else
+		SDL_SetTextureColorMod(_station_texture.texture, 255, 255, 255);
+
 	SDL_RenderCopy(sdl_renderer, _station_texture.texture, &_station_texture.rect, &station_rect);
 }

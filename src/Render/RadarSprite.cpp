@@ -47,7 +47,7 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera) const
 	}
 
 	Ship* ship = game->entity_register.getShip();
-	if (ship)
+	if (ship && ship->is_active)
 	{
 		SDL_Rect point_rect = transformToRadarView(ship->alpha_pos.x, ship->alpha_pos.y, ship->bounding_box.w, ship->bounding_box.h, radar_left);
 		SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, 255);
@@ -57,12 +57,14 @@ void RadarSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera) const
 	SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 190, 168);
 	for (auto& alien : game->entity_register.getAliens())
 	{
+		if (!alien->is_active)
+			continue;
 		SDL_Rect point_rect = transformToRadarView(alien->alpha_pos.x, alien->alpha_pos.y, alien->bounding_box.w, alien->bounding_box.h, radar_left);
 		SDL_RenderFillRect(sdl_renderer, &point_rect);
 	}
 
 	Station* station = game->entity_register.getStation();
-	if (station)
+	if (station && station->is_active)
 	{
 		SDL_Rect point_rect = transformToRadarView(station->current_state.pos.x, station->current_state.pos.y, station->bounding_box.w, station->bounding_box.h, radar_left);
 		SDL_SetRenderDrawColor(sdl_renderer, 56, 205, 212, 255);

@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include <algorithm>
+#include <functional>
 #include "EntityRegister.h"
 #include "Entity\Alien.h"
 #include "Entity\Hill.h"
@@ -24,6 +26,15 @@ void EntityRegister::registerEntity(Station* station)
 void EntityRegister::registerEntity(Bullet* bullet)
 {
 	_bullets.push_back(std::unique_ptr<Bullet>{bullet});
+}
+
+void EntityRegister::removeInactives()
+{
+	if (_ship->isInactive()) 
+		_ship = nullptr;
+	_aliens.erase(std::remove_if(_aliens.begin(), _aliens.end(), std::bind(&Entity::isInactive, std::placeholders::_1)), _aliens.end());
+	if (_station->isInactive())
+		_station = nullptr;
 }
 
 Ship* EntityRegister::getShip() const

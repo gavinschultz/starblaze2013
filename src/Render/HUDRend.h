@@ -15,5 +15,5 @@ private:
 public:
 	HUDRend(Renderer* renderer);
 	~HUDRend();
-	void render(SDL_Renderer* sdlRenderer, const TextRenderer& text_renderer, const Ship& ship, int score, int playerShips) const;
+	void render(SDL_Renderer* sdl_renderer, const TextRenderer& text_renderer, const Ship& ship, int score, int playerShips) const;
 };

@@ -25,6 +25,6 @@ private:
 public:
 	ShipSprite(Renderer* renderer);
 	~ShipSprite();
-	void render(SDL_Renderer* sdlRenderer, const Camera& camera, const Ship& ship) const;
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const Ship& ship) const;
 	bool smooth_animation;
 };

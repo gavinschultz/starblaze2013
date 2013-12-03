@@ -17,5 +17,5 @@ private:
 	SDL_Rect transformToRadarView(double entity_x, double entity_y, int entity_width, int entity_height, int radar_left) const;
 public:
 	RadarSprite(Renderer* renderer);
-	void render(SDL_Renderer* sdlRenderer, const Camera& camera) const;
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera) const;
 };

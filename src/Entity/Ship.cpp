@@ -10,10 +10,10 @@
 class Ship::impl
 {
 public:
-	static int bullet_counter;
+	int bullet_counter{ 0 };
+	double bullet_reload_countdown{ 0.0 };
 	static const std::vector<Rect> base_collision_boxes;
 };
-int Ship::impl::bullet_counter{ 0 };
 const std::vector<Rect> Ship::impl::base_collision_boxes{
 	{ 0, 1, 4, 7 },
 	{ 4, 2, 2, 6 },
@@ -33,6 +33,9 @@ Ship::~Ship() {}
 
 void Ship::fire()
 {
+	if (pimpl->bullet_reload_countdown != 0.0 && this->age < pimpl->bullet_reload_countdown)
+		return;
+	pimpl->bullet_reload_countdown = this->age + 0.2;
 	auto& bullets = game->entity_register.getBullets();
 	auto& fired_bullet = bullets[pimpl->bullet_counter];
 	fired_bullet->is_active = true;

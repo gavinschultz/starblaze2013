@@ -27,5 +27,5 @@ private:
 public:
 	BGSprite(Renderer* renderer);
 	~BGSprite();
-	void render(SDL_Renderer* sdlRenderer, const Camera& camera, const World& world) const;
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const World& world) const;
 };

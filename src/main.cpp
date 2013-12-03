@@ -68,7 +68,7 @@ void run()
 	world = std::unique_ptr<World>{new World(100)};
 	game = std::unique_ptr<Game>{new Game()};
 	timer = std::unique_ptr<Timer>{new Timer()};
-	renderer = std::unique_ptr<Renderer>{new Renderer(1024, 768, 4, world->w)};
+	renderer = std::unique_ptr<Renderer>{new Renderer(1366, 768, 4, world->w)};
 	debug = std::unique_ptr<Debug>{new Debug()};
 #ifdef _DEBUG
 	renderer->toggleGrid(true);
@@ -241,7 +241,7 @@ void run()
 			{
 				camera.focus_rect.x -= renderer->width;
 			}
-			camera.view_rect.x = camera.focus_rect.x - (48 * renderer->scaling);
+			camera.view_rect.x = camera.focus_rect.x - (world->ship_limits.x * renderer->scaling);
 			if (camera.view_rect.x < 0)
 				camera.view_rect.x += renderer->width;
 		}
