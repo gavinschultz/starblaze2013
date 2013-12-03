@@ -20,6 +20,7 @@
 #include "Entity\World.h"
 #include "Entity\Alien.h"
 #include "Entity\Bullet.h"
+#include "Entity\Debris.h"
 
 Renderer::Renderer(unsigned int screen_width, unsigned int screen_height, unsigned int scaling, double world_width) : scaling(scaling), width((unsigned int)(world_width*scaling))
 {
@@ -151,6 +152,22 @@ void Renderer::render(Camera* camera)
 	{
 		const auto& ship_sprite = (ShipSprite&)sprite_register.getPlayerShip();
 		ship_sprite.render(sdl_renderer, *camera, *ship);
+	}
+
+	for (auto& debris : game->entity_register.getDebris())
+	{
+		for (auto& debris_item : debris->getItems())
+		{
+			
+			SDL_Rect debris_item_rect = {	// TODO: use alpha_pos instead of current_state
+				renderutil::getScreenXForEntityByCameraAndDistance(debris_item->current_state.pos.x * scaling, 2 * scaling, renderer->width, *camera, 1.0),
+				std::lround(debris_item->current_state.pos.y * scaling - camera->view_rect.y),
+				2 * scaling,
+				2 * scaling
+			};
+			SDL_SetRenderDrawColor(sdl_renderer, 240, 122, 189, 255);
+			SDL_RenderFillRect(sdl_renderer, &debris_item_rect);
+		}
 	}
 
 	auto& bullets = game->entity_register.getBullets();

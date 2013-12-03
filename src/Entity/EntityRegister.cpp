@@ -7,6 +7,7 @@
 #include "Entity\Station.h"
 #include "Entity\Ship.h"
 #include "Entity\Bullet.h"
+#include "Entity\Debris.h"
 
 void EntityRegister::registerEntity(Ship* ship)
 {
@@ -26,6 +27,11 @@ void EntityRegister::registerEntity(Station* station)
 void EntityRegister::registerEntity(Bullet* bullet)
 {
 	_bullets.push_back(std::unique_ptr<Bullet>{bullet});
+}
+
+void EntityRegister::registerEntity(Debris* debris)
+{
+	_debris.push_back(std::unique_ptr<Debris>{debris});
 }
 
 void EntityRegister::removeInactives()
@@ -55,6 +61,11 @@ Station* EntityRegister::getStation() const
 const std::vector<std::unique_ptr<Bullet>>& EntityRegister::getBullets() const
 {
 	return _bullets;
+}
+
+const std::vector<std::unique_ptr<Debris>>& EntityRegister::getDebris() const
+{
+	return _debris;
 }
 
 const std::vector<Entity*> EntityRegister::getAll() const

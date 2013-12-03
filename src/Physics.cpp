@@ -9,6 +9,7 @@
 #include "Entity\Alien.h"
 #include "Entity\Bullet.h"
 #include "Entity\Station.h"
+#include "Entity\Debris.h"
 
 void physics::integrate(double delta_time, double dt)
 {
@@ -60,11 +61,6 @@ void physics::integrate(double delta_time, double dt)
 		entity->bounding_box.y = entity->current_state.pos.y;
 
 		entity->updateCollisionBoxes();
-
-		if (entity->weight == 0.5)
-		{
-			console_debug({ "bullet.x: ", std::to_string(entity->current_state.pos.x) });
-		}
 
 		entity->tick(dt);
 	}
@@ -123,6 +119,10 @@ void physics::collisionDetection()
 		}
 
 		alien->is_active = alien->is_active && !alien->is_collided;
+		if (alien->isInactive())
+		{
+			game->entity_register.registerEntity(new Debris{ alien->current_state });
+		}
 	}
 
 	game->entity_register.removeInactives();
