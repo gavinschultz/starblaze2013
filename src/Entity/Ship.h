@@ -3,6 +3,9 @@
 #include <SDL.h>
 #include "Entity.h"
 #include "Phys.h"
+#include "Alien.h"
+
+#include "Collidable.h"
 
 enum class ShipDirection { left, right };
 
@@ -21,12 +24,17 @@ public:
 	int shields{ 100 };
 	int radar{ 100 };
 	int fuel{ 10000 };
-	bool isGearDown();
+	bool isGearDown() const;
 	const double reverse_thrust_factor{ 1.6 };
 	const double takeoff_speed{ 250.0 };
 	const Vector2D max_thrust{ 400.0, 12.0 };
 	const double max_velocity{ 20000.0 };
 	double getDecelerationFactorX() const;
 	double getDecelerationFactorY() const;
-	void updateCollisionBoxes();
+	void updateCollisionBoxes(Point2D pos);
+
+	virtual const std::vector<std::unique_ptr<Collider>>& Ship::getColliders();
+
+	void collide(const Alien& alien);
+	void collide(const Station& station);
 };

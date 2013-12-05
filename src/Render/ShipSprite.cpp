@@ -30,8 +30,8 @@ void ShipSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 	SDL_RendererFlip flip = ship.direction == ShipDirection::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 	SDL_RendererFlip flipReverse = flip == SDL_FLIP_NONE ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
-	int32_t entity_x = renderutil::getScreenXForEntityByCameraAndDistance(ship.alpha_pos.x*_scaling, _ship_texture.rect.w*_scaling, renderer->width, camera, 1.0);
-	int32_t entity_y = std::lround(ship.alpha_pos.y * _scaling - camera.view_rect.y);
+	int32_t entity_x = renderutil::getScreenXForEntityByCameraAndDistance(ship.state.interpolated.x*_scaling, _ship_texture.rect.w*_scaling, renderer->width, camera, 1.0);
+	int32_t entity_y = std::lround(ship.state.interpolated.y * _scaling - camera.view_rect.y);
 	SDL_Rect ship_rect = { entity_x, entity_y, _ship_texture.rect.w  * _scaling, _ship_texture.rect.h  * _scaling };
 	
 	SDL_Rect stripe_texture_rect = { _stripe_texture.rect.x, _stripe_texture.rect.y, SHIPSTRIPE_WIDTH, _stripe_texture.rect.h };
@@ -52,19 +52,19 @@ void ShipSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 	SDL_Rect burner_rect = {};
 	SDL_Texture* burner_texture = nullptr; // may be either forward or reverse
 	SDL_Rect burner_texture_rect = { _burner_texture.rect.x, _burner_texture.rect.y, BURNER_WIDTH, _burner_texture.rect.h };
-	if (ship.current_state.thrust.x != 0.0)
+	if (ship.state.current.thrust.x != 0.0)
 	{
-		burner_texture_rect.x += std::min(std::lround(4 * std::abs(ship.current_state.thrust.x) / ship.max_thrust.x) * 8, 24L);
-		if (ship.current_state.thrust.x != 0.0)
+		burner_texture_rect.x += std::min(std::lround(4 * std::abs(ship.state.current.thrust.x) / ship.max_thrust.x) * 8, 24L);
+		if (ship.state.current.thrust.x != 0.0)
 		{
 			burner_texture = _burner_texture.texture;
 		}
 
-		if (ship.current_state.thrust.x != 0.0 && ship.direction == ShipDirection::right)
+		if (ship.state.current.thrust.x != 0.0 && ship.direction == ShipDirection::right)
 		{
 			burner_rect = { ship_rect.x + _burner_offset.x, ship_rect.y + _burner_offset.y, burner_texture_rect.w  * _scaling, burner_texture_rect.h  * _scaling };
 		}
-		else if (ship.current_state.thrust.x != 0.0 && ship.direction == ShipDirection::left)
+		else if (ship.state.current.thrust.x != 0.0 && ship.direction == ShipDirection::left)
 		{
 			burner_rect = { ship_rect.x + ship_rect.w, ship_rect.y + _burner_offset.y, burner_texture_rect.w  * _scaling, burner_texture_rect.h  * _scaling };
 		}
@@ -72,13 +72,13 @@ void ShipSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 
 	SDL_Texture* wheels_texture = nullptr;
 	SDL_Rect wheels_rect = {};
-	if (ship.altitude == 0.0 && std::abs(ship.current_state.vel.x) < ship.takeoff_speed)
+	if (ship.isGearDown())
 	{
 		wheels_rect = { ship_rect.x + _wheels_offset.x, ship_rect.y + _wheels_offset.y, _wheels_texture.rect.w * _scaling, _wheels_texture.rect.h * _scaling };
 		wheels_texture = _wheels_texture.texture;
 	}
 
-	if (ship.is_collided)
+	if (ship.collidable.isCollided())
 		SDL_SetTextureColorMod(_ship_texture.texture, 0, 0, 0);
 	else
 		SDL_SetTextureColorMod(_ship_texture.texture, 255, 255, 255);

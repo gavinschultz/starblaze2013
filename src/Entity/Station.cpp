@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Station.h"
 
+#include "Bullet.h"
+
 class Station::impl
 {
 public:
@@ -13,8 +15,8 @@ const std::vector<Rect> Station::impl::base_collision_boxes{
 
 Station::Station() : pimpl{ new impl{} }
 {
-	bounding_box = { 0, 0, 32, 16 };
-	collision_boxes = std::vector<Rect>{ *getBaseCollisionBoxes() };
+	box = { 0, 0, 32, 16 };
+	_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { &typeid(Bullet) }));
 }
 Station::~Station(){}
 

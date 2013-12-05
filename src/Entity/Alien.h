@@ -26,4 +26,9 @@ public:
 	// The target may be null, in which case it's up to the alien to work out what to do while "twiddling its thumbs"
 	void runAI(const Entity* target, double dt);
 	double getDecelerationFactorX() const;
+
+	void damage(int points);
+
+	void collide(const Bullet& bullet);
+	void collide(const Ship& ship);
 };

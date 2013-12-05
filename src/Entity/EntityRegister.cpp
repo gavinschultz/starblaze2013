@@ -36,10 +36,10 @@ void EntityRegister::registerEntity(Debris* debris)
 
 void EntityRegister::removeInactives()
 {
-	if (_ship->isInactive()) 
+	if (!_ship->is_active) 
 		_ship = nullptr;
-	_aliens.erase(std::remove_if(_aliens.begin(), _aliens.end(), std::bind(&Entity::isInactive, std::placeholders::_1)), _aliens.end());
-	if (_station->isInactive())
+	_aliens.erase(std::remove_if(_aliens.begin(), _aliens.end(), std::bind(&Entity::is_active, std::placeholders::_1)), _aliens.end()); //  broken
+	if (_station->is_active)
 		_station = nullptr;
 }
 
@@ -81,12 +81,14 @@ const std::vector<Entity*> EntityRegister::getAll() const
 	return all;
 }
 
-EntityRegister::EntityRegister()
+const std::vector<Entity&> EntityRegister::getAllActive() const
 {
-
-}
-
-EntityRegister::~EntityRegister()
-{
-
+	std::vector<Entity&> active;
+	active.push_back(*_ship.get());
+	active.push_back(*_station.get());
+	for (auto& alien : _aliens)
+		active.push_back(*alien.get());
+	for (auto& bullet : _bullets)
+		active.push_back(*bullet.get());
+	return active;
 }

@@ -8,9 +8,8 @@ class DebrisItem
 {
 public:
 	double lifetime{ 0.0 };
-	State2D current_state;
-	State2D prev_state;
-	Point2D alpha_pos;
+	TemporalState2D state;
+	bool isAlive() { return lifetime > 0.0; }
 };
 
 class Debris
@@ -21,4 +20,5 @@ public:
 	Debris(const State2D& origin);
 	~Debris();
 	const std::vector<std::unique_ptr<DebrisItem>>& getItems() const;
+	void tick(double dt);
 };

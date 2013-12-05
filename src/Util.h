@@ -16,7 +16,4 @@ namespace util
 	bool isRightOf(double x, double y, double width);
 	bool isLeftOf(double x, double y, double width);
 	double relativeX(double reference_x, double target_x, double limit);
-
-	bool areRectanglesIntersecting(const Rect& a, const Rect& b);
-	bool areRectanglesIntersecting(const SDL_Rect& a, const SDL_Rect& b);
 }
