@@ -47,6 +47,7 @@ struct Rect
 {
 	double x, y;
 	double w, h;
+	Rect(double x = 0.0, double y = 0.0, double w = 0.0, double h = 0.0) : x(x), y(y), w(w), h(h) {}
 };
 
 struct State2D
@@ -56,4 +57,11 @@ struct State2D
 	Vector2D acc;
 	Vector2D thrust;
 	int loop_count{ 0 };
+};
+
+struct TemporalState2D
+{
+	State2D current;
+	State2D prev;
+	Point2D interpolated;
 };

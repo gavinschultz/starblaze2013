@@ -101,17 +101,17 @@ void Input::handleKeyboardState(Ship* ship) const
 {
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	if (keystate[SDL_SCANCODE_UP])
-		ship->current_state.thrust.y = -ship->max_thrust.y;
+		ship->state.current.thrust.y = -ship->max_thrust.y;
 	if (keystate[SDL_SCANCODE_DOWN])
-		ship->current_state.thrust.y = ship->max_thrust.y;
+		ship->state.current.thrust.y = ship->max_thrust.y;
 	if (keystate[SDL_SCANCODE_LEFT])
 	{
-		ship->current_state.thrust.x = -ship->max_thrust.x;
+		ship->state.current.thrust.x = -ship->max_thrust.x;
 		this->turnShip(ship, ShipDirection::left);
 	}
 	if (keystate[SDL_SCANCODE_RIGHT])
 	{
-		ship->current_state.thrust.x = ship->max_thrust.x;
+		ship->state.current.thrust.x = ship->max_thrust.x;
 		this->turnShip(ship, ShipDirection::right);
 	}
 }
@@ -123,10 +123,10 @@ void Input::handleMouseMotionEvent(const SDL_MouseMotionEvent& e, Ship* ship) co
 	if (!game->is_paused)
 	{
 		if (std::abs(e.xrel) > 2)
-			ship->current_state.thrust.x = util::getsign(e.xrel) * ship->max_thrust.x;
+			ship->state.current.thrust.x = util::getsign(e.xrel) * ship->max_thrust.x;
 		else
-			ship->current_state.thrust.x = e.xrel * game->mouse_sensitivity * 16.0;
-		ship->current_state.thrust.y = e.yrel * game->mouse_sensitivity;
+			ship->state.current.thrust.x = e.xrel * game->mouse_sensitivity * 16.0;
+		ship->state.current.thrust.y = e.yrel * game->mouse_sensitivity;
 		if (e.xrel > 0)
 			this->turnShip(ship, ShipDirection::right);
 		else if (e.xrel < 0)
@@ -147,12 +147,12 @@ void Input::handleJoystickState(Ship* ship) const
 	int16_t left_y = util::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance));
 	if (std::abs(left_x) > 0)
 	{
-		ship->current_state.thrust.x = left_x * x_modifier;
+		ship->state.current.thrust.x = left_x * x_modifier;
 		this->turnShip(ship, left_x > 0 ? ShipDirection::right : ShipDirection::left);
 	}
 	if (std::abs(left_y) > 0)
 	{
-		ship->current_state.thrust.y = left_y * y_modifier;
+		ship->state.current.thrust.y = left_y * y_modifier;
 	}
 	if (SDL_GameControllerGetButton(_controller, SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X))
 	{
@@ -165,7 +165,7 @@ bool Input::turnShip(Ship* ship, ShipDirection requested_direction) const
 	bool turned = false;
 	if (ship->direction != requested_direction)
 	{
-		ship->current_state.thrust.x = 0;	// one frame to turn without modifying thrust
+		ship->state.current.thrust.x = 0;	// one frame to turn without modifying thrust
 		turned = true;
 	}
 	ship->direction = requested_direction;

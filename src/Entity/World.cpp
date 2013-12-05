@@ -3,7 +3,9 @@
 #include <random>
 #include <functional>
 #include <ctime>
+#include <algorithm>
 #include "World.h"
+#include "Entity.h"
 
 World::World(int hill_count)
 {
@@ -29,12 +31,17 @@ World::World(int hill_count)
 	}
 }
 
-SDL_Rect World::getPlayArea(const SDL_Rect& entity_bounding_box)
+Rect World::getPlayArea(const Rect& entity_box)
 {
 	return{
-		0,
+		0.0,
 		this->ship_limits.y,
-		(int)this->w,
-		this->ship_limits.h - entity_bounding_box.h
+		this->w,
+		this->ship_limits.h - entity_box.h
 	};
+}
+
+double World::getAltitude(const Entity& entity)
+{
+	return std::max(0.0, this->ship_limits.y + this->ship_limits.h - entity.state.current.pos.y - entity.box.h);
 }

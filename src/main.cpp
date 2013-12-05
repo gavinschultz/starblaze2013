@@ -122,10 +122,10 @@ void run()
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	Ship* ship = game->entity_register.getShip();
-	ship->current_state.pos.x = world->ship_limits.x;
-	ship->current_state.pos.y = world->ship_limits.y + world->ship_limits.h - ship->bounding_box.h;
+	ship->state.current.pos.x = world->ship_limits.x;
+	ship->state.current.pos.y = world->ship_limits.y + world->ship_limits.h - ship->box.h;
 
-	station->current_state.pos.y = world->ship_limits.y + world->ship_limits.h - station->bounding_box.h;
+	station->state.current.pos.y = world->ship_limits.y + world->ship_limits.h - station->box.h;
 
 	double accumulator = 0;
 	const double dt = 1.0 / 60.0;
@@ -142,8 +142,8 @@ void run()
 			delta_time = 0.25;
 		}
 
-		ship->current_state.thrust.x = 0.0;
-		ship->current_state.thrust.y = 0.0;
+		ship->state.current.thrust.x = 0.0;
+		ship->state.current.thrust.y = 0.0;
 
 		input.handleInput();
 
@@ -152,19 +152,19 @@ void run()
 
 		// Apply additional reverse thrust if required
 		double thrust_multiplier = 1.0;
-		if ((ship->current_state.vel.x > 0.0 && ship->current_state.thrust.x < 0.0) || (ship->current_state.vel.x < 0.0 && ship->current_state.thrust.x > 0.0))
+		if ((ship->state.current.vel.x > 0.0 && ship->state.current.thrust.x < 0.0) || (ship->state.current.vel.x < 0.0 && ship->state.current.thrust.x > 0.0))
 			thrust_multiplier = ship->reverse_thrust_factor;
 
-		ship->current_state.thrust.x *= thrust_multiplier;
+		ship->state.current.thrust.x *= thrust_multiplier;
 		debug->set("thrust_multiplier", thrust_multiplier);
 
 		debug->setMotionRecordMaxThresholds(ship->max_thrust.x, ship->max_thrust.y);
-		debug->addMotionRecord(ship->current_state.thrust.x, ship->current_state.thrust.y);
+		debug->addMotionRecord(ship->state.current.thrust.x, ship->state.current.thrust.y);
 
-		if (ship->current_state.thrust.x > ship->max_thrust.x * thrust_multiplier)
-			ship->current_state.thrust.x = ship->max_thrust.x * thrust_multiplier;
-		else if (ship->current_state.thrust.x < -ship->max_thrust.x * thrust_multiplier)
-			ship->current_state.thrust.x = -ship->max_thrust.x * thrust_multiplier;
+		if (ship->state.current.thrust.x > ship->max_thrust.x * thrust_multiplier)
+			ship->state.current.thrust.x = ship->max_thrust.x * thrust_multiplier;
+		else if (ship->state.current.thrust.x < -ship->max_thrust.x * thrust_multiplier)
+			ship->state.current.thrust.x = -ship->max_thrust.x * thrust_multiplier;
 		// end calculate thrust
 
 		// alien AI
@@ -182,7 +182,7 @@ void run()
 			accumulator += delta_time;
 			while (accumulator >= dt)
 			{
-				//ship->prev_state = ship->current_state;
+				//ship->state.prev = ship->state.current;
 				accumulator -= dt;
 				physics::integrate(delta_time, dt);
 				physics::collisionDetection();
@@ -194,8 +194,8 @@ void run()
 			camera.prev_focus_point = camera.focus_point;
 			camera.prev_focus_loop_count = camera.focus_loop_count;
 			camera.prev_focus_rect = camera.focus_rect;
-			camera.focus_point = { std::lround(ship->alpha_pos.x * renderer->scaling), std::lround(ship->alpha_pos.y * renderer->scaling) };
-			camera.focus_loop_count = ship->current_state.loop_count;
+			camera.focus_point = { std::lround(ship->state.interpolated.x * renderer->scaling), std::lround(ship->state.interpolated.y * renderer->scaling) };
+			camera.focus_loop_count = ship->state.current.loop_count;
 
 			camera.focus_point_vel.x = camera.focus_point.x - camera.prev_focus_point.x + ((camera.focus_loop_count - camera.prev_focus_loop_count) * renderer->width);
 
@@ -224,7 +224,7 @@ void run()
 			}
 			else
 			{
-				desired_x_abs = camera.focus_point.x + ship->bounding_box.w*renderer->scaling - camera.focus_rect.w;
+				desired_x_abs = camera.focus_point.x + ship->box.w*renderer->scaling - camera.focus_rect.w;
 				if (desired_x_abs < 0)
 					desired_x_abs += renderer->width;
 				if (!renderer->isRightOf(desired_x_abs, proposed_x_abs))

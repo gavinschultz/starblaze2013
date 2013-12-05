@@ -166,10 +166,12 @@ void Renderer::render(Camera* camera)
 	{
 		for (auto& debris_item : debris->getItems())
 		{
-			
-			SDL_Rect debris_item_rect = {	// TODO: use alpha_pos instead of current_state
-				renderutil::getScreenXForEntityByCameraAndDistance(debris_item->current_state.pos.x * scaling, 2 * scaling, renderer->width, *camera, 1.0),
-				std::lround(debris_item->current_state.pos.y * scaling - camera->view_rect.y),
+			if (!debris_item->isAlive())
+				continue;
+
+			SDL_Rect debris_item_rect = {	// TODO: use state.interpolated instead of state.current
+				renderutil::getScreenXForEntityByCameraAndDistance(debris_item->state.current.pos.x * scaling, 2 * scaling, renderer->width, *camera, 1.0),
+				std::lround(debris_item->state.current.pos.y * scaling - camera->view_rect.y),
 				2 * scaling,
 				2 * scaling
 			};
@@ -231,7 +233,7 @@ void Renderer::renderCollisionBoxes(const Camera& camera)
 	std::vector<SDL_Rect> transformed_collided_rects;
 	for (auto& entity : game->entity_register.getAll())
 	{
-		for (auto& collision_box : entity->collision_boxes)
+		for (auto& collision_box : entity->getCollisionBoxes())
 		{
 			SDL_Rect transformed_rect = SDL_Rect{
 			renderutil::getScreenXForEntityByCameraAndDistance(collision_box.x * scaling, collision_box.w * scaling, this->width, camera, 1.0),

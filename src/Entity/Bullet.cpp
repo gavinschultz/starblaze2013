@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "Bullet.h"
+#include "Alien.h"
 
 class Bullet::impl
 {
 public:
 	static const std::vector<Rect> base_collision_boxes;
+	double age{ 0.0 };
 };
 const std::vector<Rect> Bullet::impl::base_collision_boxes{
 	{ 0, 0, 4, 2 }
@@ -13,25 +15,28 @@ const std::vector<Rect> Bullet::impl::base_collision_boxes{
 Bullet::Bullet() : pimpl{ new impl{} }
 {
 	this->is_active = false;
-	this->bounding_box = { 0, 0, 4, 2 };
-	this->health = 1;
-	this->weight = 0.5;
-	this->max_lift = 0.0;
-	collision_boxes = std::vector<Rect>{ *getBaseCollisionBoxes() };
+	this->box = { 0, 0, 4, 2 };
+	this->attrib.health = 1;
+	this->attrib.weight = 0.5;
+	this->attrib.max_lift = 0.0;
+	this->_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { &typeid(Alien) }));
+	this->deceleration_factor = { 0.0, 0.0 };
 }
 
 Bullet::~Bullet() {}
 
-double Bullet::getDecelerationFactorX() const
-{
-	return 0.0;
-}
-
 void Bullet::tick(double dt)
 {
-	Entity::tick(dt);
-	if (age > 0.7)
+	if (is_active)
+		pimpl->age += dt;
+	if (pimpl->age > 0.7)
 		this->is_active = false;
+}
+
+void Bullet::reset()
+{
+	pimpl->age = 0.0;
+	is_active = true;
 }
 
 const std::vector<Rect>* Bullet::getBaseCollisionBoxes() const

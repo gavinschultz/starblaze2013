@@ -33,24 +33,24 @@ WaveAttack::WaveAttack() : pimpl{ new impl{} }{}
 WaveAttack::~WaveAttack(){}
 void WaveAttack::run(Alien& alien, const Entity* target, double dt)
 {
-	Vector2D vec_a_to_t = { target->current_state.pos.x - alien.current_state.pos.x, target->current_state.pos.y - alien.current_state.pos.y };
+	Vector2D vec_a_to_t = { target->state.current.pos.x - alien.state.current.pos.x, target->state.current.pos.y - alien.state.current.pos.y };
 	double magnitude = 0.0;
 	Vector2D vec_a_to_t_norm = mathutil::normaliseVector(vec_a_to_t, &magnitude);
 
 	//double sin_y = std::sin(std::fmod(pimpl->radians_counter, 6.28)) * pimpl->sin_multiplier;
 
-	double relative_x = util::relativeX(target->current_state.pos.x, alien.current_state.pos.x, world->w);
+	double relative_x = util::relativeX(target->state.current.pos.x, alien.state.current.pos.x, world->w);
 	double thrust_factor = 1.5;
 	if (std::abs(relative_x) < 1024)
 		//thrust_factor = relative_x / 1280 + 0.2;
 		thrust_factor = (std::abs(relative_x) / 2560 + 0.1);
 	thrust_factor *= std::copysign(1.0, vec_a_to_t.x);
 	//double thrust_factor = 0.6 + (std::min(std::abs(relative_x), alien.max_thrust*4) / (alien.max_thrust * 4));
-	alien.current_state.thrust.x = pimpl->thrust * thrust_factor;
+	alien.state.current.thrust.x = pimpl->thrust * thrust_factor;
 
 	pimpl->radians_counter += dt; // *(1 / pimpl->sin_multiplier) *(1 / pimpl->hz);
-	double midpoint_y = (144.0 - alien.bounding_box.h) / 2;
+	double midpoint_y = (144.0 - alien.box.h) / 2;
 	double sin_y = midpoint_y * std::sin(pimpl->hz * (pimpl->radians_counter)) + midpoint_y;
-	alien.current_state.pos.y = sin_y;
+	alien.state.current.pos.y = sin_y;
 	debug->set("sin_y", sin_y);
 }

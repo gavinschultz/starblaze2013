@@ -12,6 +12,4 @@ public:
 	Sprite();
 	Sprite(unsigned int scaling);
 	~Sprite();
-	virtual void render(SDL_Renderer* sdl_renderer, const Camera& camera) {};
-	virtual void render(SDL_Renderer* sdl_renderer, const Camera& camera, const Entity& entity){};
 };

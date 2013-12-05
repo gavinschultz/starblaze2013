@@ -3,6 +3,9 @@
 #include <memory>
 #include <SDL.h>
 #include "Hill.h"
+#include "Phys.h"
+
+class Entity;
 
 class World
 {
@@ -13,7 +16,8 @@ public:
 	//SDL_Rect ship_limits{ { 48, 0, 160, 144 } };	// square
 	//SDL_Rect ship_limits{ { 48, 0, 248, 144 } };	// 1366 x 768 - short edges
 	SDL_Rect ship_limits = SDL_Rect{ 56, 0, 232, 144 };	// 1366 x 768 - far edges
-	SDL_Rect getPlayArea(const SDL_Rect& entity_bounding_box);
+	Rect getPlayArea(const Rect& entity_box);
+	double getAltitude(const Entity& entity);
 };
 
 extern std::unique_ptr<World> world;
