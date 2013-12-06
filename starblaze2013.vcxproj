@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Attacks\AttackAlgorithm.h" />
+    <ClInclude Include="src\Entity\AlienBomb.h" />
     <ClInclude Include="src\Entity\Collidable.h" />
     <ClInclude Include="src\Entity\Alien.h" />
     <ClInclude Include="src\Entity\Bullet.h" />

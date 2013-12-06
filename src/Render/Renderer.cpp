@@ -233,7 +233,7 @@ void Renderer::renderCollisionBoxes(const Camera& camera)
 	std::vector<SDL_Rect> transformed_collided_rects;
 	for (auto& entity : game->entity_register.getAll())
 	{
-		for (auto& collision_box : entity->getCollisionBoxes())
+		for (auto& collision_box : entity->getCollidable().getCollisionBoxes())
 		{
 			SDL_Rect transformed_rect = SDL_Rect{
 			renderutil::getScreenXForEntityByCameraAndDistance(collision_box.x * scaling, collision_box.w * scaling, this->width, camera, 1.0),

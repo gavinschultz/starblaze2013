@@ -9,13 +9,16 @@
 #include "Bullet.h"
 #include "Ship.h"
 #include "Debris.h"
+#include "Game.h"
+#include "Collidable.h"
 
 class Alien::impl
 {
 public:
 	static int rndseed;
 	std::unique_ptr<AttackAlgorithm> attack_algorithm;
-	static const std::vector<Rect> Alien::impl::base_collision_boxes;
+	static const std::vector<Rect> base_collision_boxes;
+	static const Rect base_outer_box;
 };
 int Alien::impl::rndseed{ 0 };
 const std::vector<Rect> Alien::impl::base_collision_boxes{
@@ -27,11 +30,12 @@ const std::vector<Rect> Alien::impl::base_collision_boxes{
 	{ 0, 9, 6, 3 },
 	{ 10, 9, 6, 3 }
 };
+const Rect base_outer_box = { 0, 0, 16, 12 };
 
-Alien::Alien() : pimpl{ new impl{} }
+Alien::Alien() : Entity(new NormalCollidable{ impl::base_outer_box, impl::base_collision_boxes, { defaultShipToAlienCollider.get(), defaultShipToStationCollider.get() } }) pimpl{ new impl{} }
 {
 	this->box = { 0, 0, 16, 12 };
-	this->_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { &typeid(Ship), &typeid(Bullet) }));
+	this->_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { }));
 
 	this->attrib.weight = 100.0;
 	this->attrib.max_lift = 150.0;

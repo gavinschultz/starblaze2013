@@ -6,9 +6,10 @@
 #include <memory>
 #include "Bullet.h"
 #include "Alien.h"
-
+#include "Station.h"
 #include "World.h"
 #include "Game.h"
+#include "Collidable.h"
 
 class Ship::impl
 {
@@ -34,9 +35,11 @@ public:
 	double age{ 0.0 };
 	int bullet_counter{ 0 };
 	double reload_countdown{ 0.5 };
+	static const Rect base_outer_box;
 	static const std::vector<Rect> base_collision_boxes;
 	static const std::vector<std::unique_ptr<Collider>> colliders;
 };
+const Rect Ship::impl::base_outer_box{ 0, 0, 32, 8 };
 const std::vector<Rect> Ship::impl::base_collision_boxes{
 	{ 0, 1, 4, 7 },
 	{ 4, 2, 2, 6 },
@@ -49,12 +52,10 @@ const std::vector<std::unique_ptr<Collider>> Ship::impl::colliders{
 	std::make_unique<Collider>(new ShipToStationCollider())
 };
 
-Ship::Ship() : pimpl{ new impl{} }
+Ship::Ship() : Entity(new NormalCollidable{ impl::base_outer_box, impl::base_collision_boxes, { defaultShipToAlienCollider.get(), defaultShipToStationCollider.get() } }), pimpl{ new impl{} }
 {
-	box = { 0, 0, 32, 8 };
 	attrib.weight = 110.0;
 	attrib.max_lift = 700.0;
-	_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { &typeid(Alien), &typeid(Station) }));
 }
 Ship::~Ship() {}
 
@@ -95,7 +96,7 @@ const std::vector<Rect>* Ship::getBaseCollisionBoxes() const
 
 void Ship::updateCollisionBoxes(Point2D pos)
 {
-	collidable.updateCollisionBoxes(pos, (direction == ShipDirection::left));
+	this->getCollidable().updateCollisionBoxes(pos, (direction == ShipDirection::left));
 }
 
 bool Ship::isGearDown() const

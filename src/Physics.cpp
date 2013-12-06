@@ -95,7 +95,7 @@ void physics::collisionDetection()
 		if (!entity->is_active)
 			continue;
 
-		for (auto& collider : entity->getColliders())
+		for (const auto collider : entity->getCollidable().getColliders())
 		{
 			collider->test(entity);
 		}
