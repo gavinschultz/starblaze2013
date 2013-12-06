@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Bullet.h"
 #include "Alien.h"
+#include "Collidable.h"
 
 class Bullet::impl
 {
@@ -19,7 +20,7 @@ Bullet::Bullet() : pimpl{ new impl{} }
 	this->attrib.health = 1;
 	this->attrib.weight = 0.5;
 	this->attrib.max_lift = 0.0;
-	this->_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { &typeid(Alien) }));
+	this->_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { defaultBulletToAlienCollider }));
 	this->deceleration_factor = { 0.0, 0.0 };
 }
 

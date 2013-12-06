@@ -4,6 +4,8 @@
 #include "Phys.h"
 #include "Entity.h"
 
+class Collider;
+
 class Collidable
 {
 public:
@@ -12,13 +14,12 @@ public:
 	virtual const Rect getOuterBox() const = 0;
 	virtual void updateCollisionBoxes(Point2D pos, bool hflip = false) = 0;
 	virtual void reset() = 0;
-	virtual bool canCollideWith(const Entity& entity) const = 0;
 	virtual bool isCollided() const = 0;
-	virtual bool testBoxCollision(Collidable& collidable) = 0;
 	virtual void setCollided() = 0;
+	virtual const std::vector<const Collider*>& getColliders() const = 0;
 };
 
-class NonCollidable : Collidable
+class NonCollidable : public Collidable
 {
 public:
 	NonCollidable() {}
@@ -27,182 +28,98 @@ public:
 	virtual const Rect getOuterBox() const { return Rect{}; }
 	virtual void updateCollisionBoxes(Point2D pos, bool hflip = false) { }
 	virtual void reset() { }
-	virtual bool canCollideWith(const Entity& entity) const { return false; }
 	virtual bool isCollided() const { return false; }
-	virtual bool testBoxCollision(Collidable& collidable) { return false; }
 	virtual void setCollided() { }
+	virtual const std::vector<const Collider*>& getColliders() const { return std::vector<const Collider*>{}; }
 };
 
-class NormalCollidable : Collidable
+class NormalCollidable : public Collidable
 {
 private:
 	bool _is_collided{ false };
 	const std::vector<Rect> _base_collision_boxes;
 	std::vector<Rect> _collision_boxes;
-	const std::vector<const std::type_info*> _collidable_types;
 	const Rect _outer_box;
+	const std::vector<const Collider*> _colliders;
 public:
-	NormalCollidable(const Rect& outer_collision_box, const std::vector<Rect>& collision_boxes, const std::vector<const std::type_info*>& collidable_types);
+	NormalCollidable(
+		const Rect& outer_collision_box, 
+		const std::vector<Rect>& collision_boxes, 
+		const std::vector<const Collider*>& colliders
+		);
 	virtual const std::vector<Rect>& getBaseCollisionBoxes() const { return _base_collision_boxes; }
 	virtual const std::vector<Rect>& getCollisionBoxes() const { return _collision_boxes; }
 	virtual const Rect getOuterBox() const { return _outer_box; }
 	virtual void updateCollisionBoxes(Point2D pos, bool hflip = false);
 	virtual void reset() { _is_collided = false; }
-	virtual bool canCollideWith(const Entity& entity) const { return std::find(_collidable_types.cbegin(), _collidable_types.cend(), typeid(entity).name()) == _collidable_types.cend(); }
 	virtual bool isCollided() const { return _is_collided; }
-	virtual bool testBoxCollision(Collidable& collidable);
 	virtual void setCollided() { _is_collided = true; }
+	virtual const std::vector<const Collider*>& getColliders() const { return _colliders; }
 };
 
-#include "AlienBomb.h"
-#include "Bullet.h"
-#include "Station.h"
-#include "Alien.h"
-#include "Ship.h"
-#include "Util.h"
-#include "Game.h"
-
-namespace collider
+namespace collide
 {
 	bool areRectanglesIntersecting(const Rect& a, const Rect& b);
 	bool areRectanglesIntersecting(const SDL_Rect& a, const SDL_Rect& b);
-
-	bool isCollidingByRectangles(const Collidable& a, const Collidable& b)
-	{
-		if (!collider::areRectanglesIntersecting(a.getOuterBox(), b.getOuterBox()))
-			return false;
-
-		for (auto& coll_a : a.getCollisionBoxes())
-		{
-			for (auto& coll_b : b.getCollisionBoxes())
-			{
-				if (collider::areRectanglesIntersecting(coll_a, coll_b))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	bool isCollidingByTemporalPositionLine(const Collidable& collidable, const TemporalState2D& temporal_position)
-	{
-		return false;
-	}
+	bool isCollidingByRectangles(Collidable& a, Collidable& b);
+	bool isCollidingByTemporalPositionLine(const Collidable& collidable, const TemporalState2D& temporal_position);
 }
 
-//TODO: make templates
-bool collider::areRectanglesIntersecting(const Rect& a, const Rect& b)
-{
-	if (a.x + a.w < b.x)
-		return false;
-	if (b.x + b.w < a.x)
-		return false;
-	if (a.y + a.h < b.y)
-		return false;
-	if (b.y + b.h < a.y)
-		return false;
-	return true;
-}
-bool collider::areRectanglesIntersecting(const SDL_Rect& a, const SDL_Rect& b)
-{
-	if (a.x + a.w < b.x)
-		return false;
-	if (b.x + b.w < a.x)
-		return false;
-	if (a.y + a.h < b.y)
-		return false;
-	if (b.y + b.h < a.y)
-		return false;
-	return true;
-	//return SDL_HasIntersection(&a, &b);
-}
+class Entity;
+class Ship;
+class Alien;
+class Bullet;
+class Station;
+class AlienBomb;
 
 class Collider
 {
 public:
-	virtual bool test(Entity* a);
+	virtual bool test(Entity* a) const = 0;
 };
 
-class ShipToAlienCollider : Collider
+class ShipToAlienCollider : public Collider
 {
-	bool test(Entity* a)
-	{
-		auto ship = (Ship*)a;
-		for (auto& alien : game->entity_register.getAliens())
-		{
-			if (collider::isCollidingByRectangles(ship->getCollidable(), alien->getCollidable()))
-			{
-				collide(*ship, *alien.get());
-				return true;
-			}
-			return false;
-		}
-	}
-	void collide(Ship& ship, Alien& alien)
-	{
-		alien.damage(100);
-		ship.damage(100);
-	}
+private:
+	void collide(Ship& ship, Alien& alien) const;
+public:
+	bool test(Entity* a) const;
 };
 
-class ShipToStationCollider : Collider
+class ShipToStationCollider : public Collider
 {
-	void collide(Entity* a, Entity* b)
-	{
-		auto ship = (Ship*)a;
-		auto station = (Station*)b;
-
-		if (ship->state.current.vel.x > 100)
-			return;
-
-		//station->can_dock = true;
-	}
+private:
+	void collide(Entity* a, Entity* b) const;
+public:
+	bool test(Entity* a) const;
 };
 
-class BulletToAlienCollider : Collider
+class BulletToAlienCollider : public Collider
 {
-	bool test(Entity* a)
-	{
-		auto bullet = (Bullet*)a;
-		for (auto& alien : game->entity_register.getAliens())
-		{
-			if (collider::isCollidingByRectangles(bullet->getCollidable(), alien->getCollidable()))
-			{
-				collide(*bullet, *alien.get());
-				return true;
-			}
-			return false;
-		}
-	}
-	void collide(Bullet& bullet, Alien& alien)
-	{
-		bullet.damage(100);
-		alien.damage(100);
-	}
+private:
+	void collide(Bullet& bullet, Alien& alien) const;
+public:
+	bool test(Entity* a) const;
 };
 
-class AlienBombToStationCollider : Collider
+class AlienBombToStationCollider : public Collider
 {
-	bool test(Entity* a)
-	{
-		return false;
-	}
-	void collide(AlienBomb& bomb, Station& station)
-	{
-		bomb.damage(100);
-		station.damage(100);
-	}
+private:
+	void collide(AlienBomb& bomb, Station& station) const;
+public:
+	bool test(Entity* a) const;
 };
 
-class AlienBombToShipCollider : Collider
+class AlienBombToShipCollider : public Collider
 {
-	bool test(Entity* a)
-	{
-		return false;
-	}
-	void collide(AlienBomb& bomb, Ship& ship)
-	{
-		bomb.damage(100);
-		ship.damage(100);
-	}
+private:
+	void collide(AlienBomb& bomb, Ship& ship) const;
+public:
+	bool test(Entity* a) const;
 };
+
+extern const std::unique_ptr<ShipToAlienCollider> defaultShipToAlienCollider;
+extern const std::unique_ptr<ShipToStationCollider> defaultShipToStationCollider;
+extern const std::unique_ptr<BulletToAlienCollider> defaultBulletToAlienCollider;
+extern const std::unique_ptr<AlienBombToStationCollider> defaultBombToStationCollider;
+extern const std::unique_ptr<AlienBombToShipCollider> defaultBombToShipCollider;
