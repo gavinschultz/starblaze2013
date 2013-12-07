@@ -66,13 +66,19 @@ bool collide::isCollidingByTemporalPositionLine(const Collidable& collidable, co
 }
 
 
+Collidable::Collidable() {}
+Collidable::~Collidable() {}
+
+const std::vector<Rect> NonCollidable::empty_rect = {};
+
 NormalCollidable::NormalCollidable(
 	const Rect& outer_box,
-	const std::vector<Rect>& collision_boxes,
-	const std::vector<const Collider*>& colliders)
+	const std::vector<Rect>& collision_boxes
+	//,const std::vector<const Collider*>& colliders
+	)
 	: _outer_box{ outer_box },
-	_collision_boxes{ collision_boxes },
-	_colliders{ colliders }
+	_collision_boxes{ collision_boxes }
+	//,_colliders{ colliders }
 {}
 
 void NormalCollidable::updateCollisionBoxes(Point2D pos, bool hflip)
@@ -100,6 +106,7 @@ void NormalCollidable::updateCollisionBoxes(Point2D pos, bool hflip)
 	}
 }
 
+
 bool ShipToAlienCollider::test(Entity* a) const
 {
 	auto ship = (Ship*)a;
@@ -110,8 +117,8 @@ bool ShipToAlienCollider::test(Entity* a) const
 			collide(*ship, *alien.get());
 			return true;
 		}
-		return false;
 	}
+	return false;
 }
 
 void ShipToAlienCollider::collide(Ship& ship, Alien& alien) const
@@ -146,8 +153,8 @@ bool BulletToAlienCollider::test(Entity* a) const
 			collide(*bullet, *alien.get());
 			return true;
 		}
-		return false;
 	}
+	return false;
 }
 void BulletToAlienCollider::collide(Bullet& bullet, Alien& alien) const
 {

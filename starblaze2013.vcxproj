@@ -91,6 +91,7 @@
   <ItemGroup>
     <ClInclude Include="src\Attacks\AttackAlgorithm.h" />
     <ClInclude Include="src\Entity\AlienBomb.h" />
+    <ClInclude Include="src\Entity\Base.h" />
     <ClInclude Include="src\Entity\Collidable.h" />
     <ClInclude Include="src\Entity\Alien.h" />
     <ClInclude Include="src\Entity\Bullet.h" />
@@ -138,6 +139,7 @@
     <ClCompile Include="src\Entity\Bullet.cpp" />
     <ClCompile Include="src\Entity\Collidable.cpp" />
     <ClCompile Include="src\Entity\Debris.cpp" />
+    <ClCompile Include="src\Entity\Entity.cpp" />
     <ClCompile Include="src\Entity\EntityRegister.cpp" />
     <ClCompile Include="src\Entity\Ship.cpp" />
     <ClCompile Include="src\Entity\Station.cpp" />

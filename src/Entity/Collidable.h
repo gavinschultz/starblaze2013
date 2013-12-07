@@ -9,6 +9,8 @@ class Collider;
 class Collidable
 {
 public:
+	Collidable();
+	~Collidable();
 	virtual const std::vector<Rect>& getBaseCollisionBoxes() const = 0;
 	virtual const std::vector<Rect>& getCollisionBoxes() const = 0;
 	virtual const Rect getOuterBox() const = 0;
@@ -16,21 +18,23 @@ public:
 	virtual void reset() = 0;
 	virtual bool isCollided() const = 0;
 	virtual void setCollided() = 0;
-	virtual const std::vector<const Collider*>& getColliders() const = 0;
+	//virtual const std::vector<const Collider*>& getColliders() const = 0;
 };
 
 class NonCollidable : public Collidable
 {
+private:
+	static const std::vector<Rect> empty_rect;
 public:
 	NonCollidable() {}
-	virtual const std::vector<Rect>& getBaseCollisionBoxes() const { return std::vector<Rect>{}; }
-	virtual const std::vector<Rect>& getCollisionBoxes() const { return std::vector<Rect>{}; }
+	virtual const std::vector<Rect>& getBaseCollisionBoxes() const { return empty_rect; }
+	virtual const std::vector<Rect>& getCollisionBoxes() const { return empty_rect; }
 	virtual const Rect getOuterBox() const { return Rect{}; }
 	virtual void updateCollisionBoxes(Point2D pos, bool hflip = false) { }
 	virtual void reset() { }
 	virtual bool isCollided() const { return false; }
 	virtual void setCollided() { }
-	virtual const std::vector<const Collider*>& getColliders() const { return std::vector<const Collider*>{}; }
+	//virtual const std::vector<const Collider*>& getColliders() const { return std::vector<const Collider*>{}; }
 };
 
 class NormalCollidable : public Collidable
@@ -40,12 +44,12 @@ private:
 	const std::vector<Rect> _base_collision_boxes;
 	std::vector<Rect> _collision_boxes;
 	const Rect _outer_box;
-	const std::vector<const Collider*> _colliders;
+	//const std::vector<const Collider*> _colliders;
 public:
 	NormalCollidable(
 		const Rect& outer_collision_box, 
-		const std::vector<Rect>& collision_boxes, 
-		const std::vector<const Collider*>& colliders
+		const std::vector<Rect>& collision_boxes
+		//,const std::vector<const Collider*>& colliders
 		);
 	virtual const std::vector<Rect>& getBaseCollisionBoxes() const { return _base_collision_boxes; }
 	virtual const std::vector<Rect>& getCollisionBoxes() const { return _collision_boxes; }
@@ -54,7 +58,12 @@ public:
 	virtual void reset() { _is_collided = false; }
 	virtual bool isCollided() const { return _is_collided; }
 	virtual void setCollided() { _is_collided = true; }
-	virtual const std::vector<const Collider*>& getColliders() const { return _colliders; }
+	//virtual const std::vector<const Collider*>& getColliders() const { return _colliders; }
+};
+
+class DockingCollidable : public Collidable
+{
+
 };
 
 namespace collide
@@ -117,9 +126,9 @@ private:
 public:
 	bool test(Entity* a) const;
 };
-
-extern const std::unique_ptr<ShipToAlienCollider> defaultShipToAlienCollider;
-extern const std::unique_ptr<ShipToStationCollider> defaultShipToStationCollider;
-extern const std::unique_ptr<BulletToAlienCollider> defaultBulletToAlienCollider;
-extern const std::unique_ptr<AlienBombToStationCollider> defaultBombToStationCollider;
-extern const std::unique_ptr<AlienBombToShipCollider> defaultBombToShipCollider;
+//
+//extern const std::unique_ptr<ShipToAlienCollider> defaultShipToAlienCollider;
+//extern const std::unique_ptr<ShipToStationCollider> defaultShipToStationCollider;
+//extern const std::unique_ptr<BulletToAlienCollider> defaultBulletToAlienCollider;
+//extern const std::unique_ptr<AlienBombToStationCollider> defaultBombToStationCollider;
+//extern const std::unique_ptr<AlienBombToShipCollider> defaultBombToShipCollider;

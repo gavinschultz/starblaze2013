@@ -62,7 +62,7 @@ void physics::integrate(double delta_time, double dt)
 		entity->box.x = entity->state.current.pos.x;
 		entity->box.y = entity->state.current.pos.y;
 
-		entity->updateCollisionBoxes();
+		//entity->updateCollisionBoxes();
 
 		entity->tick(dt);
 	}
@@ -95,10 +95,10 @@ void physics::collisionDetection()
 		if (!entity->is_active)
 			continue;
 
-		for (const auto collider : entity->getCollidable().getColliders())
-		{
-			collider->test(entity);
-		}
+		//for (const auto collider : entity->getCollidable().getColliders())
+		//{
+		//	collider->test(entity);
+		//}
 	}
 
 	game->entity_register.removeInactives();
