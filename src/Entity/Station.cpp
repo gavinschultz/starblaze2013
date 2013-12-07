@@ -16,10 +16,10 @@ const std::vector<Rect> Station::impl::base_collision_boxes{
 };
 const Rect Station::impl::base_outer_box = { 0, 0, 32, 16 };
 
-Station::Station() : Entity(new NormalCollidable{ pimpl->base_outer_box, *getBaseCollisionBoxes(), { } }), pimpl{ new impl{} }
+//Station::Station() : Entity(new NormalCollidable{ impl::base_outer_box, impl::base_collision_boxes }), pimpl{ new impl{} }
+Station::Station() : Entity(), pimpl{ new impl{} }
 {
-	box = { 0, 0, 32, 16 };
-	_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), {}));
+	box = impl::base_outer_box;
 }
 Station::~Station(){}
 

@@ -78,10 +78,11 @@ void ShipSprite::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 		wheels_texture = _wheels_texture.texture;
 	}
 
-	if (ship.getCollidable().isCollided())
-		SDL_SetTextureColorMod(_ship_texture.texture, 0, 0, 0);
-	else
-		SDL_SetTextureColorMod(_ship_texture.texture, 255, 255, 255);
+	//if (ship.getCollidable().isCollided())
+	//	SDL_SetTextureColorMod(_ship_texture.texture, 0, 0, 0);
+	//else
+	//	SDL_SetTextureColorMod(_ship_texture.texture, 255, 255, 255);
+
 	SDL_RenderCopyEx(sdl_renderer, _ship_texture.texture, &_ship_texture.rect, &ship_rect, 0, NULL, flip);
 	SDL_SetTextureColorMod(_ship_texture.texture, 255, 255, 255); // shared texture, so reset to defaults
 

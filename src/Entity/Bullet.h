@@ -13,6 +13,4 @@ public:
 	double getDecelerationFactorX() const;
 	void tick(double dt);
 	void reset();
-
-	void collide(const Alien& alien);
 };

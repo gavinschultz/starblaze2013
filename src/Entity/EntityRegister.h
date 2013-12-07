@@ -12,14 +12,17 @@ class Debris;
 class EntityRegister
 {
 public:
+	EntityRegister();
+	~EntityRegister();
+
 	// retrieval
 	Ship* getShip() const;
 	const std::vector<std::unique_ptr<Alien>>& getAliens() const;
 	Station* getStation() const;
 	const std::vector<std::unique_ptr<Bullet>>& getBullets() const;
 	const std::vector<std::unique_ptr<Debris>>& getDebris() const;
-	const std::vector<Entity*> getAll() const;	//TODO: convert to Entity&
-	const std::vector<Entity&> getAllActive() const;
+	const std::vector<Entity*> getAll() const;
+	const std::vector<Entity*> getAllActive() const;
 
 	// registration
 	void registerEntity(Ship* ship);

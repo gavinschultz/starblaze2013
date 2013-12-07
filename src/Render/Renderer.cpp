@@ -233,15 +233,15 @@ void Renderer::renderCollisionBoxes(const Camera& camera)
 	std::vector<SDL_Rect> transformed_collided_rects;
 	for (auto& entity : game->entity_register.getAll())
 	{
-		for (auto& collision_box : entity->getCollidable().getCollisionBoxes())
-		{
-			SDL_Rect transformed_rect = SDL_Rect{
-			renderutil::getScreenXForEntityByCameraAndDistance(collision_box.x * scaling, collision_box.w * scaling, this->width, camera, 1.0),
-			collision_box.y * scaling,
-			collision_box.w * scaling,
-			collision_box.h * scaling };
-			transformed_rects.push_back(transformed_rect);
-		}
+		//for (auto& collision_box : entity->getCollidable().getCollisionBoxes())
+		//{
+		//	SDL_Rect transformed_rect = SDL_Rect{
+		//	renderutil::getScreenXForEntityByCameraAndDistance(collision_box.x * scaling, collision_box.w * scaling, this->width, camera, 1.0),
+		//	collision_box.y * scaling,
+		//	collision_box.w * scaling,
+		//	collision_box.h * scaling };
+		//	transformed_rects.push_back(transformed_rect);
+		//}
 	}
 	glLineWidth(1.0f);
 	SDL_SetRenderDrawColor(sdl_renderer, 255, 0, 0, 255);

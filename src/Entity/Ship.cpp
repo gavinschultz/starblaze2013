@@ -37,7 +37,7 @@ public:
 	double reload_countdown{ 0.5 };
 	static const Rect base_outer_box;
 	static const std::vector<Rect> base_collision_boxes;
-	static const std::vector<std::unique_ptr<Collider>> colliders;
+	//static const std::vector<std::unique_ptr<Collider>> colliders;
 };
 const Rect Ship::impl::base_outer_box{ 0, 0, 32, 8 };
 const std::vector<Rect> Ship::impl::base_collision_boxes{
@@ -47,19 +47,17 @@ const std::vector<Rect> Ship::impl::base_collision_boxes{
 	{ 8, 4, 18, 4 },
 	{ 26, 5, 6, 3 }
 };
-const std::vector<std::unique_ptr<Collider>> Ship::impl::colliders{
-	std::make_unique<Collider>(new ShipToAlienCollider()),
-	std::make_unique<Collider>(new ShipToStationCollider())
-};
 
-Ship::Ship() : Entity(new NormalCollidable{ impl::base_outer_box, impl::base_collision_boxes, { defaultShipToAlienCollider.get(), defaultShipToStationCollider.get() } }), pimpl{ new impl{} }
+//Ship::Ship() : Entity(new NormalCollidable{ impl::base_outer_box, impl::base_collision_boxes, { defaultShipToAlienCollider.get(), defaultShipToStationCollider.get() } }), pimpl{ new impl{} }
+Ship::Ship() : Entity(), pimpl{ new impl{} }
 {
+	box = impl::base_outer_box;
 	attrib.weight = 110.0;
 	attrib.max_lift = 700.0;
 }
 Ship::~Ship() {}
 
-const std::vector<std::unique_ptr<Collider>>& Ship::getColliders() { return pimpl->colliders; }
+//const std::vector<std::unique_ptr<Collider>>& Ship::getColliders() { return pimpl->colliders; }
 
 void Ship::fire()
 {
@@ -96,7 +94,7 @@ const std::vector<Rect>* Ship::getBaseCollisionBoxes() const
 
 void Ship::updateCollisionBoxes(Point2D pos)
 {
-	this->getCollidable().updateCollisionBoxes(pos, (direction == ShipDirection::left));
+	//this->getCollidable().updateCollisionBoxes(pos, (direction == ShipDirection::left));
 }
 
 bool Ship::isGearDown() const

@@ -33,8 +33,5 @@ public:
 	double getDecelerationFactorY() const;
 	void updateCollisionBoxes(Point2D pos);
 
-	virtual const std::vector<std::unique_ptr<Collider>>& Ship::getColliders();
-
-	void collide(const Alien& alien);
-	void collide(const Station& station);
+	//virtual const std::vector<std::unique_ptr<Collider>>& Ship::getColliders();
 };

@@ -4,15 +4,20 @@
 #include <SDL.h>
 #include "Phys.h"
 #include "PhysicalAttributes.h"
-#include "Collidable.h"
+//#include "Collidable.h"
+
+class Collidable;
 
 class Entity 
 {
+private:
+	std::unique_ptr<Collidable> _collidable;
 protected:
 	Vector2D deceleration_factor{ 1.0, 1.0 };
-	std::unique_ptr<Collidable> _collidable;
 public:
-	Entity(Collidable* collidable);
+	//Entity(Collidable* collidable);
+	Entity();
+	~Entity();
 	TemporalState2D state;
 	Rect box;
 	PhysicalAttributes attrib;
@@ -22,7 +27,6 @@ public:
 	virtual void damage(int points) { attrib.health -= points; }
 
 	// Collisions
-	Collidable& getCollidable() const { return *_collidable; }
-	virtual void updateCollisionBoxes() { //_collidable->updateCollisionBoxes(this->state.current.pos); }
-	}
+	Collidable& getCollidable() const;
+	virtual void updateCollisionBoxes();
 };

@@ -28,7 +28,4 @@ public:
 	double getDecelerationFactorX() const;
 
 	void damage(int points);
-
-	void collide(const Bullet& bullet);
-	void collide(const Ship& ship);
 };

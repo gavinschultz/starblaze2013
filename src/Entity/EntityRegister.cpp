@@ -9,6 +9,9 @@
 #include "Entity\Bullet.h"
 #include "Entity\Debris.h"
 
+EntityRegister::EntityRegister() {}
+EntityRegister::~EntityRegister() {}
+
 void EntityRegister::registerEntity(Ship* ship)
 {
 	_ship = std::unique_ptr<Ship>{ship};
@@ -34,11 +37,15 @@ void EntityRegister::registerEntity(Debris* debris)
 	_debris.push_back(std::unique_ptr<Debris>{debris});
 }
 
+bool isInactive(const std::unique_ptr<Alien>& entity)
+{
+	return !entity->is_active;
+}
 void EntityRegister::removeInactives()
 {
 	if (!_ship->is_active) 
 		_ship = nullptr;
-	_aliens.erase(std::remove_if(_aliens.begin(), _aliens.end(), std::bind(&Entity::is_active, std::placeholders::_1)), _aliens.end()); //  broken
+	_aliens.erase(std::remove_if(_aliens.begin(), _aliens.end(), std::bind(isInactive, std::placeholders::_1)), _aliens.end()); //  broken
 	if (_station->is_active)
 		_station = nullptr;
 }
@@ -81,14 +88,14 @@ const std::vector<Entity*> EntityRegister::getAll() const
 	return all;
 }
 
-const std::vector<Entity&> EntityRegister::getAllActive() const
+const std::vector<Entity*> EntityRegister::getAllActive() const
 {
-	std::vector<Entity&> active;
-	active.push_back(*_ship.get());
-	active.push_back(*_station.get());
+	std::vector<Entity*> active;
+	active.push_back(_ship.get());
+	active.push_back(_station.get());
 	for (auto& alien : _aliens)
-		active.push_back(*alien.get());
+		active.push_back(alien.get());
 	for (auto& bullet : _bullets)
-		active.push_back(*bullet.get());
+		active.push_back(bullet.get());
 	return active;
 }

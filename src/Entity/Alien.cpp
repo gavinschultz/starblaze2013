@@ -30,12 +30,12 @@ const std::vector<Rect> Alien::impl::base_collision_boxes{
 	{ 0, 9, 6, 3 },
 	{ 10, 9, 6, 3 }
 };
-const Rect base_outer_box = { 0, 0, 16, 12 };
+const Rect Alien::impl::base_outer_box = { 0, 0, 16, 12 };
 
-Alien::Alien() : Entity(new NormalCollidable{ impl::base_outer_box, impl::base_collision_boxes, { defaultShipToAlienCollider.get(), defaultShipToStationCollider.get() } }) pimpl{ new impl{} }
+//Alien::Alien() : Entity(new NormalCollidable{ impl::base_outer_box, impl::base_collision_boxes, { defaultShipToAlienCollider.get(), defaultShipToStationCollider.get() } }), pimpl{ new impl{} }
+Alien::Alien() : Entity(), pimpl{ new impl{} }
 {
-	this->box = { 0, 0, 16, 12 };
-	this->_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { }));
+	this->box = impl::base_outer_box;
 
 	this->attrib.weight = 100.0;
 	this->attrib.max_lift = 150.0;
@@ -66,9 +66,4 @@ void Alien::damage(int points)
 	if (attrib.health > 0)
 		return;
 	game->entity_register.registerEntity(new Debris{ this->state.current });
-}
-
-const std::vector<Rect>* Alien::getBaseCollisionBoxes() const
-{
-	return &(pimpl->base_collision_boxes);
 }

@@ -7,20 +7,22 @@ class Bullet::impl
 {
 public:
 	static const std::vector<Rect> base_collision_boxes;
+	static const Rect base_outer_box;
 	double age{ 0.0 };
 };
 const std::vector<Rect> Bullet::impl::base_collision_boxes{
 	{ 0, 0, 4, 2 }
 };
+const Rect Bullet::impl::base_outer_box{ 0, 0, 4, 2 };
 
-Bullet::Bullet() : pimpl{ new impl{} }
+//Bullet::Bullet() : Entity(new NormalCollidable{impl::base_outer_box, impl::base_collision_boxes, { defaultBulletToAlienCollider.get() }}), pimpl{ new impl{} }
+Bullet::Bullet() : Entity(), pimpl{ new impl{} }
 {
 	this->is_active = false;
-	this->box = { 0, 0, 4, 2 };
+	this->box = impl::base_outer_box;
 	this->attrib.health = 1;
 	this->attrib.weight = 0.5;
 	this->attrib.max_lift = 0.0;
-	this->_collidable = std::make_unique<Collidable>(new NormalCollidable(box, *getBaseCollisionBoxes(), { defaultBulletToAlienCollider }));
 	this->deceleration_factor = { 0.0, 0.0 };
 }
 
@@ -38,9 +40,4 @@ void Bullet::reset()
 {
 	pimpl->age = 0.0;
 	is_active = true;
-}
-
-const std::vector<Rect>* Bullet::getBaseCollisionBoxes() const
-{
-	return &(pimpl->base_collision_boxes);
 }
