@@ -1,19 +1,13 @@
 #pragma once
 #include <SDL.h>
-#include "Entity\Ship.h"
+#include <memory>
 
-class Input
+class InputSystem
 {
 private:
-	SDL_GameController* _controller = nullptr;
-	void handleKeyboardEvent(const SDL_KeyboardEvent& e, Ship* ship) const;
-	void handleKeyboardState(Ship* ship) const;
-	void handleMouseMotionEvent(const SDL_MouseMotionEvent& e, Ship* ship) const;
-	void handleJoystickState(Ship* ship) const;
-
-	bool turnShip(Ship* ship, ShipDirection requested_direction) const;
+	class impl; std::unique_ptr<impl> pi;
 public:
-	Input();
-	~Input();
-	void handleInput();
+	InputSystem();
+	~InputSystem();
+	void update();
 };

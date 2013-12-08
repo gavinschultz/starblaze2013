@@ -1,11 +1,17 @@
 #include "stdafx.h"
-#include "Debug.h"
-#include <string>
-#include <Windows.h>
-#include <stdarg.h>
+#include <initializer_list>
 #include <iostream>
+#include <sstream>
+#include <Windows.h>
+#include <vector>
+#include "program.h"
 
-void console_debug(std::initializer_list<std::string> args)
+namespace
+{
+	std::vector<debug::DebugItem> items;
+}
+
+void debug::console(std::initializer_list<std::string> args)
 {
 	std::ostringstream ss;
 	for (auto& s : args)
@@ -18,50 +24,32 @@ void console_debug(std::initializer_list<std::string> args)
 	OutputDebugString(ss.str().c_str());
 }
 
-Debug::Debug() : motion_history(motion_history_limit, Vector2D{0.0,0.0})
-{
-	
-}
-
-Debug::~Debug()
-{
-
-}
-
-void Debug::set(std::string label, std::string value)
+void debug::set(std::string label, std::string value)
 {
 	for (auto& i : items)
 	{
-		if (i->label == label)
+		if (i.label == label)
 		{
-			i->value = value;
+			i.value = value;
 			return;
 		}
 	}
-
-	items.push_back(std::unique_ptr<DebugItem>{new DebugItem{ label, value }});
+	items.push_back(DebugItem{label, value});
 }
 
-void Debug::set(std::string label, double value)
+void debug::set(std::string label, double value)
 {
-	this->set(label, std::to_string(value));
+	debug::set(label, std::to_string(value));
 }
 
-void Debug::set(std::string label, int value)
+void debug::set(std::string label, int value)
 {
-	this->set(label, std::to_string(value));
+	debug::set(label, std::to_string(value));
 }
 
-void Debug::setMotionRecordMaxThresholds(double x, double y)
+const std::vector<debug::DebugItem>& debug::getItems()
 {
-	motion_max_thresholds = Vector2D{ x, y };
-}
-
-void Debug::addMotionRecord(double x, double y)
-{
-	if (motion_history_counter >= motion_history.size()-1)
-		motion_history_counter = 0;
-	else
-		motion_history_counter++;
-	motion_history[motion_history_counter] = Vector2D{ x, y };
+	if (items.size() > 0)
+		debug::console({ "Item: ", items[0].label, "/", items[0].value });
+	return items;
 }

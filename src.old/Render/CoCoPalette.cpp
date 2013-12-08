@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "cocopalette.h"
 #include <array>
 
 /*
@@ -20,8 +19,9 @@ The TRS-80 CoCo uses the Motorola 6847 VDG.
 From http://forums.bannister.org/ubbthreads.php?ubb=showflat&Number=64986&PHPSESSID=3c74d06c904029be10e5bfea6062aeab
 */
 
-std::array<SDL_Color, 11> CoCoPalette::colors = {
-	{
+namespace CoCoPalette
+{
+	std::array<SDL_Color, 11> colors { {
 		SDL_Color{ 7, 255, 0, 255 },
 		SDL_Color{ 255, 255, 0, 255 },
 		SDL_Color{ 59, 8, 255, 255 },
@@ -33,5 +33,5 @@ std::array<SDL_Color, 11> CoCoPalette::colors = {
 		SDL_Color{ 0, 0, 0, 255 },
 		SDL_Color{ 0, 124, 0, 255 },
 		SDL_Color{ 145, 0, 0, 255 }
-	} 
-};
+	} };
+}
