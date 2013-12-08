@@ -3,6 +3,5 @@
 
 namespace mathutil
 {
-	double round(double value, int sf);
 	Vector2D normaliseVector(Vector2D v, double* magnitude);
 }

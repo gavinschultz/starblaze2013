@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "mathutil.h"
+#include "MathUtil.h"
 #include <cmath>
 
 Vector2D mathutil::normaliseVector(Vector2D v, double* magnitude)
@@ -9,9 +9,4 @@ Vector2D mathutil::normaliseVector(Vector2D v, double* magnitude)
 	if (magnitude)
 		*magnitude = m;
 	return v_out;
-}
-
-double mathutil::round(double value, int sf)
-{
-	return std::floor((value*std::pow(10, sf)) + 0.5) / std::pow(10, sf);
 }

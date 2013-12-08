@@ -1,34 +1,13 @@
 #include "stdafx.h"
-#include "Game.h"
-#include <memory>
-#include <SDL.h>
-#include <SDL_image.h>
-#include "Debug.h"
+#include "game.h"
 
-Game::Game()
+void Game::handleKeyboardEvent(const SDL_KeyboardEvent& e)
 {
-
-}
-
-Game::~Game()
-{
-
-}
-
-void Game::start()
-{
-	
-}
-
-void Game::togglePause(bool state)
-{
-	is_paused = state;
-	if (!is_paused)
-		is_frame_by_frame = false;
-}
-
-void Game::advanceFrameByFrame()
-{
-	is_frame_by_frame = true;
-	is_paused = true;
+	switch (e.keysym.sym)
+	{
+	case SDLK_q:
+	case SDLK_ESCAPE:
+		this->quit = true;
+		return;
+	}
 }

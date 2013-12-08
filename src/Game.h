@@ -1,21 +1,13 @@
 #pragma once
 #include <memory>
-#include "Entity\EntityRegister.h"
-#include "Render\Renderer.h"
+#include <SDL.h>
 
 class Game
 {
 public:
-	Game();
-	~Game();
-	void start();
-	void togglePause(bool state);
-	bool is_paused{ false };
-	void advanceFrameByFrame();
-	bool is_frame_by_frame{ false };
+	void handleKeyboardEvent(const SDL_KeyboardEvent& e);
 	bool quit{ false };
-	EntityRegister entity_register;
-	float mouse_sensitivity{ 1.0 };
+	bool is_paused{ false };
 };
 
 extern std::unique_ptr<Game> game;

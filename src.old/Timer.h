@@ -5,7 +5,12 @@
 class Timer
 {
 private:
-	class impl; std::unique_ptr<impl> pi;	
+	int _fps;
+	double _start_time;
+	double _elapsed_time;
+	double _total_time;
+	uint32_t _frame;
+	void debug();
 public:
 	Timer(const int fps = 60);
 	~Timer();
@@ -15,7 +20,6 @@ public:
 	double getLastFrameDuration() const;
 	uint32_t getTotalFrames() const;
 	double getTime() const;
-	double getFrameStartTime() const;
 };
 
 extern std::unique_ptr<Timer> timer;

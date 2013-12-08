@@ -56,6 +56,7 @@ struct State2D
 	Vector2D vel;
 	Vector2D acc;
 	Vector2D thrust;
+	int loop_count{ 0 };
 };
 
 struct TemporalState2D

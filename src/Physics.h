@@ -1,8 +1,7 @@
 #pragma once
 
-namespace physics
+class PhysicsSystem
 {
-	void integrate(double delta_time, double dt);
-	void interpolate(double alpha);
-	void collisionDetection();
-}
+public:
+	void update();
+};

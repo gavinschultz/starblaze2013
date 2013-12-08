@@ -3,23 +3,13 @@
 #include <sstream>
 #include <Windows.h>
 
-class Timer::impl
+Timer::Timer(const int fps)
 {
-public:
-	int fps;
-	double start_time;
-	double elapsed_time;
-	double total_time;
-	uint32_t frame;
-};
-
-Timer::Timer(const int fps) : pi{ new impl{} }
-{
-	pi->fps = fps;
-	pi->start_time = 0;
-	pi->elapsed_time = 0;
-	pi->total_time = 0;
-	pi->frame = 0;
+	this->_fps = fps;
+	this->_start_time = 0;
+	this->_elapsed_time = 0;
+	this->_total_time = 0;
+	this->_frame = 0;
 }
 
 Timer::~Timer()
@@ -28,24 +18,24 @@ Timer::~Timer()
 
 void Timer::startFrame()
 {
-	pi->start_time = getTime();
-	pi->frame++;
+	_start_time = getTime();
+	_frame++;
 }
 
 void Timer::endFrame()
 {
-	pi->elapsed_time = getTime() - pi->start_time;
-	pi->total_time += pi->elapsed_time;
+	_elapsed_time = getTime() - _start_time;
+	_total_time += _elapsed_time;
 }
 
 double Timer::getFrameRate() const
 {
-	return 1.0 / pi->elapsed_time;
+	return 1.0 / _elapsed_time;
 }
 
 double Timer::getLastFrameDuration() const
 {
-	return pi->elapsed_time;
+	return _elapsed_time;
 }
 
 // Get time in seconds since the simulation has started
@@ -68,10 +58,12 @@ double Timer::getTime() const
 
 uint32_t Timer::getTotalFrames() const
 {
-	return pi->frame;
+	return this->_frame;
 }
 
-double Timer::getFrameStartTime() const
+void Timer::debug()
 {
-	return pi->start_time;
+	std::ostringstream ss;
+	ss << "{" << _frame << "}\tStart time: " << _start_time << "\tLast frame: " << this->getLastFrameDuration() << "\tFrame rate:" << this->getFrameRate() << "\tTotal time:" << _total_time << "\n";
+	OutputDebugString(ss.str().c_str());
 }
