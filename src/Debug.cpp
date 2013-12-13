@@ -47,9 +47,12 @@ void debug::set(std::string label, int value)
 	debug::set(label, std::to_string(value));
 }
 
+void debug::set(std::string label, unsigned int value)
+{
+	debug::set(label, std::to_string(value));
+}
+
 const std::vector<debug::DebugItem>& debug::getItems()
 {
-	if (items.size() > 0)
-		debug::console({ "Item: ", items[0].label, "/", items[0].value });
 	return items;
 }

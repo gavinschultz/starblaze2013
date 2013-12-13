@@ -3,13 +3,7 @@
 #include <unordered_map>
 #include <memory>
 #include <SDL.h>
-
-class SpriteTexture
-{
-public:
-	SDL_Texture* texture;
-	SDL_Rect rect;
-};
+#include "MappedTexture.h"
 
 class SpriteLoader
 {
@@ -19,5 +13,5 @@ public:
 	SpriteLoader();
 	~SpriteLoader();
 	void load(SDL_Renderer* sdl_renderer, const std::string& spritesheet_path);
-	const SpriteTexture& getSprite(const std::string& name) const;
+	const MappedTexture& getSprite(const std::string& name) const;
 };

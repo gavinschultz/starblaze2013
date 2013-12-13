@@ -10,21 +10,22 @@
 #include "cocopalette.h"
 #include "timer.h"
 #include "spriteloader.h"
-
-class Window
-{
-public:
-	unsigned int w;
-	unsigned int h;
-};
+#include "component.h"
+#include "session.h"
+#include "renderdefs.h"
+#include "renderutil.h"
+#include "phys.h"
+#include "prefs.h"
+#include "bmfontloader.h"
 
 class RenderSystem::impl
 {
 public:
+	impl();
+	~impl();
 	Window window;
 	SDL_Window* sdl_window;
 	SDL_Renderer* sdl_renderer;
-	SDL_Palette* sdl_palette;
 	
 	std::unique_ptr<SpriteLoader> sprite_loader;
 
@@ -32,10 +33,15 @@ public:
 
 	TTF_Font* debug_font;
 
-	void renderText(const std::string text, uint32_t x, uint32_t y) const;
-	void renderFPS(int fps) const;
 	void renderDebug(const std::vector<debug::DebugItem>& items) const;
+
+	std::unique_ptr<BackgroundRender> background_render;
+	std::unique_ptr<FPSRender> fps_render;
+	std::unique_ptr<DebugRender> debug_render;
 };
+
+RenderSystem::impl::impl() = default;
+RenderSystem::impl::~impl() = default;
 
 RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height, unsigned int sprite_scale, int render_width) : pi{ new impl{} }
 {
@@ -80,93 +86,106 @@ RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height
 		program::exit(RetCode::sdl_error, { "Error initializing SDL_TTF: %s\n", TTF_GetError() });
 	}
 
-	if (!(pi->debug_font = TTF_OpenFont("resources\\DroidSans.ttf", 16))) 
+	if (!(pi->debug_font = TTF_OpenFont("resources\\ostrich-black.ttf", 48))) 
 	{
 		program::exit(RetCode::sdl_error, { "Error opening debug font: %s\n", TTF_GetError() });
 	}
 
-	pi->sdl_palette = SDL_AllocPalette(11);
-	SDL_SetPaletteColors(pi->sdl_palette, CoCoPalette::colors.data(), 0, 11);
+	palette = SDL_AllocPalette(11);
+	SDL_SetPaletteColors(palette, CoCoPalette::colors.data(), 0, 11);
+
+	bmfont::load(pi->sdl_renderer, "resources\\font-ostrich-black.fnt");
 
 	//_text_renderer = std::unique_ptr<TextRenderer>{new TextRenderer{ this, sprite_loader.getSprite("characters") }};
 
 	debug::console({ "Renderer info\n--------------\n", getInfo() });
+
+	pi->background_render = std::make_unique<BackgroundRender>(*this);
+	pi->fps_render = std::make_unique<FPSRender>(pi->debug_font, pi->window);
+	pi->debug_render = std::make_unique<DebugRender>(pi->debug_font);
 }
 RenderSystem::~RenderSystem() {}
 
-void RenderSystem::update()
+void RenderSystem::draw(Camera& camera)
 {
 	SDL_RenderClear(pi->sdl_renderer);
 	SDL_SetRenderDrawColor(pi->sdl_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	
-	pi->renderFPS(std::lround(timer->getFrameRate()));
-	pi->renderDebug(debug::getItems());
+	//auto playfield = db->getPlayField();
+	//if (playfield)
+	//{
+	//	pi->background_render->render(pi->sdl_renderer, camera, *playfield);
+	//}
+
+	//for (auto e : db->getEntitiesOfType(E::station))
+	//{
+	//	station_render.draw(pi->sdl_renderer, camera, (Station*)e);
+	//}
+
+	//for (auto e : db->getEntitiesOfType(E::alien))
+	//{
+	//	alien_render.draw(pi->sdl_renderer, camera, (Alien*)e);
+	//}
+
+	//auto ship = db->getPlayer();
+	//if (ship)
+	//{
+	//	ship_renderable.draw(pi->sdl_renderer, camera, ship);
+	//}
+
+	//for (auto e : db->getEntitiesOfType(E::debris))
+	//{
+	//	debris_render.draw(pi->sdl_renderer, camera, (Debris*)e);
+	//}
+
+	//for (auto e : db->getEntitiesOfType(E::bullet))
+	//{
+	//	bullet_render.draw(pi->sdl_renderer, camera, (Bullet*)e);
+	//}
+
+	//hud_render.draw(pi->sdl_renderer, ship, session::score, session::lives);
+
+	//for (auto c : db->getComponentsOfType(C::radartrackable))
+	//{
+	//	radar_render.draw(pi->sdl_renderer, camera, (RadarTrackable*)c);
+	//}
+
+	//for (auto text_plate : db->getTextPlates())
+	//{
+	//	text_render.draw(pi->sdl_renderer, text_plate);
+	//}
+
+	//if (prefs::show_grid)
+	//{
+	//	grid_render.draw(pi->sdl_renderer);
+	//}
+
+	if (prefs::show_fps)
+	{
+		pi->fps_render->render(pi->sdl_renderer, timer->getFrameRate());
+	}
+
+	if (prefs::show_debug)
+	{
+		pi->debug_render->render(pi->sdl_renderer, debug::getItems());
+	}
+
+	//if (prefs::show_zeroline)
+	//{
+	//	zeroline_render.draw(pi->sdl_renderer, camera);
+	//}
+
+	//if (prefs::show_collisionboxes)
+	//{
+	//	collisionbox_render.draw(pi->sdl_renderer, camera);
+	//}
+	//
+	//if (prefs::show_motionhistory)
+	//{
+	//	motionhistory_render.draw(pi->sdl_renderer, debug::getMotionHistory())
+	//}
 
 	SDL_RenderPresent(pi->sdl_renderer);
-}
-
-void RenderSystem::impl::renderText(const std::string text, uint32_t x, uint32_t y) const
-{
-	SDL_Color text_color = { 255, 255, 255 };
-	SDL_Surface* text_surface = TTF_RenderText_Blended(debug_font, text.c_str(), text_color);
-	if (!text_surface)
-	{
-		debug::console({ "Unable to initialize font (mostly for debugging): ", SDL_GetError() });
-		return;
-	}
-	SDL_Rect text_texture_rect = { 0, 0, text_surface->w, text_surface->h };
-	SDL_Rect text_rect = { x, y, text_surface->w, text_surface->h };
-	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(sdl_renderer, text_surface);
-	if (!text_texture)
-	{
-		debug::console({ "Unable to create texture from surface: ", SDL_GetError() });
-		return;
-	}
-	SDL_FreeSurface(text_surface);
-	if (SDL_RenderCopy(sdl_renderer, text_texture, &text_texture_rect, &text_rect) < 0)
-	{
-		debug::console({ "Unable to render text texture: ", SDL_GetError() });
-		return;
-	}
-	SDL_DestroyTexture(text_texture);
-}
-
-void RenderSystem::impl::renderFPS(int fps) const
-{
-	static int cached_fps;
-	if (timer->getTotalFrames() % 10 == 0)
-		cached_fps = fps;
-	this->renderText("FPS:" + std::to_string(fps), 50, 50);
-}
-
-void RenderSystem::impl::renderDebug(const std::vector<debug::DebugItem>& items) const
-{
-	//TODO: probably horribly inefficient
-
-	const int initial_y = 100;
-	int y = initial_y;
-	int text_w, text_h;
-	int max_text_w = 0;
-	int font_height = TTF_FontHeight(debug_font);
-	for (auto& i : items)
-	{
-		std::string text = i.label + ": ";
-		this->renderText(text, 50, y);
-		if (TTF_SizeText(debug_font, text.c_str(), &text_w, &text_h) < 0)
-		{
-			debug::console({ "Unable to calculate font size: ", SDL_GetError() });
-			return;
-		}
-		max_text_w = std::max(max_text_w, text_w);
-		y += font_height + 4;
-	}
-
-	y = initial_y;
-	for (auto& i : items)
-	{
-		this->renderText(i.value, max_text_w + 50, y);
-		y += font_height + 4;
-	}
 }
 
 bool RenderSystem::isFullscreen() const 
@@ -234,6 +253,11 @@ std::string RenderSystem::getInfo() const
 	}
 
 	return ss.str();
+}
+
+const Window& RenderSystem::getWindow() const
+{
+	return pi->window;
 }
 
 extern std::unique_ptr<RenderSystem> rendersys;

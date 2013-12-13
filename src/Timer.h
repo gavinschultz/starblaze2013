@@ -13,7 +13,7 @@ public:
 	void endFrame();
 	double getFrameRate() const;
 	double getLastFrameDuration() const;
-	uint32_t getTotalFrames() const;
+	unsigned int getTotalFrames() const;
 	double getTime() const;
 	double getFrameStartTime() const;
 };

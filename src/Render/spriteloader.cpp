@@ -51,7 +51,7 @@ class SpriteLoader::impl
 public:
 	SDL_Texture* texture = nullptr;	// only support for one texture (i.e. one spritesheet) at the moment
 	SDL_Rect texture_rect;
-	std::unordered_map<std::string, SpriteTexture> sprites_by_name;
+	std::unordered_map<std::string, MappedTexture> sprites_by_name;
 };
 
 SpriteLoader::SpriteLoader() : pi{ new impl{} }
@@ -120,7 +120,7 @@ void SpriteLoader::load(SDL_Renderer* sdl_renderer, const std::string& spriteshe
 		std::regex pattern{ "(.*)(.tga)" };
 		std::string replace{ "$1" };
 		std::string sprite_name_parsed = std::regex_replace(sprite_name, pattern, replace);
-		pi->sprites_by_name[sprite_name_parsed] = SpriteTexture{ pi->texture, SDL_Rect{ frame_x, frame_y, frame_w, frame_h } };
+		pi->sprites_by_name[sprite_name_parsed] = MappedTexture{ pi->texture, SDL_Rect{ frame_x, frame_y, frame_w, frame_h } };
 
 		debug::console({ "Loaded sprite ", sprite_name, " x:", std::to_string(frame_x), " y:", std::to_string(frame_y), " w:", std::to_string(frame_w), " h:", std::to_string(frame_h) });
 	}
@@ -128,7 +128,7 @@ void SpriteLoader::load(SDL_Renderer* sdl_renderer, const std::string& spriteshe
 	debug::console({ "Loaded spritesheet '", spritesheet_image_filename, "'" });
 }
 
-const SpriteTexture& SpriteLoader::getSprite(const std::string& name) const
+const MappedTexture& SpriteLoader::getSprite(const std::string& name) const
 {
 	if (pi->sprites_by_name.count(name) == 0)
 		throw std::runtime_error("The sprite " + name + " was not found.");

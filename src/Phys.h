@@ -1,6 +1,14 @@
 #pragma once
 #include <stdint.h>
 
+struct Window
+{
+public:
+	unsigned int w;
+	unsigned int h;
+	Window(unsigned int w = 0, unsigned int h = 0) : w(w), h(h) {};
+};
+
 struct Point2D
 {
 	double x;
@@ -10,9 +18,9 @@ struct Point2D
 
 struct Point2Di
 {
-	int32_t x;
-	int32_t y;
-	Point2Di(int32_t x = 0, int32_t y = 0) : x(x), y(y) {}
+	int x;
+	int y;
+	Point2Di(int x = 0, int y = 0) : x(x), y(y) {}
 };
 
 struct Point2Du
@@ -31,9 +39,9 @@ struct Vector2D
 
 struct Vector2Di
 {
-	int32_t x;
-	int32_t y;
-	Vector2Di(int32_t x = 0, int32_t y = 0) : x(x), y(y) {}
+	int x;
+	int y;
+	Vector2Di(int x = 0, int y = 0) : x(x), y(y) {}
 };
 
 struct Vector2Du

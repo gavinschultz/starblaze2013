@@ -2,7 +2,7 @@
 
 "alien1.tga":
 {
-	"frame": {"x":0,"y":113,"w":16,"h":12},
+	"frame": {"x":92,"y":257,"w":16,"h":12},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":12},
@@ -10,39 +10,63 @@
 },
 "characters.tga":
 {
-	"frame": {"x":0,"y":1,"w":60,"h":80},
+	"frame": {"x":0,"y":256,"w":60,"h":80},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":80},
 	"sourceSize": {"w":60,"h":80}
 },
-"coco_8col_palette.tga":
+"font-ostrich-black_0.tga":
 {
-	"frame": {"x":0,"y":125,"w":8,"h":1},
+	"frame": {"x":0,"y":0,"w":256,"h":256},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":1},
-	"sourceSize": {"w":8,"h":1}
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
 },
 "fuel.tga":
 {
-	"frame": {"x":0,"y":97,"w":32,"h":16},
+	"frame": {"x":60,"y":257,"w":32,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":16},
 	"sourceSize": {"w":32,"h":16}
 },
-"hills.tga":
+"hill1.tga":
 {
-	"frame": {"x":32,"y":81,"w":32,"h":16},
+	"frame": {"x":187,"y":261,"w":16,"h":4},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":16},
-	"sourceSize": {"w":32,"h":16}
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
+	"sourceSize": {"w":16,"h":4}
+},
+"hill2.tga":
+{
+	"frame": {"x":235,"y":258,"w":16,"h":4},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
+	"sourceSize": {"w":16,"h":4}
+},
+"hill3.tga":
+{
+	"frame": {"x":219,"y":258,"w":16,"h":4},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
+	"sourceSize": {"w":16,"h":4}
+},
+"hill4.tga":
+{
+	"frame": {"x":92,"y":269,"w":16,"h":4},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
+	"sourceSize": {"w":16,"h":4}
 },
 "repair.tga":
 {
-	"frame": {"x":0,"y":81,"w":32,"h":16},
+	"frame": {"x":123,"y":256,"w":32,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":16},
@@ -50,7 +74,7 @@
 },
 "ship.tga":
 {
-	"frame": {"x":32,"y":97,"w":32,"h":8},
+	"frame": {"x":155,"y":256,"w":32,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":8},
@@ -58,7 +82,7 @@
 },
 "shipburner.tga":
 {
-	"frame": {"x":32,"y":105,"w":32,"h":5},
+	"frame": {"x":187,"y":256,"w":32,"h":5},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":5},
@@ -66,7 +90,7 @@
 },
 "shipstripe_line.tga":
 {
-	"frame": {"x":0,"y":0,"w":63,"h":1},
+	"frame": {"x":60,"y":256,"w":63,"h":1},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":63,"h":1},
@@ -74,7 +98,7 @@
 },
 "shiptaillight.tga":
 {
-	"frame": {"x":32,"y":111,"w":32,"h":1},
+	"frame": {"x":219,"y":257,"w":32,"h":1},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":1},
@@ -82,7 +106,7 @@
 },
 "shipwheels.tga":
 {
-	"frame": {"x":32,"y":110,"w":32,"h":1},
+	"frame": {"x":219,"y":256,"w":32,"h":1},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":1},
@@ -93,8 +117,8 @@
 	"version": "1.0",
 	"image": "spritesheet.tga",
 	"format": "RGBA8888",
-	"size": {"w":64,"h":128},
+	"size": {"w":256,"h":512},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:b0a5f7c45866ddd396309a30095c6572:0b05da64093bb9007c715d5c72b7550a:aade35f590a2fbcd5cdfd4ce8477e23b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:e152492a2d26a9b3c01a86756b0e84c7:a5e21696cc170cd0dd5f90938a2adfc0:aade35f590a2fbcd5cdfd4ce8477e23b$"
 }
 }
