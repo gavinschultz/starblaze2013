@@ -6,13 +6,15 @@
 #include "input.h"
 #include "physics.h"
 #include "component.h"
-#include "game.h"
+#include "session.h"
+#include "playfield.h"
+#include "render\camera.h"
 
 void run();
 
-std::unique_ptr<Game> game;
 std::unique_ptr<EntityRepository> db;
 std::unique_ptr<Timer> timer;
+std::unique_ptr<PlayField> playfield;
 
 int main(int argc, char* args[])
 {
@@ -22,11 +24,11 @@ int main(int argc, char* args[])
 	}
 	catch (std::runtime_error re)
 	{
-		program::exit(RetCode::runtime_error, { "Unhandled run-time error: ", re.what() });
+		program::exit(RetCode::runtime_error, { "Run-time error: ", re.what() });
 	}
 	catch (std::exception e)
 	{
-		program::exit(RetCode::unknown_error, { "Unhandled unknown exception: ", e.what() });
+		program::exit(RetCode::unknown_error, { "Unknown exception: ", e.what() });
 	}
 
 	program::cleanup();
@@ -40,12 +42,14 @@ void run()
 		program::exit(RetCode::sdl_error, { "Error initializing SDL: ", SDL_GetError() });
 	}
 
-	game = std::make_unique<Game>();
-	db = std::make_unique<EntityRepository>();
-	timer = std::make_unique<Timer>();
 	auto render = std::make_unique<RenderSystem>(1366, 768, 4, 0);
 	auto physics = std::make_unique<PhysicsSystem>();
 	auto input = std::make_unique<InputSystem>();
+	db = std::make_unique<EntityRepository>();
+	timer = std::make_unique<Timer>();
+	playfield = std::make_unique<PlayField>(render->getWindow());
+
+	auto camera = Camera{ SDL_Rect{ 0, 0, 1366, 768 }, SDL_Rect{ (int)playfield->boundaries.x, (int)playfield->boundaries.y, (int)playfield->boundaries.w, (int)playfield->boundaries.h } };
 
 	while (true)
 	{
@@ -61,15 +65,17 @@ void run()
 
 		input->update();
 
-		if (game->quit)
+		if (session::quit)
 			break;
-		if (game->is_paused)
+		if (session::is_paused)
 			continue;
 
 		physics->update();
 		usage::collect("logic");
 
-		render->update();
+		debug::set("Total frames", timer->getTotalFrames());
+
+		render->draw(camera);
 		usage::collect("render");
 
 		timer->endFrame();

@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include "input.h"
 #include "component.h"
-#include "game.h"
+#include "session.h"
 
 SDL_GameController* _controller = nullptr;
 
@@ -31,12 +31,13 @@ void InputSystem::update()
 	SDL_Event pevent;
 	while (SDL_PollEvent(&pevent))
 	{
-		if (game->is_paused && pevent.type != SDL_KEYDOWN)
+		if (session::is_paused && pevent.type != SDL_KEYDOWN)
 			continue;
 
 		switch (pevent.type)
 		{
 		case SDL_KEYDOWN:
+			session::handleKeyboardEvent(pevent.key);
 			pi->handleKeyboardEvent(pevent.key);
 			break;
 		case SDL_MOUSEMOTION:
@@ -85,10 +86,6 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 {
 	switch (e.keysym.sym)
 	{
-	case SDLK_ESCAPE:
-	case SDLK_q:
-		game->quit = true;
-		return;
 	case SDLK_F6:
 		//game->mouse_sensitivity = std::max(2.0f, game->mouse_sensitivity - 0.5f);
 		break;

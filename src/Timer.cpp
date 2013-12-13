@@ -10,7 +10,7 @@ public:
 	double start_time;
 	double elapsed_time;
 	double total_time;
-	uint32_t frame;
+	unsigned int frame;
 };
 
 Timer::Timer(const int fps) : pi{ new impl{} }
@@ -66,7 +66,7 @@ double Timer::getTime() const
 	return ((double)(counter - start) / (double)frequency);
 }
 
-uint32_t Timer::getTotalFrames() const
+unsigned int Timer::getTotalFrames() const
 {
 	return pi->frame;
 }

@@ -178,112 +178,84 @@
         <array>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
-            <filename>coco_8col_palette.tga</filename>
-            <filename>hills.tga</filename>
             <filename>ship.tga</filename>
             <filename>shipburner.tga</filename>
             <filename>shiptaillight.tga</filename>
@@ -293,6 +265,22 @@
             <filename>repair.tga</filename>
             <filename>fuel.tga</filename>
             <filename>repair.tga</filename>
+            <filename>hill1.tga</filename>
+            <filename>hill2.tga</filename>
+            <filename>hill3.tga</filename>
+            <filename>hill4.tga</filename>
+            <filename>hill1.tga</filename>
+            <filename>hill2.tga</filename>
+            <filename>hill3.tga</filename>
+            <filename>hill4.tga</filename>
+            <filename>hill1.tga</filename>
+            <filename>hill2.tga</filename>
+            <filename>hill3.tga</filename>
+            <filename>hill4.tga</filename>
+            <filename>hill1.tga</filename>
+            <filename>hill2.tga</filename>
+            <filename>hill3.tga</filename>
+            <filename>hill4.tga</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

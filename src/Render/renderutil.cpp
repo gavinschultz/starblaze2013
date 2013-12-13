@@ -2,26 +2,30 @@
 #include <cmath>
 #include <string>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include "renderutil.h"
 #include "program.h"
+#include "bmfontloader.h"
 
-//int32_t renderutil::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, uint32_t entity_sprite_width, uint32_t world_width, const Camera& camera, double distance_factor)
-//{
-//	double camera_x_abs = camera.view_rect.x;
-//
-//	double camera_x_rel;
-//	if (camera_x_abs > world_width / 2)
-//		camera_x_rel = camera_x_abs - world_width;
-//	else
-//		camera_x_rel = camera_x_abs;
-//
-//	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
-//
-//	if (entity_x_at_camera_x + entity_sprite_width > world_width * distance_factor)
-//		entity_x_at_camera_x -= world_width * distance_factor;
-//
-//	return std::lround(entity_x_at_camera_x);
-//}
+#include "prefs.h"
+
+int32_t renderutil::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, unsigned int entity_sprite_width, unsigned int world_width, const Camera& camera, double distance_factor)
+{
+	double camera_x_abs = camera.view_rect.x;
+
+	double camera_x_rel;
+	if (camera_x_abs > world_width / 2)
+		camera_x_rel = camera_x_abs - world_width;
+	else
+		camera_x_rel = camera_x_abs;
+
+	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
+
+	if (entity_x_at_camera_x + entity_sprite_width > world_width * distance_factor)
+		entity_x_at_camera_x -= world_width * distance_factor;
+
+	return std::lround(entity_x_at_camera_x);
+}
 
 SDL_Texture* renderutil::loadTextureFromFile(SDL_Renderer* sdl_renderer, std::string image_path, SDL_Rect* texture_rect)
 {
@@ -30,6 +34,7 @@ SDL_Texture* renderutil::loadTextureFromFile(SDL_Renderer* sdl_renderer, std::st
 	{
 		program::exit(RetCode::sdl_error, { "Error loading file '", image_path, "': ", SDL_GetError() });
 	}
+
 	SDL_Texture* sdl_texture = SDL_CreateTextureFromSurface(sdl_renderer, sdl_surface);
 	if (!sdl_texture)
 	{
@@ -53,4 +58,43 @@ SDL_Texture* renderutil::loadTextureFromFile(SDL_Renderer* sdl_renderer, std::st
 SDL_Rect renderutil::scaleRect(const SDL_Rect& rect, unsigned int scaling)
 {
 	return SDL_Rect{ rect.x, rect.y, rect.w * scaling, rect.h * scaling };
+}
+
+void render::renderSystemText_Bitmap(SDL_Renderer* sdl_renderer, const std::string& text, unsigned int x, unsigned int y)
+{
+	auto& font_map = bmfont::getMap();
+	auto& bmfile = bmfont::getDefinition();
+	for (auto c : text)
+	{
+		auto& font_texture = font_map.at(c);
+		SDL_Rect render_rect = { x + bmfile.chars.at(c).xoffset, y + bmfile.chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
+		SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
+		x += bmfile.chars.at(c).xadvance;
+	}
+}
+
+void render::renderSystemText_TTF(SDL_Renderer* sdl_renderer, TTF_Font* font, const std::string& text, unsigned int x, unsigned int y)
+{
+	SDL_Color text_color = { 255, 255, 255 };
+	SDL_Surface* text_surface = TTF_RenderText_Blended(font, text.c_str(), text_color);
+	if (!text_surface)
+	{
+		debug::console({ "Unable to initialize font (mostly for debugging): ", SDL_GetError() });
+		return;
+	}
+	SDL_Rect text_texture_rect = { 0, 0, text_surface->w, text_surface->h };
+	SDL_Rect text_rect = { x, y, text_surface->w, text_surface->h };
+	SDL_Texture* text_texture = SDL_CreateTextureFromSurface(sdl_renderer, text_surface);
+	if (!text_texture)
+	{
+		debug::console({ "Unable to create texture from surface: ", SDL_GetError() });
+		return;
+	}
+	SDL_FreeSurface(text_surface);
+	if (SDL_RenderCopy(sdl_renderer, text_texture, &text_texture_rect, &text_rect) < 0)
+	{
+		debug::console({ "Unable to render text texture: ", SDL_GetError() });
+		return;
+	}
+	SDL_DestroyTexture(text_texture);
 }

@@ -3,14 +3,16 @@
 #include <memory>
 
 class Entity;
+class PlayField;
 
-typedef enum ComponentType
+typedef enum class ComponentType
 {
 	input,
-	player
+	player,
+	render
 } C;
 
-typedef enum EntityType
+typedef enum class EntityType
 {
 	ship,
 	alien,
@@ -32,6 +34,7 @@ public:
 	std::vector<Entity*> getFirstEntityWithComponentType(ComponentType type);
 
 	Component* getPlayer();
+	PlayField* getPlayField();
 };
 
 extern std::unique_ptr<EntityRepository> db;
@@ -51,7 +54,10 @@ public:
 	int lives{ 0 };
 };
 
-class RenderComponent
-{
-
-};
+//#include "render/renderable.h"
+//class RenderComponent
+//{
+//public:
+//	bool is_visible{ false };
+//	std::unique_ptr<Renderable> renderable;
+//};
