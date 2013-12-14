@@ -73,6 +73,8 @@ void run()
 		physics->update();
 		usage::collect("logic");
 
+		if (timer->getTotalFrames() % 5 == 0)
+			debug::set("Physics time", timer->getTime() - timer->getFrameStartTime());
 		debug::set("Total frames", timer->getTotalFrames());
 
 		render->draw(camera);

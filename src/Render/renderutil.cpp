@@ -66,7 +66,7 @@ void render::renderSystemText_Bitmap(SDL_Renderer* sdl_renderer, const std::stri
 	auto& bmfile = bmfont::getDefinition();
 	for (auto c : text)
 	{
-		auto& font_texture = font_map.at(c);
+		auto font_texture = font_map.at(c);
 		SDL_Rect render_rect = { x + bmfile.chars.at(c).xoffset, y + bmfile.chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
 		SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
 		x += bmfile.chars.at(c).xadvance;
