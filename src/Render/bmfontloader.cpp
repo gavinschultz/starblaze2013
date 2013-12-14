@@ -119,37 +119,40 @@ namespace
 		}
 		return file;
 	}
+}
 
-	//PageLine readPageLine(const std::string& line)
-	//{
-	//	try
-	//	{
-	//		PageLine page_line;
-	//		std::string token;
-	//		std::stringstream ss{ line };
-	//		while (ss >> token)
-	//		{
-	//			if (token.substr(0, 2) == "id")
-	//				page_line.id = std::stoi(token.substr(4, std::string::npos));
-	//			if (token.substr(0, 4) == "file")
-	//				page_line.filename = strutil::strip(token.substr(5, std::string::npos), "\"");
-	//		}
-	//		return page_line;
-	//	}
-	//	catch (std::exception e)
-	//	{
-	//		throw std::runtime_error("An error occurred while parsing the page line [" + line + "]: " + e.what());
-	//	}
-	//}
-	//CharsLine readCharsLine(const std::string& line)
-	//{
-	//	try
-	//	{
-	//		CharsLine chars_line;
-	//		std::string token;
-	//		std::stringstream ss{ line };
-	//	}
-	//}
+bmfont::BMFontFile::BMFontFile() = default;
+bmfont::BMFontFile::~BMFontFile() = default;
+bmfont::BMFontFile::BMFontFile(const bmfont::BMFontFile& rhs) : chars(rhs.chars), info(rhs.info), page(rhs.page)
+{
+	debug::console({ "BMFontFile copy constructor called..." });
+}
+bmfont::BMFontFile& bmfont::BMFontFile::operator=(const bmfont::BMFontFile& rhs)
+{
+	if (this != &rhs)
+	{
+		debug::console({ "BMFontFile copy assignment constructor called..." });
+		this->chars = rhs.chars;
+		this->info = rhs.info;
+		this->page = rhs.page;
+	}
+	return *this;
+}
+
+bmfont::BMFontFile::BMFontFile(bmfont::BMFontFile&& rhs)
+{
+	debug::console({ "BMFontFile move constructor called..." });
+	this->chars = std::move(rhs.chars);
+	this->info = std::move(rhs.info);
+	this->page = std::move(rhs.page);
+}
+bmfont::BMFontFile& bmfont::BMFontFile::operator=(bmfont::BMFontFile&& rhs)
+{
+	debug::console({ "BMFontFile move assignment constructor called..." });
+	this->chars = std::move(rhs.chars);
+	this->info = std::move(rhs.info);
+	this->page = std::move(rhs.page);
+	return *this;
 }
 
 void bmfont::load(SDL_Renderer* sdl_renderer, const std::string& bmfont_path)
