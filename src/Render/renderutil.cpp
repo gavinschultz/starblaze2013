@@ -64,23 +64,51 @@ void render::renderSystemText_Bitmap(SDL_Renderer* sdl_renderer, const std::stri
 {
 	if (prefs::tmp_toggle)
 	{
-		auto& font_map = bmfont::getMap();
-		auto& bmfile = bmfont::getDefinition();
-		bmfont::renderText(sdl_renderer, text, x, y);
+		auto font_map = *bmfont::getMap();
+		auto bmfile = *bmfont::getDefinition();
+		for (auto c : text)
+		{
+			auto font_texture = font_map.at(c);
+			auto chars_def = bmfile.chars.at(c);
+			SDL_Rect render_rect = { x + chars_def.xoffset, y + chars_def.yoffset, font_texture.rect.w, font_texture.rect.h };
+			SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
+			x += chars_def.xadvance;
+		}
 	}
 	else
 	{
-		auto font_map = bmfont::getMap();
-		auto bmfile = bmfont::getDefinition();
-		bmfont::renderText(sdl_renderer, text, x, y);
-		/*for (auto c : text)
+		 auto font_map = bmfont::getMap();
+		 auto bmfile = bmfont::getDefinition();
+		for (auto c : text)
 		{
-			auto font_texture = font_map.at(c);
-			SDL_Rect render_rect = { x + bmfile.chars.at(c).xoffset, y + bmfile.chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
+			auto font_texture = font_map->at(c);
+			SDL_Rect render_rect = { x + bmfile->chars.at(c).xoffset, y + bmfile->chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
 			SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
-			x += bmfile.chars.at(c).xadvance;
-		}*/
+			x += bmfile->chars.at(c).xadvance;
+		}
 	}
+
+	/*
+	 * Something I'd like to look into later: the below version of this function, which omits the reference (&) on font_map and bmfile, and therefore
+	 * invokes a copy.
+	 *   a) technically runs faster (despite running more assembly code) and
+	 *   b) reduces the frame rate to 20 or 30fps, suggesting VSYNC misses
+	 * Only happens in debug mode though. 
+	 * Something to do with cache coherency? Can't tell why it's happening from the disassembly, would be interesting to find out what's going on.
+	 * with a deep profile.
+	 *
+
+	 auto font_map = *bmfont::getMap();
+	 auto bmfile = *bmfont::getDefinition();
+	 for (auto c : text)
+	 {
+		 auto font_texture = font_map.at(c);
+		 auto chars_def = bmfile.chars.at(c);
+		 SDL_Rect render_rect = { x + chars_def.xoffset, y + chars_def.yoffset, font_texture.rect.w, font_texture.rect.h };
+		 SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
+		 x += chars_def.xadvance;
+	 }
+	*/
 }
 
 void render::renderSystemText_TTF(SDL_Renderer* sdl_renderer, TTF_Font* font, const std::string& text, unsigned int x, unsigned int y)

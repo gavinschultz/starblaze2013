@@ -192,14 +192,14 @@ void bmfont::load(SDL_Renderer* sdl_renderer, const std::string& bmfont_path)
 	debug::console({ "Loaded BMFont '", bmfont_path, "'" });
 }
 
-const std::unordered_map<int, MappedTexture>& bmfont::getMap()
+const std::unordered_map<int, MappedTexture>* bmfont::getMap()
 {
-	return *mapped_textures_.get();
+	return mapped_textures_.get();
 }
 
-const bmfont::BMFontFile& bmfont::getDefinition()
+const bmfont::BMFontFile* bmfont::getDefinition()
 {
-	return *bmfile_.get();
+	return bmfile_.get();
 }
 
 void bmfont::renderText(SDL_Renderer* sdl_renderer, const std::string& text, unsigned int x, unsigned int y)
