@@ -49,6 +49,15 @@ namespace bmfont
 		InfoLine info;
 		PageLine page;
 		std::unordered_map<int, CharLine> chars;
+
+		// copy/move constructors
+		BMFontFile();
+		~BMFontFile();
+		BMFontFile(const BMFontFile& bmfile);
+		BMFontFile& operator=(const BMFontFile& rhs);
+		BMFontFile(BMFontFile&& bmfile);
+		BMFontFile& operator=(BMFontFile&& rhs);
+
 	};
 
 	void load(SDL_Renderer* renderer, const std::string& path);
