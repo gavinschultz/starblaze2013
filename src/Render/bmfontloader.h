@@ -51,16 +51,16 @@ namespace bmfont
 		std::unordered_map<int, CharLine> chars;
 
 		// copy/move constructors
-		BMFontFile();
-		~BMFontFile();
-		BMFontFile(const BMFontFile& bmfile);
-		BMFontFile& operator=(const BMFontFile& rhs);
-		BMFontFile(BMFontFile&& bmfile);
-		BMFontFile& operator=(BMFontFile&& rhs);
-
+		//BMFontFile();
+		//~BMFontFile();
+		//BMFontFile(const BMFontFile& bmfile);
+		//BMFontFile& operator=(const BMFontFile& rhs);
+		//BMFontFile(BMFontFile&& bmfile);
+		//BMFontFile& operator=(BMFontFile&& rhs);
 	};
 
-	void load(SDL_Renderer* renderer, const std::string& path);
+	void load(SDL_Renderer* sdl_renderer, const std::string& path);
 	const std::unordered_map<int, MappedTexture>& getMap();
 	const BMFontFile& getDefinition();
+	void renderText(SDL_Renderer* sdl_renderer, const std::string& text, unsigned int x, unsigned int y);
 }

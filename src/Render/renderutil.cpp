@@ -62,14 +62,24 @@ SDL_Rect renderutil::scaleRect(const SDL_Rect& rect, unsigned int scaling)
 
 void render::renderSystemText_Bitmap(SDL_Renderer* sdl_renderer, const std::string& text, unsigned int x, unsigned int y)
 {
-	auto& font_map = bmfont::getMap();
-	auto& bmfile = bmfont::getDefinition();
-	for (auto c : text)
+	if (prefs::tmp_toggle)
 	{
-		auto font_texture = font_map.at(c);
-		SDL_Rect render_rect = { x + bmfile.chars.at(c).xoffset, y + bmfile.chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
-		SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
-		x += bmfile.chars.at(c).xadvance;
+		auto& font_map = bmfont::getMap();
+		auto& bmfile = bmfont::getDefinition();
+		bmfont::renderText(sdl_renderer, text, x, y);
+	}
+	else
+	{
+		auto font_map = bmfont::getMap();
+		auto bmfile = bmfont::getDefinition();
+		bmfont::renderText(sdl_renderer, text, x, y);
+		/*for (auto c : text)
+		{
+			auto font_texture = font_map.at(c);
+			SDL_Rect render_rect = { x + bmfile.chars.at(c).xoffset, y + bmfile.chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
+			SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
+			x += bmfile.chars.at(c).xadvance;
+		}*/
 	}
 }
 

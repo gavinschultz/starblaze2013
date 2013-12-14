@@ -20,5 +20,8 @@ void session::handleKeyboardEvent(const SDL_KeyboardEvent& e)
 		prefs::show_fps = !prefs::show_fps;
 		prefs::show_debug = prefs::show_fps;
 		break;
+	case SDLK_F10:
+		prefs::tmp_toggle = !prefs::tmp_toggle;
+		break;
 	}
 }

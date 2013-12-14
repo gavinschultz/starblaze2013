@@ -121,39 +121,39 @@ namespace
 	}
 }
 
-bmfont::BMFontFile::BMFontFile() = default;
-bmfont::BMFontFile::~BMFontFile() = default;
-bmfont::BMFontFile::BMFontFile(const bmfont::BMFontFile& rhs) : chars(rhs.chars), info(rhs.info), page(rhs.page)
-{
-	debug::console({ "BMFontFile copy constructor called..." });
-}
-bmfont::BMFontFile& bmfont::BMFontFile::operator=(const bmfont::BMFontFile& rhs)
-{
-	if (this != &rhs)
-	{
-		debug::console({ "BMFontFile copy assignment constructor called..." });
-		this->chars = rhs.chars;
-		this->info = rhs.info;
-		this->page = rhs.page;
-	}
-	return *this;
-}
-
-bmfont::BMFontFile::BMFontFile(bmfont::BMFontFile&& rhs)
-{
-	debug::console({ "BMFontFile move constructor called..." });
-	this->chars = std::move(rhs.chars);
-	this->info = std::move(rhs.info);
-	this->page = std::move(rhs.page);
-}
-bmfont::BMFontFile& bmfont::BMFontFile::operator=(bmfont::BMFontFile&& rhs)
-{
-	debug::console({ "BMFontFile move assignment constructor called..." });
-	this->chars = std::move(rhs.chars);
-	this->info = std::move(rhs.info);
-	this->page = std::move(rhs.page);
-	return *this;
-}
+//bmfont::BMFontFile::BMFontFile() = default;
+//bmfont::BMFontFile::~BMFontFile() = default;
+//bmfont::BMFontFile::BMFontFile(const bmfont::BMFontFile& rhs) : chars(rhs.chars), info(rhs.info), page(rhs.page)
+//{
+//	debug::console({ "BMFontFile copy constructor called..." });
+//}
+//bmfont::BMFontFile& bmfont::BMFontFile::operator=(const bmfont::BMFontFile& rhs)
+//{
+//	if (this != &rhs)
+//	{
+//		debug::console({ "BMFontFile copy assignment constructor called..." });
+//		this->chars = rhs.chars;
+//		this->info = rhs.info;
+//		this->page = rhs.page;
+//	}
+//	return *this;
+//}
+//
+//bmfont::BMFontFile::BMFontFile(bmfont::BMFontFile&& rhs)
+//{
+//	debug::console({ "BMFontFile move constructor called..." });
+//	this->chars = std::move(rhs.chars);
+//	this->info = std::move(rhs.info);
+//	this->page = std::move(rhs.page);
+//}
+//bmfont::BMFontFile& bmfont::BMFontFile::operator=(bmfont::BMFontFile&& rhs)
+//{
+//	debug::console({ "BMFontFile move assignment constructor called..." });
+//	this->chars = std::move(rhs.chars);
+//	this->info = std::move(rhs.info);
+//	this->page = std::move(rhs.page);
+//	return *this;
+//}
 
 void bmfont::load(SDL_Renderer* sdl_renderer, const std::string& bmfont_path)
 {
@@ -198,4 +198,15 @@ const std::unordered_map<int, MappedTexture>& bmfont::getMap()
 const bmfont::BMFontFile& bmfont::getDefinition()
 {
 	return bmfile_;
+}
+
+void bmfont::renderText(SDL_Renderer* sdl_renderer, const std::string& text, unsigned int x, unsigned int y)
+{
+	for (auto c : text)
+	{
+		auto font_texture = mapped_textures_.at(c);
+		SDL_Rect render_rect = { x + bmfile_.chars.at(c).xoffset, y + bmfile_.chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
+		SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
+		x += bmfile_.chars.at(c).xadvance;
+	}
 }
