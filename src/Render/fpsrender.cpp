@@ -25,7 +25,7 @@ FPSRender::impl::impl(TTF_Font* font, const Window& window) : font_{ font }
 		debug::console({ "Unable to calculate font size for debug renderer: ", SDL_GetError() });
 		return;
 	}
-	pos_ = { (int)window.w - text_w, 20 };
+	pos_ = { (int)window.w - text_w, 40 };
 }
 
 void FPSRender::impl::render(SDL_Renderer* sdl_renderer, double fps) const

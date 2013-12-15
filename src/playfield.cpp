@@ -6,9 +6,10 @@
 #include <algorithm>
 #include "playfield.h"
 #include "phys.h"
+#include "mathutil.h"
 
 PlayField::PlayField(const Window& window, int hill_count)
-: boundaries{ 228.0, 0.0, window.w - 228.0, window.h - 192.0 }	// 1366 x 768 - wide-ish margins
+: boundaries{ 228.0, 0.0, window.w - (228.0 * 2), window.h - 192.0 }	// 1366 x 768 - wide-ish margins
 {
 	auto rnd_hill_y_channel = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine((uint32_t)time(0)));
 	auto rnd_hill_x_channel = std::bind(std::uniform_int_distribution<int>{0, (int)(this->w / 8) - 1}, std::default_random_engine((uint32_t)time(0) - 1));
@@ -32,7 +33,7 @@ PlayField::PlayField(const Window& window, int hill_count)
 	}
 }
 
-Rect PlayField::getPlayArea(const Rect& entity_box)
+Rect PlayField::getPlayArea(const Rect& entity_box) const
 {
 	return{
 		0.0,
@@ -42,7 +43,12 @@ Rect PlayField::getPlayArea(const Rect& entity_box)
 	};
 }
 
-double PlayField::getAltitude(int entity_pos_y, int entity_box_h)
+double PlayField::getAltitude(double entity_pos_y, double entity_box_h) const
 {
 	return std::max(0.0, this->boundaries.y + this->boundaries.h - entity_pos_y - entity_box_h);
+}
+
+double PlayField::getAbsolutePosX(double entity_pos_x) const
+{
+	return mathutil::abswrap(entity_pos_x, this->w);
 }

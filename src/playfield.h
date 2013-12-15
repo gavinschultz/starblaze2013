@@ -29,8 +29,7 @@ public:
 	 */
 	Rect boundaries;
 
-	Rect getPlayArea(const Rect& entity_box);
-	double getAltitude(int entity_pos_y, int entity_box_h);
+	Rect getPlayArea(const Rect& entity_box) const;
+	double getAltitude(double entity_pos_y, double entity_box_h) const;
+	double getAbsolutePosX(double entity_pos_x) const;
 };
-
-extern std::unique_ptr<PlayField> playfield;

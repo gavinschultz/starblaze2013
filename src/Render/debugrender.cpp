@@ -20,7 +20,7 @@ DebugRender::~DebugRender() = default;
 void DebugRender::render(SDL_Renderer* sdl_renderer, const std::vector<debug::DebugItem>& debug_items)
 {
 	//TODO: probably horribly inefficient
-	const int initial_y = 20;
+	const int initial_y = 40;
 	int y = initial_y;
 	int text_w, text_h;
 	int max_text_w = 0;

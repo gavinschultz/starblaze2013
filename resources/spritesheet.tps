@@ -179,86 +179,58 @@
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>alien1.tga</filename>
             <filename>characters.tga</filename>
             <filename>ship.tga</filename>
-            <filename>shipburner.tga</filename>
-            <filename>shiptaillight.tga</filename>
             <filename>shipwheels.tga</filename>
             <filename>shipstripe_line.tga</filename>
             <filename>fuel.tga</filename>
@@ -281,6 +253,22 @@
             <filename>hill2.tga</filename>
             <filename>hill3.tga</filename>
             <filename>hill4.tga</filename>
+            <filename>burner0.tga</filename>
+            <filename>burner1.tga</filename>
+            <filename>burner2.tga</filename>
+            <filename>burner3.tga</filename>
+            <filename>burner0.tga</filename>
+            <filename>burner1.tga</filename>
+            <filename>burner2.tga</filename>
+            <filename>burner3.tga</filename>
+            <filename>burner0.tga</filename>
+            <filename>burner1.tga</filename>
+            <filename>burner2.tga</filename>
+            <filename>burner3.tga</filename>
+            <filename>burner0.tga</filename>
+            <filename>burner1.tga</filename>
+            <filename>burner2.tga</filename>
+            <filename>burner3.tga</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

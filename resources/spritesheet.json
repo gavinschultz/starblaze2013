@@ -2,31 +2,55 @@
 
 "alien1.tga":
 {
-	"frame": {"x":92,"y":257,"w":16,"h":12},
+	"frame": {"x":0,"y":97,"w":16,"h":12},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":12},
 	"sourceSize": {"w":16,"h":12}
 },
+"burner0.tga":
+{
+	"frame": {"x":0,"y":122,"w":8,"h":5},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":5},
+	"sourceSize": {"w":8,"h":5}
+},
+"burner1.tga":
+{
+	"frame": {"x":0,"y":117,"w":8,"h":5},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":5},
+	"sourceSize": {"w":8,"h":5}
+},
+"burner2.tga":
+{
+	"frame": {"x":24,"y":101,"w":8,"h":5},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":5},
+	"sourceSize": {"w":8,"h":5}
+},
+"burner3.tga":
+{
+	"frame": {"x":16,"y":101,"w":8,"h":5},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":5},
+	"sourceSize": {"w":8,"h":5}
+},
 "characters.tga":
 {
-	"frame": {"x":0,"y":256,"w":60,"h":80},
+	"frame": {"x":0,"y":1,"w":60,"h":80},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":80},
 	"sourceSize": {"w":60,"h":80}
 },
-"font-ostrich-black_0.tga":
-{
-	"frame": {"x":0,"y":0,"w":256,"h":256},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
-	"sourceSize": {"w":256,"h":256}
-},
 "fuel.tga":
 {
-	"frame": {"x":60,"y":257,"w":32,"h":16},
+	"frame": {"x":32,"y":81,"w":32,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":16},
@@ -34,7 +58,7 @@
 },
 "hill1.tga":
 {
-	"frame": {"x":187,"y":261,"w":16,"h":4},
+	"frame": {"x":24,"y":117,"w":16,"h":4},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
@@ -42,7 +66,7 @@
 },
 "hill2.tga":
 {
-	"frame": {"x":235,"y":258,"w":16,"h":4},
+	"frame": {"x":8,"y":121,"w":16,"h":4},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
@@ -50,7 +74,7 @@
 },
 "hill3.tga":
 {
-	"frame": {"x":219,"y":258,"w":16,"h":4},
+	"frame": {"x":8,"y":117,"w":16,"h":4},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
@@ -58,7 +82,7 @@
 },
 "hill4.tga":
 {
-	"frame": {"x":92,"y":269,"w":16,"h":4},
+	"frame": {"x":16,"y":97,"w":16,"h":4},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":4},
@@ -66,7 +90,7 @@
 },
 "repair.tga":
 {
-	"frame": {"x":123,"y":256,"w":32,"h":16},
+	"frame": {"x":0,"y":81,"w":32,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":16},
@@ -74,39 +98,23 @@
 },
 "ship.tga":
 {
-	"frame": {"x":155,"y":256,"w":32,"h":8},
+	"frame": {"x":0,"y":109,"w":32,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":8},
 	"sourceSize": {"w":32,"h":8}
 },
-"shipburner.tga":
-{
-	"frame": {"x":187,"y":256,"w":32,"h":5},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":5},
-	"sourceSize": {"w":32,"h":5}
-},
 "shipstripe_line.tga":
 {
-	"frame": {"x":60,"y":256,"w":63,"h":1},
+	"frame": {"x":0,"y":0,"w":63,"h":1},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":63,"h":1},
 	"sourceSize": {"w":63,"h":1}
 },
-"shiptaillight.tga":
-{
-	"frame": {"x":219,"y":257,"w":32,"h":1},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":1},
-	"sourceSize": {"w":32,"h":1}
-},
 "shipwheels.tga":
 {
-	"frame": {"x":219,"y":256,"w":32,"h":1},
+	"frame": {"x":32,"y":97,"w":32,"h":1},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":1},
@@ -117,8 +125,8 @@
 	"version": "1.0",
 	"image": "spritesheet.tga",
 	"format": "RGBA8888",
-	"size": {"w":256,"h":512},
+	"size": {"w":64,"h":128},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:e152492a2d26a9b3c01a86756b0e84c7:a5e21696cc170cd0dd5f90938a2adfc0:aade35f590a2fbcd5cdfd4ce8477e23b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:019155a3a991dc6059b180892a691d3f:48c06cb705fec0aa83527614f58b2c77:aade35f590a2fbcd5cdfd4ce8477e23b$"
 }
 }

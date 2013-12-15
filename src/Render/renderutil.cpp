@@ -121,3 +121,8 @@ void render::renderSystemText_TTF(SDL_Renderer* sdl_renderer, TTF_Font* font, co
 	}
 	SDL_DestroyTexture(text_texture);
 }
+
+bool renderutil::hasDimensions(SDL_Rect rect)
+{
+	return (rect.w != 0 && rect.h != 0);
+}

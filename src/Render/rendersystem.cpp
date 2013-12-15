@@ -17,6 +17,7 @@
 #include "phys.h"
 #include "prefs.h"
 #include "bmfontloader.h"
+#include "playfield.h"
 
 class RenderSystem::impl
 {
@@ -38,6 +39,11 @@ public:
 	std::unique_ptr<BackgroundRender> background_render;
 	std::unique_ptr<FPSRender> fps_render;
 	std::unique_ptr<DebugRender> debug_render;
+	std::unique_ptr<GridRender> grid_render;
+	std::unique_ptr<ShipRender> ship_render;
+	std::unique_ptr<HUDRender> hud_render;
+	std::unique_ptr<RadarRender> radar_render;
+	std::unique_ptr<TextRender> text_render;
 };
 
 RenderSystem::impl::impl() = default;
@@ -99,23 +105,31 @@ RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height
 	//_text_renderer = std::unique_ptr<TextRenderer>{new TextRenderer{ this, sprite_loader.getSprite("characters") }};
 
 	debug::console({ "Renderer info\n--------------\n", getInfo() });
+}
+RenderSystem::~RenderSystem() {}
 
+void RenderSystem::init()
+{
 	pi->background_render = std::make_unique<BackgroundRender>(*this);
 	pi->fps_render = std::make_unique<FPSRender>(pi->debug_font, pi->window);
 	pi->debug_render = std::make_unique<DebugRender>(pi->debug_font);
+	pi->grid_render = std::make_unique<GridRender>();
+	pi->ship_render = std::make_unique<ShipRender>(*this);
+	pi->hud_render = std::make_unique<HUDRender>(*this);
+	pi->radar_render = std::make_unique<RadarRender>(*this);
+	pi->text_render = std::make_unique<TextRender>(*this, renderer->getSpriteLoader().getSprite("characters"));
 }
-RenderSystem::~RenderSystem() {}
 
 void RenderSystem::draw(Camera& camera)
 {
 	SDL_RenderClear(pi->sdl_renderer);
 	SDL_SetRenderDrawColor(pi->sdl_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	
-	//auto playfield = db->getPlayField();
-	//if (playfield)
-	//{
-	//	pi->background_render->render(pi->sdl_renderer, camera, *playfield);
-	//}
+	auto playfield = db->getPlayField();
+	if (playfield)
+	{
+		pi->background_render->render(pi->sdl_renderer, camera, *playfield);
+	}
 
 	//for (auto e : db->getEntitiesOfType(E::station))
 	//{
@@ -127,11 +141,14 @@ void RenderSystem::draw(Camera& camera)
 	//	alien_render.draw(pi->sdl_renderer, camera, (Alien*)e);
 	//}
 
-	//auto ship = db->getPlayer();
-	//if (ship)
-	//{
-	//	ship_renderable.draw(pi->sdl_renderer, camera, ship);
-	//}
+	auto player_state = (TemporalState2DComponent*)db->getComponentsOfTypeForEntity(E::ship, C::temporalstate);
+	auto player_orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
+	auto player_thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	auto ship = db->getPlayer();
+	if (ship)
+	{
+		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust);
+	}
 
 	//for (auto e : db->getEntitiesOfType(E::debris))
 	//{
@@ -143,21 +160,18 @@ void RenderSystem::draw(Camera& camera)
 	//	bullet_render.draw(pi->sdl_renderer, camera, (Bullet*)e);
 	//}
 
-	//hud_render.draw(pi->sdl_renderer, ship, session::score, session::lives);
+	auto player_info = (PlayerComponent*)db->getComponentsOfTypeForEntity(E::ship, C::player);
+	pi->hud_render->render(pi->sdl_renderer, *player_info, session::score, session::lives, *pi->text_render);
 
-	//for (auto c : db->getComponentsOfType(C::radartrackable))
-	//{
-	//	radar_render.draw(pi->sdl_renderer, camera, (RadarTrackable*)c);
-	//}
+	pi->radar_render->renderBox(pi->sdl_renderer);
+	for (auto c : db->getComponentsOfType(C::radartrackable))
+	{
+		pi->radar_render->render(pi->sdl_renderer, camera, *(RadarTrackableComponent*)c);
+	}
 
 	//for (auto text_plate : db->getTextPlates())
 	//{
 	//	text_render.draw(pi->sdl_renderer, text_plate);
-	//}
-
-	//if (prefs::show_grid)
-	//{
-	//	grid_render.draw(pi->sdl_renderer);
 	//}
 
 	if (prefs::show_fps)
@@ -168,6 +182,16 @@ void RenderSystem::draw(Camera& camera)
 	if (prefs::show_debug)
 	{
 		pi->debug_render->render(pi->sdl_renderer, debug::getItems());
+	}
+
+	if (prefs::show_grid)
+	{
+		Rect playfield_rect;
+		if (playfield)
+			playfield_rect = playfield->boundaries;
+		else
+			playfield_rect = { 0, 0, 0, 0 };
+		pi->grid_render->render(pi->sdl_renderer, pi->window, playfield_rect);
 	}
 
 	//if (prefs::show_zeroline)
@@ -198,7 +222,7 @@ void RenderSystem::setFullscreen(bool state)
 	pi->is_fullscreen = state;
 	int flag;
 	if (state)
-		flag = SDL_WindowFlags::SDL_WINDOW_FULLSCREEN_DESKTOP;
+		flag = SDL_WindowFlags::SDL_WINDOW_FULLSCREEN; // SDL_WindowFlags::SDL_WINDOW_FULLSCREEN_DESKTOP;
 	else
 		flag = 0;
 
@@ -259,5 +283,3 @@ const Window& RenderSystem::getWindow() const
 {
 	return pi->window;
 }
-
-extern std::unique_ptr<RenderSystem> rendersys;

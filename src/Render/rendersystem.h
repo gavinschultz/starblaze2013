@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <glew.h>
 #include "system.h"
 #include "phys.h"
 
@@ -16,6 +17,7 @@ public:
 
 	SDL_Palette* palette;
 
+	void init();
 	void draw(Camera& camera);
 
 	void setFullscreen(bool state);
@@ -26,3 +28,5 @@ public:
 
 	const SpriteLoader& getSpriteLoader() const;
 };
+
+extern std::unique_ptr<RenderSystem> renderer;
