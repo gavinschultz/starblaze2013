@@ -125,7 +125,6 @@
     <ClCompile Include="src\render\debugrender.cpp" />
     <ClCompile Include="src\render\fpsrender.cpp" />
     <ClCompile Include="src\render\gridrenderable.cpp" />
-    <ClCompile Include="src\render\MappedTexture.cpp" />
     <ClCompile Include="src\session.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\mathutil.cpp" />
