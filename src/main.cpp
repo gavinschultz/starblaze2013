@@ -9,17 +9,22 @@
 #include "session.h"
 #include "playfield.h"
 #include "render\camera.h"
+#include "prefs.h"
 
 void run();
+void init();
 
 std::unique_ptr<EntityRepository> db;
 std::unique_ptr<Timer> timer;
-std::unique_ptr<PlayField> playfield;
+std::unique_ptr<RenderSystem> renderer;
+std::unique_ptr<PhysicsSystem> physics;
+std::unique_ptr<InputSystem> input;
 
 int main(int argc, char* args[])
 {
 	try
 	{
+		init();
 		run();
 	}
 	catch (std::runtime_error re)
@@ -35,22 +40,35 @@ int main(int argc, char* args[])
 	return RetCode::success;
 }
 
-void run()
+void init()
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING))
 	{
 		program::exit(RetCode::sdl_error, { "Error initializing SDL: ", SDL_GetError() });
 	}
 
-	auto render = std::make_unique<RenderSystem>(1366, 768, 4, 0);
-	auto physics = std::make_unique<PhysicsSystem>();
-	auto input = std::make_unique<InputSystem>();
 	db = std::make_unique<EntityRepository>();
+	renderer = std::make_unique<RenderSystem>(1366, 768, 4, 0);
 	timer = std::make_unique<Timer>();
-	playfield = std::make_unique<PlayField>(render->getWindow());
+	physics = std::make_unique<PhysicsSystem>();
+	input = std::make_unique<InputSystem>();
 
+	const auto horient = new HorizontalOrientComponent();
+	const auto state = new TemporalState2DComponent();
+	const auto thrust = new ThrustComponent();
+	const auto radartrack = new RadarTrackableComponent();
+	db->registerEntity(E::ship, { horient, state, thrust, radartrack });
+	db->registerEntity(E::playfield, {});
+
+	renderer->init();
+}
+
+void run()
+{
+	PlayField* playfield = db->getPlayField();
 	auto camera = Camera{ SDL_Rect{ 0, 0, 1366, 768 }, SDL_Rect{ (int)playfield->boundaries.x, (int)playfield->boundaries.y, (int)playfield->boundaries.w, (int)playfield->boundaries.h } };
 
+	double accumulator = 0.0;
 	while (true)
 	{
 		timer->startFrame();
@@ -70,14 +88,18 @@ void run()
 		if (session::is_paused)
 			continue;
 
-		physics->update();
+		double dt = physics->dt;
+		accumulator += lastframe_delta;
+		while (accumulator >= dt)
+		{
+			accumulator -= dt;
+			physics->update(dt);
+		}
+		physics->interpolate(accumulator / dt);
+
 		usage::collect("logic");
 
-		if (timer->getTotalFrames() % 5 == 0)
-			debug::set("Physics time", timer->getTime() - timer->getFrameStartTime());
-		debug::set("Total frames", timer->getTotalFrames());
-
-		render->draw(camera);
+		renderer->draw(camera);
 		usage::collect("render");
 
 		timer->endFrame();

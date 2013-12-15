@@ -63,7 +63,6 @@ struct State2D
 	Point2D pos;
 	Vector2D vel;
 	Vector2D acc;
-	Vector2D thrust;
 };
 
 struct TemporalState2D
@@ -72,3 +71,9 @@ struct TemporalState2D
 	State2D prev;
 	Point2D interpolated;
 };
+
+typedef enum class HorizontalOrientEnum
+{
+	left,
+	right
+} HOrient;

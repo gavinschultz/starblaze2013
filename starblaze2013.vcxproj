@@ -95,6 +95,7 @@
     <ClInclude Include="src\render\bmfontloader.h" />
     <ClInclude Include="src\render\mappedtexture.h" />
     <ClInclude Include="src\render\renderdefs.h" />
+    <ClInclude Include="src\render\textrender.h" />
     <ClInclude Include="src\session.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\mathutil.h" />
@@ -125,6 +126,11 @@
     <ClCompile Include="src\render\debugrender.cpp" />
     <ClCompile Include="src\render\fpsrender.cpp" />
     <ClCompile Include="src\render\gridrenderable.cpp" />
+    <ClCompile Include="src\render\hudrender.cpp" />
+    <ClCompile Include="src\render\mappedtexture.cpp" />
+    <ClCompile Include="src\render\radarrender.cpp" />
+    <ClCompile Include="src\render\shiprender.cpp" />
+    <ClCompile Include="src\render\textrender.cpp" />
     <ClCompile Include="src\session.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\mathutil.cpp" />

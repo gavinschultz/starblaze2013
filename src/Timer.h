@@ -18,4 +18,4 @@ public:
 	double getFrameStartTime() const;
 };
 
-extern std::unique_ptr<Timer> timer;
+extern std::unique_ptr<Timer> timer; // TODO: if we never have use for any other instance of timer, maybe convert this to a namespace

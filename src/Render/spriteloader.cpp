@@ -63,6 +63,8 @@ SpriteLoader::~SpriteLoader() {}
 
 void SpriteLoader::load(SDL_Renderer* sdl_renderer, const std::string& spritesheet_json_path)
 {
+	const static int SCALING = 4;	// TODO: allow dynamic setting of this
+
 	debug::console({ "Loading spritesheet from JSON in ", spritesheet_json_path });
 
 	FileLoader file_loader{ spritesheet_json_path, "r" };
@@ -120,7 +122,7 @@ void SpriteLoader::load(SDL_Renderer* sdl_renderer, const std::string& spriteshe
 		std::regex pattern{ "(.*)(.tga)" };
 		std::string replace{ "$1" };
 		std::string sprite_name_parsed = std::regex_replace(sprite_name, pattern, replace);
-		pi->sprites_by_name[sprite_name_parsed] = MappedTexture{ pi->texture, SDL_Rect{ frame_x, frame_y, frame_w, frame_h } };
+		pi->sprites_by_name[sprite_name_parsed] = MappedTexture{ pi->texture, SDL_Rect{ frame_x, frame_y, frame_w, frame_h }, SCALING };
 
 		debug::console({ "Loaded sprite ", sprite_name, " x:", std::to_string(frame_x), " y:", std::to_string(frame_y), " w:", std::to_string(frame_w), " h:", std::to_string(frame_h) });
 	}
