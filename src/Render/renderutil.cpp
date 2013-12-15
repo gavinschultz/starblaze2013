@@ -62,30 +62,15 @@ SDL_Rect renderutil::scaleRect(const SDL_Rect& rect, unsigned int scaling)
 
 void render::renderSystemText_Bitmap(SDL_Renderer* sdl_renderer, const std::string& text, unsigned int x, unsigned int y)
 {
-	if (prefs::tmp_toggle)
+	const auto& font_map = bmfont::getMap();
+	const auto& bmfile = bmfont::getDefinition();
+	for (auto c : text)
 	{
-		auto font_map = *bmfont::getMap();
-		auto bmfile = *bmfont::getDefinition();
-		for (auto c : text)
-		{
-			auto font_texture = font_map.at(c);
-			auto chars_def = bmfile.chars.at(c);
-			SDL_Rect render_rect = { x + chars_def.xoffset, y + chars_def.yoffset, font_texture.rect.w, font_texture.rect.h };
-			SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
-			x += chars_def.xadvance;
-		}
-	}
-	else
-	{
-		 auto font_map = bmfont::getMap();
-		 auto bmfile = bmfont::getDefinition();
-		for (auto c : text)
-		{
-			auto font_texture = font_map->at(c);
-			SDL_Rect render_rect = { x + bmfile->chars.at(c).xoffset, y + bmfile->chars.at(c).yoffset, font_texture.rect.w, font_texture.rect.h };
-			SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
-			x += bmfile->chars.at(c).xadvance;
-		}
+		auto font_texture = font_map.at(c);
+		auto chars_def = bmfile.chars.at(c);
+		SDL_Rect render_rect = { x + chars_def.xoffset, y + chars_def.yoffset, font_texture.rect.w, font_texture.rect.h };
+		SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
+		x += chars_def.xadvance;
 	}
 
 	/*
@@ -93,7 +78,7 @@ void render::renderSystemText_Bitmap(SDL_Renderer* sdl_renderer, const std::stri
 	 * invokes a copy.
 	 *   a) technically runs faster (despite running more assembly code) and
 	 *   b) reduces the frame rate to 20 or 30fps, suggesting VSYNC misses
-	 * Only happens in debug mode though. 
+	 * Only happens in debug mode though.
 	 * Something to do with cache coherency? Can't tell why it's happening from the disassembly, would be interesting to find out what's going on.
 	 * with a deep profile.
 	 *
@@ -102,13 +87,13 @@ void render::renderSystemText_Bitmap(SDL_Renderer* sdl_renderer, const std::stri
 	 auto bmfile = *bmfont::getDefinition();
 	 for (auto c : text)
 	 {
-		 auto font_texture = font_map.at(c);
-		 auto chars_def = bmfile.chars.at(c);
-		 SDL_Rect render_rect = { x + chars_def.xoffset, y + chars_def.yoffset, font_texture.rect.w, font_texture.rect.h };
-		 SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
-		 x += chars_def.xadvance;
+	 auto font_texture = font_map.at(c);
+	 auto chars_def = bmfile.chars.at(c);
+	 SDL_Rect render_rect = { x + chars_def.xoffset, y + chars_def.yoffset, font_texture.rect.w, font_texture.rect.h };
+	 SDL_RenderCopy(sdl_renderer, font_texture.texture, &font_texture.rect, &render_rect);
+	 x += chars_def.xadvance;
 	 }
-	*/
+	 */
 }
 
 void render::renderSystemText_TTF(SDL_Renderer* sdl_renderer, TTF_Font* font, const std::string& text, unsigned int x, unsigned int y)

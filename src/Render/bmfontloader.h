@@ -61,7 +61,7 @@ namespace bmfont
 	};
 
 	void load(SDL_Renderer* sdl_renderer, const std::string& path);
-	const std::unordered_map<int, MappedTexture>* getMap();
-	const BMFontFile* getDefinition();
+	const std::unordered_map<int, MappedTexture>& getMap();
+	const BMFontFile& getDefinition();
 	void renderText(SDL_Renderer* sdl_renderer, const std::string& text, unsigned int x, unsigned int y);
 }

@@ -29,6 +29,7 @@ void DebugRender::render(SDL_Renderer* sdl_renderer, const std::vector<debug::De
 	{
 		std::string text = i.label + ": ";
 		render::renderSystemText_Bitmap(sdl_renderer, text, 20, y);
+		//render::renderSystemText_TTF(sdl_renderer, pi->font_, text, 20, y);
 		if (TTF_SizeText(pi->font_, text.c_str(), &text_w, &text_h) < 0)
 		{
 			debug::console({ "Unable to calculate font size: ", SDL_GetError() });
@@ -42,6 +43,7 @@ void DebugRender::render(SDL_Renderer* sdl_renderer, const std::vector<debug::De
 	for (auto& i : debug_items)
 	{
 		render::renderSystemText_Bitmap(sdl_renderer, i.value, max_text_w + 50, y);
+		//render::renderSystemText_TTF(sdl_renderer, pi->font_, i.value, max_text_w + 50, y);
 		y += font_height + 4;
 	}
 }
