@@ -10,4 +10,5 @@ public:
 	InputSystem();
 	~InputSystem();
 	void update();
+	void detect();
 };

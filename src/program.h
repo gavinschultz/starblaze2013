@@ -15,6 +15,7 @@ const enum RetCode
 
 namespace program
 {
+	SDL_Thread* input_detect_thread;
 	void exit(int retcode, std::initializer_list<std::string> msg);
 	void cleanup();
 }

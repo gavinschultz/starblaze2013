@@ -16,7 +16,8 @@ typedef enum class ComponentType
 	thrust,
 	horient,
 	radartrackable,
-	textplate
+	textplate,
+	firebullets
 } C;
 
 typedef enum class EntityType
@@ -94,6 +95,7 @@ public:
 	Vector2D current;
 	Vector2D prev;
 	Vector2D max;
+	void resetCurrent() { current = { 0, 0 }; }
 };
 
 class PlayerComponent : public Component
@@ -121,4 +123,15 @@ public:
 	TextPlateComponent(TextPlate* textplate) : Component(C::textplate), textplate{ textplate } {}
 	bool visible{ false };
 	std::unique_ptr<TextPlate> textplate;
+};
+
+class FireBulletsComponent : public Component
+{
+private:
+	bool fire_{ false };
+public:
+	FireBulletsComponent() : Component(C::firebullets) {}
+	void fire() { fire_ = true; }
+	bool isFireRequired() { return fire_; }
+	void reset() { fire_ = false; }
 };

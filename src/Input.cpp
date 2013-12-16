@@ -4,17 +4,15 @@
 #include "input.h"
 #include "component.h"
 #include "session.h"
+#include "mathutil.h"
 
 #include "timer.h"
-
-SDL_GameController* _controller = nullptr;
 
 class InputSystem::impl
 {
 public:
 	SDL_GameController* controller;
 	void resetComponentsForInput();
-	void connectController();
 	void handleKeyboardEvent(const SDL_KeyboardEvent& e) const;
 	void handleKeyboardState() const;
 	void handleMouseMotionEvent(const SDL_MouseMotionEvent& e) const;
@@ -24,13 +22,16 @@ public:
 
 InputSystem::InputSystem() : pi{ new impl{} }
 {
-	pi->connectController();
+	detect();
 }
 
 InputSystem::~InputSystem() {}
 
 void InputSystem::update()
 {
+	if (timer->getTotalFrames() % 180 == 0)	// joystick detection in SDL seems to be cheap, but still no need to hammer it
+		detect();
+
 	pi->resetComponentsForInput();
 
 	SDL_Event pevent;
@@ -63,13 +64,17 @@ void InputSystem::update()
 void InputSystem::impl::resetComponentsForInput()
 {
 	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
-	thrust->current.x = 0;
+	auto fire = (FireBulletsComponent*)db->getComponentsOfTypeForEntity(E::ship, C::firebullets);
+	if (thrust)
+		thrust->resetCurrent();
+	if (fire)
+		fire->reset();
 }
 
-void InputSystem::impl::connectController()
+void InputSystem::detect()
 {
-	if (this->controller)
-		return;	// already connected
+	if (!SDL_GameControllerGetAttached(pi->controller))
+		pi->controller = nullptr;
 
 	int joystick_count;
 	if ((joystick_count = SDL_NumJoysticks()) < 0)
@@ -90,7 +95,7 @@ void InputSystem::impl::connectController()
 			}
 			debug::console({ "Controller detected: ", SDL_GameControllerName(opened_controller) });
 			debug::console({ "Controller mapping: ", SDL_GameControllerMapping(opened_controller) });
-			controller = opened_controller;
+			pi->controller = opened_controller;
 			break;
 		}
 	}
@@ -173,28 +178,36 @@ void InputSystem::impl::handleMouseMotionEvent(const SDL_MouseMotionEvent& e) co
 
 void InputSystem::impl::handleJoystickState() const
 {
-	//const int16_t tolerance = 6000;
-	//const double x_modifier = ship->max_thrust.x / (std::numeric_limits<int16_t>::max() - tolerance);
-	//const double y_modifier = ship->max_thrust.y / (std::numeric_limits<int16_t>::max() - tolerance);
-	//if (!_controller)
-	//	return;
-	//int16_t left_x_raw = SDL_GameControllerGetAxis(_controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX);
-	//int16_t left_y_raw = SDL_GameControllerGetAxis(_controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY);
-	//int16_t left_x = util::getsign(left_x_raw)*std::max(0, (std::abs(left_x_raw) - tolerance));
-	//int16_t left_y = util::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance));
-	//if (std::abs(left_x) > 0)
-	//{
-	//	ship->state.current.thrust.x = left_x * x_modifier;
-	//	this->turnShip(ship, left_x > 0 ? ShipDirection::right : ShipDirection::left);
-	//}
-	//if (std::abs(left_y) > 0)
-	//{
-	//	ship->state.current.thrust.y = left_y * y_modifier;
-	//}
-	//if (SDL_GameControllerGetButton(_controller, SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X))
-	//{
-	//	ship->fire();
-	//}
+	if (!SDL_GameControllerGetAttached(controller))
+		return;
+
+	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	auto orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
+	auto fire = (FireBulletsComponent*)db->getComponentsOfTypeForEntity(E::ship, C::firebullets);
+
+	const static int16_t tolerance = 6000;
+	const double x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance);
+	const double y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance);
+	
+	int16_t left_x_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX);
+	int16_t left_y_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY);
+	int16_t left_x = mathutil::getsign(left_x_raw)*std::max(0, (std::abs(left_x_raw) - tolerance));
+	int16_t left_y = mathutil::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance));
+	if (left_x != 0)
+	{
+		thrust->current.x = left_x * x_modifier;
+		auto requested_direction = (left_x > 0 ? HOrient::right : HOrient::left);
+		turnWithThrustConsideration(requested_direction, orient->direction, *thrust);
+	}
+	if (std::abs(left_y) > 0)
+	{
+		thrust->current.y = left_y * y_modifier;
+	}
+
+	if (fire && SDL_GameControllerGetButton(controller, SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X))
+	{
+		fire->fire();
+	}
 }
 
 void InputSystem::impl::turnWithThrustConsideration(HOrient requested, HOrient& current, ThrustComponent& thrust) const
