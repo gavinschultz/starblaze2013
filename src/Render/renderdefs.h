@@ -48,7 +48,7 @@ private:
 public:
 	DebugRender(TTF_Font* font);
 	~DebugRender();
-	void render(SDL_Renderer* sdl_renderer, const std::unordered_map<std::string, debug::DebugItem>& debug_items);
+	void render(SDL_Renderer* sdl_renderer, const std::unordered_map<std::string, std::string>& debug_items);
 };
 
 class ShipRender

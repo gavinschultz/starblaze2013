@@ -8,7 +8,7 @@
 
 namespace
 {
-	std::unordered_map<std::string, debug::DebugItem> items;
+	std::unordered_map<std::string, std::string> items;
 }
 
 void debug::console(std::initializer_list<std::string> args)
@@ -26,8 +26,7 @@ void debug::console(std::initializer_list<std::string> args)
 
 void debug::set(std::string label, std::string value)
 {
-	items[label].label = label;
-	items[label].value = value;
+	items[label] = value;
 	//for (auto& i : items)
 	//{
 	//	if (i.label == label)
@@ -54,7 +53,7 @@ void debug::set(std::string label, unsigned int value)
 	debug::set(label, std::to_string(value));
 }
 
-const std::unordered_map<std::string, debug::DebugItem>& debug::getItems()
+const std::unordered_map<std::string, std::string>& debug::getItems()
 {
 	return items;
 }

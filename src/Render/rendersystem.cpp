@@ -178,6 +178,7 @@ void RenderSystem::draw(Camera& camera)
 		pi->fps_render->render(pi->sdl_renderer, timer->getFrameRate());
 	}
 
+	debug::set("thrust", player_thrust->current.x);
 	if (prefs::show_debug)
 	{
 		pi->debug_render->render(pi->sdl_renderer, debug::getItems());
