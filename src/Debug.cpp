@@ -6,36 +6,26 @@
 #include <unordered_map>
 #include "program.h"
 
-namespace
-{
-	std::unordered_map<std::string, std::string> items;
-}
+//namespace
+//{
+//	std::unordered_map<std::string, std::string> items;
+//}
 
 void debug::console(std::initializer_list<std::string> args)
 {
 	std::ostringstream ss;
 	for (auto& s : args)
 	{
-		std::cerr << s;
 		ss << s;
 	}
-	std::cerr << '\n';
 	ss << '\n';
+	std::cerr << ss.str();
 	OutputDebugString(ss.str().c_str());
 }
 
 void debug::set(std::string label, std::string value)
 {
 	items[label] = value;
-	//for (auto& i : items)
-	//{
-	//	if (i.label == label)
-	//	{
-	//		i.value = value;
-	//		return;
-	//	}
-	//}
-	//items.push_back(DebugItem{label, value});
 }
 
 void debug::set(std::string label, double value)

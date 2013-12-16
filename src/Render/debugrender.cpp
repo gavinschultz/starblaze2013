@@ -20,7 +20,6 @@ DebugRender::~DebugRender() = default;
 
 void DebugRender::render(SDL_Renderer* sdl_renderer, const std::unordered_map<std::string, std::string>& debug_items)
 {
-	//TODO: probably horribly inefficient
 	static const int initial_y = 40;
 	int y = initial_y;
 	int text_w, text_h;
@@ -32,7 +31,7 @@ void DebugRender::render(SDL_Renderer* sdl_renderer, const std::unordered_map<st
 		//render::renderSystemText_TTF(sdl_renderer, pi->font_, text, 20, y);
 		if (TTF_SizeText(pi->font_, text.c_str(), &text_w, &text_h) < 0)
 		{
-			debug::console({ "Unable to calculate font size: ", SDL_GetError() });
+			debug::console({ "Unable to calculate text size: ", SDL_GetError() });
 			return;
 		}
 		max_text_w = std::max(max_text_w, text_w);

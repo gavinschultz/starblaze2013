@@ -4,7 +4,7 @@
 void program::exit(int retcode, std::initializer_list<std::string> msg)
 {
 	debug::console(msg);
-	SDL_Quit();
+	cleanup();
 	std::exit(retcode);
 }
 
