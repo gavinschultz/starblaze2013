@@ -104,7 +104,6 @@
     <ClInclude Include="src\render\camera.h" />
     <ClInclude Include="src\render\cocopalette.h" />
     <ClInclude Include="src\component.h" />
-    <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\phys.h" />
     <ClInclude Include="src\program.h" />
     <ClInclude Include="src\render\renderutil.h" />

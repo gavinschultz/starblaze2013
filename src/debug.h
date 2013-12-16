@@ -27,8 +27,3 @@ namespace debug
 	void set(std::string label, std::string value);
 	const std::unordered_map<std::string, std::string>& getItems();
 }
-
-namespace
-{
-	std::unordered_map<std::string, std::string> items;
-}
