@@ -55,6 +55,7 @@ void init()
 
 	const auto horient = new HorizontalOrientComponent();
 	const auto state = new TemporalState2DComponent();
+	state->interpolated.x = 50;
 	const auto thrust = new ThrustComponent();
 	thrust->max = { 400, 12 };
 	const auto radartrack = new RadarTrackableComponent();

@@ -5,6 +5,8 @@
 #include "component.h"
 #include "session.h"
 
+#include "timer.h"
+
 SDL_GameController* _controller = nullptr;
 
 class InputSystem::impl
@@ -149,8 +151,6 @@ void InputSystem::impl::handleKeyboardState() const
 		thrust->current.x = thrust->max.x;
 		turnWithThrustConsideration(HOrient::right, orient->direction, *thrust);
 	}
-
-	debug::set("thrust", thrust->current.x);
 }
 
 void InputSystem::impl::handleMouseMotionEvent(const SDL_MouseMotionEvent& e) const

@@ -40,7 +40,7 @@ public:
 		this->ship_texture_ = sprite_loader.getSprite("ship");
 
 		this->stripe_offset_ = { 0, 24 };
-		this->burner_offset_ = { this->burner_textures_[0].rect.w, ship_texture_.rect.h - 5 };
+		this->burner_offset_ = { -this->burner_textures_[0].getScaledRect().w, ship_texture_.getScaledRect().h - 20 };
 		this->wheels_offset_ = { 0, this->ship_texture_.rect.h };
 		this->taillight_rect_ = { 0, 0, 8, 4 };
 
@@ -79,7 +79,6 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 
 	SDL_Rect burner_rect = {};
 	MappedTexture* burner_texture = nullptr;
-	SDL_Rect burner_texture_rect = { pi->burner_textures_[0].rect.x, pi->burner_textures_[0].rect.y, pi->burner_textures_[0].rect.w, pi->burner_textures_[0].rect.h };
 	if (thrust.current.x != 0.0)
 	{
 		long burner_index = std::min(std::lround(4 * std::abs(thrust.current.x) / thrust.max.x), 3L);
@@ -91,11 +90,11 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 
 		if (thrust.current.x != 0.0 && orient.direction == HOrient::right)
 		{
-			burner_rect = { ship_rect.x + pi->burner_offset_.x, ship_rect.y + pi->burner_offset_.y, burner_texture->rect.w, burner_texture_rect.h };
+			burner_rect = { ship_rect.x + pi->burner_offset_.x, ship_rect.y + pi->burner_offset_.y, burner_texture->getScaledRect().w, burner_texture->getScaledRect().h };
 		}
 		else if (thrust.current.x != 0.0 && orient.direction == HOrient::left)
 		{
-			burner_rect = { ship_rect.x + ship_rect.w, ship_rect.y + pi->burner_offset_.y, burner_texture_rect.w, burner_texture_rect.h };
+			burner_rect = { ship_rect.x + ship_rect.w, ship_rect.y + pi->burner_offset_.y, burner_texture->getScaledRect().w, burner_texture->getScaledRect().h };
 		}
 	}
 
@@ -123,7 +122,7 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 	}
 	if (renderutil::hasDimensions(burner_rect))
 	{
-		SDL_RenderCopyEx(sdl_renderer, burner_texture->texture, &burner_texture_rect, &burner_rect, 0, NULL, flip);
+		SDL_RenderCopyEx(sdl_renderer, burner_texture->texture, &burner_texture->rect, &burner_rect, 0, NULL, flip);
 	}
 	if (renderutil::hasDimensions(wheels_rect))
 	{

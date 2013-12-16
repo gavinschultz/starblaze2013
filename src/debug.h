@@ -19,5 +19,5 @@ namespace debug
 	void set(std::string label, unsigned int value);
 	void set(std::string label, double value);
 	void set(std::string label, std::string value);
-	const std::unordered_map<std::string, debug::DebugItem>& getItems();
+	const std::unordered_map<std::string, std::string>& getItems();
 }
