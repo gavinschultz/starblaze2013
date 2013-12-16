@@ -7,8 +7,8 @@
 class TextRender::impl
 {
 public:
+	impl(const MappedTexture& characters_texture) : charmap_texture{ characters_texture } {}
 	MappedTexture charmap_texture;
-	//const uint32_t scaling{;
 	const uint32_t spacing{ 0 };	// character spacing in unscaled pixels
 	static const std::unordered_map<char, Point2Di> char_offsets;
 };
@@ -26,13 +26,10 @@ const std::unordered_map<char, Point2Di> TextRender::impl::char_offsets{
 	{ '?', { 0, 0110 } }
 };
 
-TextRender::TextRender(const RenderSystem& renderer, const MappedTexture& characters_texture) : pi{ new impl{} }
-{
-	pi->charmap_texture = characters_texture;
-}
+TextRender::TextRender(const RenderSystem& renderer, const MappedTexture& characters_texture) : pi{ new impl{ characters_texture } } {}
 TextRender::~TextRender() {}
 
-void TextRender::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, SDL_Color color) const
+void TextRender::renderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, SDL_Color color) const
 {
 	if (c >= 'a' && c <= 'z')
 		c -= 0x20;
@@ -56,20 +53,20 @@ void TextRender::RenderChar(SDL_Renderer* sdl_renderer, char c, Point2Di pos, SD
 	}
 }
 
-void TextRender::RenderString(SDL_Renderer* sdl_renderer, const std::string& text, Point2Di pos, SDL_Color color) const
+void TextRender::renderString(SDL_Renderer* sdl_renderer, const std::string& text, Point2Di pos, SDL_Color color) const
 {
 	for (auto c : text)
 	{
-		this->RenderChar(sdl_renderer, c, { pos.x, pos.y }, color);
+		this->renderChar(sdl_renderer, c, { pos.x, pos.y }, color);
 		pos.x += (16 + pi->spacing);
 	}
 }
 
-void TextRender::RenderPlate(SDL_Renderer* sdl_renderer, const TextPlate& plate, SDL_Color color) const
+void TextRender::renderPlate(SDL_Renderer* sdl_renderer, const TextPlate& plate, SDL_Color color) const
 {
 	for (auto& line : plate.lines)
 	{
-		this->RenderString(sdl_renderer, line.text, line.offset, color);
+		this->renderString(sdl_renderer, line.text, line.offset, color);
 	}
 }
 

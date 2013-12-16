@@ -2,12 +2,14 @@
 #include "component.h"
 #include "playfield.h"
 #include "render\rendersystem.h"
+#include "render\textrender.h"
 
 class EntityRepository::impl
 {
 public:
 	std::unique_ptr<Entity> ship_;
 	std::unique_ptr<PlayField> playfield_;
+	std::unique_ptr<TextPlate> textplate_;
 	std::vector<std::unique_ptr<Component>> components_;
 };
 
@@ -59,4 +61,9 @@ void EntityRepository::registerEntity(EntityType type, std::initializer_list<Com
 	{
 		pi->playfield_ = std::make_unique<PlayField>(renderer->getWindow());
 	}
+}
+
+void EntityRepository::registerComponent(Component* c)
+{
+	pi->components_.push_back(std::unique_ptr<Component>(c));
 }

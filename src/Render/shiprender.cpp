@@ -78,11 +78,16 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 	}
 
 	SDL_Rect burner_rect = {};
-	const MappedTexture* burner_texture;
+	MappedTexture* burner_texture = nullptr;
 	SDL_Rect burner_texture_rect = { pi->burner_textures_[0].rect.x, pi->burner_textures_[0].rect.y, pi->burner_textures_[0].rect.w, pi->burner_textures_[0].rect.h };
 	if (thrust.current.x != 0.0)
 	{
-		burner_texture = &pi->burner_textures_.at(std::min(std::lround(4 * std::abs(thrust.current.x) / thrust.max.x), 4L));
+		long burner_index = std::min(std::lround(4 * std::abs(thrust.current.x) / thrust.max.x), 3L);
+		burner_texture = &pi->burner_textures_.at(burner_index);
+		if (!burner_texture)
+		{
+			throw std::runtime_error{ "Unable to locate ship burner texture for index " + std::to_string(burner_index) + " thrust.current.x=" + std::to_string(thrust.current.x) + " thrust.max.x=" + std::to_string(thrust.max.x) };
+		}
 
 		if (thrust.current.x != 0.0 && orient.direction == HOrient::right)
 		{

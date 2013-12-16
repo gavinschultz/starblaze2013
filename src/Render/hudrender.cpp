@@ -32,8 +32,8 @@ void HUDRender::render(SDL_Renderer* sdl_renderer, const PlayerComponent& player
 	SDL_SetRenderDrawColor(sdl_renderer, pi->gauge_color.r, pi->gauge_color.g, pi->gauge_color.b, 255);
 	SDL_RenderFillRects(sdl_renderer, *(pi->gauge_rects.data()), 4);
 
-	text_renderer.RenderChar(sdl_renderer, 'F', { 8, 736 }, pi->label_color);
-	text_renderer.RenderChar(sdl_renderer, 'T', { 72, 736 }, pi->label_color);
-	text_renderer.RenderChar(sdl_renderer, 'S', { 136, 736 }, pi->label_color);
-	text_renderer.RenderChar(sdl_renderer, 'R', { 200, 736 }, pi->label_color);
+	text_renderer.renderChar(sdl_renderer, 'F', { 8, 736 }, pi->label_color);
+	text_renderer.renderChar(sdl_renderer, 'T', { 72, 736 }, pi->label_color);
+	text_renderer.renderChar(sdl_renderer, 'S', { 136, 736 }, pi->label_color);
+	text_renderer.renderChar(sdl_renderer, 'R', { 200, 736 }, pi->label_color);
 }
