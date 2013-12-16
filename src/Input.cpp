@@ -11,11 +11,13 @@ class InputSystem::impl
 {
 public:
 	SDL_GameController* controller;
+	void resetComponentsForInput();
 	void connectController();
 	void handleKeyboardEvent(const SDL_KeyboardEvent& e) const;
 	void handleKeyboardState() const;
 	void handleMouseMotionEvent(const SDL_MouseMotionEvent& e) const;
 	void handleJoystickState() const;
+	void turnWithThrustConsideration(HOrient requested, HOrient& current, ThrustComponent& thrust) const;
 };
 
 InputSystem::InputSystem() : pi{ new impl{} }
@@ -27,7 +29,8 @@ InputSystem::~InputSystem() {}
 
 void InputSystem::update()
 {
-	//Ship* ship = game->entity_register.getShip();
+	pi->resetComponentsForInput();
+
 	SDL_Event pevent;
 	while (SDL_PollEvent(&pevent))
 	{
@@ -48,8 +51,17 @@ void InputSystem::update()
 		}
 	}
 
+	if (session::is_paused)
+		return;
+
 	pi->handleJoystickState();
 	pi->handleKeyboardState();
+}
+
+void InputSystem::impl::resetComponentsForInput()
+{
+	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	thrust->current.x = 0;
 }
 
 void InputSystem::impl::connectController()
@@ -119,21 +131,26 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 
 void InputSystem::impl::handleKeyboardState() const
 {
-	//auto* keystate = SDL_GetKeyboardState(NULL);
-	//if (keystate[SDL_SCANCODE_UP])
-	//	ship->state.current.thrust.y = -ship->max_thrust.y;
-	//if (keystate[SDL_SCANCODE_DOWN])
-	//	ship->state.current.thrust.y = ship->max_thrust.y;
-	//if (keystate[SDL_SCANCODE_LEFT])
-	//{
-	//	ship->state.current.thrust.x = -ship->max_thrust.x;
-	//	this->turnShip(ship, ShipDirection::left);
-	//}
-	//if (keystate[SDL_SCANCODE_RIGHT])
-	//{
-	//	ship->state.current.thrust.x = ship->max_thrust.x;
-	//	this->turnShip(ship, ShipDirection::right);
-	//}
+	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	auto orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
+
+	auto* keystate = SDL_GetKeyboardState(NULL);
+	if (keystate[SDL_SCANCODE_UP])
+		thrust->current.y = -thrust->max.y;
+	if (keystate[SDL_SCANCODE_DOWN])
+		thrust->current.y = thrust->max.y;
+	if (keystate[SDL_SCANCODE_LEFT])
+	{
+		thrust->current.x = -thrust->max.x;
+		turnWithThrustConsideration(HOrient::left, orient->direction, *thrust);
+	}
+	if (keystate[SDL_SCANCODE_RIGHT])
+	{
+		thrust->current.x = thrust->max.x;
+		turnWithThrustConsideration(HOrient::right, orient->direction, *thrust);
+	}
+
+	debug::set("thrust", thrust->current.x);
 }
 
 void InputSystem::impl::handleMouseMotionEvent(const SDL_MouseMotionEvent& e) const
@@ -180,14 +197,10 @@ void InputSystem::impl::handleJoystickState() const
 	//}
 }
 
-//bool Input::turnShip(Ship* ship, ShipDirection requested_direction) const
-//{
-//	bool turned = false;
-//	if (ship->direction != requested_direction)
-//	{
-//		ship->state.current.thrust.x = 0;	// one frame to turn without modifying thrust
-//		turned = true;
-//	}
-//	ship->direction = requested_direction;
-//	return turned;
-//}
+void InputSystem::impl::turnWithThrustConsideration(HOrient requested, HOrient& current, ThrustComponent& thrust) const
+{
+	if (requested == current)
+		return;
+	thrust.current.x = 0;	// one frame to turn without modifying thrust - allow for a turn without necessarily reducing existing momentum
+	current = requested;
+}

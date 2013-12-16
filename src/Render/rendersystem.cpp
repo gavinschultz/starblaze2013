@@ -102,8 +102,6 @@ RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height
 
 	bmfont::load(pi->sdl_renderer, "resources\\font-ostrich-black.fnt");
 
-	//_text_renderer = std::unique_ptr<TextRenderer>{new TextRenderer{ this, sprite_loader.getSprite("characters") }};
-
 	debug::console({ "Renderer info\n--------------\n", getInfo() });
 }
 RenderSystem::~RenderSystem() {}
@@ -169,10 +167,11 @@ void RenderSystem::draw(Camera& camera)
 		pi->radar_render->render(pi->sdl_renderer, camera, *(RadarTrackableComponent*)c);
 	}
 
-	//for (auto text_plate : db->getTextPlates())
-	//{
-	//	text_render.draw(pi->sdl_renderer, text_plate);
-	//}
+	for (auto c : db->getComponentsOfType(C::textplate))
+	{
+		auto textplate_component = (TextPlateComponent*)c;
+		pi->text_render->renderPlate(pi->sdl_renderer, *textplate_component->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
+	}
 
 	if (prefs::show_fps)
 	{
@@ -265,7 +264,7 @@ std::string RenderSystem::getInfo() const
 	for (unsigned int i = 0; i < renderer_info.num_texture_formats; i++)
 	{
 		Uint32 texture_format = renderer_info.texture_formats[i];
-		ss << "Texture format " << i << ":     " << SDL_GetPixelFormatName(texture_format) << "\n";
+		ss << "Texture format " << i << ":     " << SDL_GetPixelFormatName(texture_format) << " " << (SDL_ISPIXELFORMAT_FOURCC(texture_format) ? "*" : "") << "\n";
 		ss << "  Pixel type:         " << sdlutil::getPixelType(texture_format) << "\n";
 		ss << "  Pixel order:        " << sdlutil::getPixelOrder(texture_format) << "\n";
 		ss << "  Pixel layout:       " << sdlutil::getPixelLayout(texture_format) << "\n";
@@ -273,7 +272,6 @@ std::string RenderSystem::getInfo() const
 		ss << "  Bytes per pixel:    " << SDL_BYTESPERPIXEL(texture_format) << "\n";
 		ss << "  Has palette:        " << (SDL_ISPIXELFORMAT_INDEXED(texture_format) ? "yes" : "no") << "\n";
 		ss << "  Has alpha:          " << (SDL_ISPIXELFORMAT_ALPHA(texture_format) ? "yes" : "no") << "\n";
-		//ss << "  Special format:     " << (SDL_ISPIXELFORMAT_FOURCC(texture_format) ? "yes" : "no") << "\n";	// doesn't seem important...
 	}
 
 	return ss.str();

@@ -52,8 +52,10 @@ void usage::to_screen()
 
 	for (auto& up : usage_points)
 	{
+		double percent_usage = up.getUsagePercentage(frame_duration);
+		double duration_ms = (up.time2 - up.time1) * 1000.0;
 		char buffer[20];
-		std::sprintf(buffer, "%05.2f (%05.2fms)", up.getUsagePercentage(frame_duration), (up.time2 - up.time1) * 1000.0);
+		std::sprintf(buffer, "%05.2f (%05.2fms)", percent_usage, duration_ms);
 		debug::set("Usage (" + up.label + ") %", buffer);
 	}
 }

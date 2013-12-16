@@ -56,6 +56,7 @@ void init()
 	const auto horient = new HorizontalOrientComponent();
 	const auto state = new TemporalState2DComponent();
 	const auto thrust = new ThrustComponent();
+	thrust->max = { 400, 12 };
 	const auto radartrack = new RadarTrackableComponent();
 	db->registerEntity(E::ship, { horient, state, thrust, radartrack });
 	db->registerEntity(E::playfield, {});

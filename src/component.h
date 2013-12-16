@@ -2,6 +2,8 @@
 #include <vector>
 #include <memory>
 
+#include"render\textrender.h"	//TODO: get out of here, currently needed for unique_ptr
+
 class Entity;
 class PlayField;
 
@@ -13,7 +15,8 @@ typedef enum class ComponentType
 	temporalstate,
 	thrust,
 	horient,
-	radartrackable
+	radartrackable,
+	textplate
 } C;
 
 typedef enum class EntityType
@@ -62,7 +65,7 @@ public:
 	PlayField* getPlayField();
 
 	void registerEntity(EntityType type, std::initializer_list<Component*> components);
-	//void registerComponent(Component* component);
+	void registerComponent(Component* component);
 };
 
 extern std::unique_ptr<EntityRepository> db;
@@ -112,10 +115,10 @@ public:
 	Rect box;
 };
 
-//#include "render/renderable.h"
-//class RenderComponent
-//{
-//public:
-//	bool is_visible{ false };
-//	std::unique_ptr<Renderable> renderable;
-//};
+class TextPlateComponent : public Component
+{
+public:
+	TextPlateComponent(TextPlate* textplate) : Component(C::textplate), textplate{ textplate } {}
+	bool visible{ false };
+	std::unique_ptr<TextPlate> textplate;
+};
