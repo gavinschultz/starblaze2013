@@ -3,12 +3,12 @@
 #include <iostream>
 #include <sstream>
 #include <Windows.h>
-#include <vector>
+#include <unordered_map>
 #include "program.h"
 
 namespace
 {
-	std::vector<debug::DebugItem> items;
+	std::unordered_map<std::string, debug::DebugItem> items;
 }
 
 void debug::console(std::initializer_list<std::string> args)
@@ -26,15 +26,17 @@ void debug::console(std::initializer_list<std::string> args)
 
 void debug::set(std::string label, std::string value)
 {
-	for (auto& i : items)
-	{
-		if (i.label == label)
-		{
-			i.value = value;
-			return;
-		}
-	}
-	items.push_back(DebugItem{label, value});
+	items[label].label = label;
+	items[label].value = value;
+	//for (auto& i : items)
+	//{
+	//	if (i.label == label)
+	//	{
+	//		i.value = value;
+	//		return;
+	//	}
+	//}
+	//items.push_back(DebugItem{label, value});
 }
 
 void debug::set(std::string label, double value)
@@ -52,7 +54,7 @@ void debug::set(std::string label, unsigned int value)
 	debug::set(label, std::to_string(value));
 }
 
-const std::vector<debug::DebugItem>& debug::getItems()
+const std::unordered_map<std::string, debug::DebugItem>& debug::getItems()
 {
 	return items;
 }

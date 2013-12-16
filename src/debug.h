@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace debug
 {
@@ -18,5 +19,5 @@ namespace debug
 	void set(std::string label, unsigned int value);
 	void set(std::string label, double value);
 	void set(std::string label, std::string value);
-	const std::vector<DebugItem>& getItems();
+	const std::unordered_map<std::string, debug::DebugItem>& getItems();
 }

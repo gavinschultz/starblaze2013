@@ -18,15 +18,16 @@ public:
 DebugRender::DebugRender(TTF_Font* font) : pi{ new impl{ font } } {}
 DebugRender::~DebugRender() = default;
 
-void DebugRender::render(SDL_Renderer* sdl_renderer, const std::vector<debug::DebugItem>& debug_items)
+void DebugRender::render(SDL_Renderer* sdl_renderer, const std::unordered_map<std::string, debug::DebugItem>& debug_items)
 {
 	//TODO: probably horribly inefficient
 	static const int initial_y = 40;
 	int y = initial_y;
 	int text_w, text_h;
 	int max_text_w = 0;
-	for (auto& i : debug_items)
+	for (auto& item : debug_items)
 	{
+		auto& i = item.second;
 		std::string text = i.label + ": ";
 		render::renderSystemText_Bitmap(sdl_renderer, text, 20, y);
 		//render::renderSystemText_TTF(sdl_renderer, pi->font_, text, 20, y);
@@ -40,8 +41,9 @@ void DebugRender::render(SDL_Renderer* sdl_renderer, const std::vector<debug::De
 	}
 
 	y = initial_y;
-	for (auto& i : debug_items)
+	for (auto& item : debug_items)
 	{
+		auto& i = item.second;
 		render::renderSystemText_Bitmap(sdl_renderer, i.value, max_text_w + 50, y);
 		//render::renderSystemText_TTF(sdl_renderer, pi->font_, i.value, max_text_w + 50, y);
 		y += pi->font_height + 4;

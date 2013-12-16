@@ -3,6 +3,7 @@
 #include <SDL_ttf.h>
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include "program.h"
 #include "component.h"
 #include "phys.h"
@@ -47,7 +48,7 @@ private:
 public:
 	DebugRender(TTF_Font* font);
 	~DebugRender();
-	void render(SDL_Renderer* sdl_renderer, const std::vector<debug::DebugItem>& debug_items);
+	void render(SDL_Renderer* sdl_renderer, const std::unordered_map<std::string, debug::DebugItem>& debug_items);
 };
 
 class ShipRender
