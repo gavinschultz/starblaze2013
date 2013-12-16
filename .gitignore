@@ -1,10 +1,10 @@
-starblaze2013.v12.suo
-starblaze2013.vcxproj.filters
-starblaze2013.vcxproj.user
+*.v12.suo
+*.vcxproj.filters
+*.vcxproj.user
 Debug/
 Release/
-starblaze2013.opensdf
-starblaze2013.sdf
+*.opensdf
+*.sdf
 run_original_starblaze.bat
 ipch/
 Local.props

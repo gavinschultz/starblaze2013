@@ -6,10 +6,10 @@
 #include <unordered_map>
 #include "program.h"
 
-//namespace
-//{
-//	std::unordered_map<std::string, std::string> items;
-//}
+namespace
+{
+	std::unordered_map<std::string, std::string> items;
+}
 
 void debug::console(std::initializer_list<std::string> args)
 {
@@ -28,20 +28,9 @@ void debug::set(std::string label, std::string value)
 	items[label] = value;
 }
 
-void debug::set(std::string label, double value)
-{
-	debug::set(label, std::to_string(value));
-}
-
-void debug::set(std::string label, int value)
-{
-	debug::set(label, std::to_string(value));
-}
-
-void debug::set(std::string label, unsigned int value)
-{
-	debug::set(label, std::to_string(value));
-}
+void debug::set(std::string label, double value) { debug::set(label, std::to_string(value)); }
+void debug::set(std::string label, int value) { debug::set(label, std::to_string(value)); }
+void debug::set(std::string label, unsigned int value) { debug::set(label, std::to_string(value)); }
 
 const std::unordered_map<std::string, std::string>& debug::getItems()
 {

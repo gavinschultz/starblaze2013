@@ -11,8 +11,8 @@
 #include "render\camera.h"
 #include "prefs.h"
 
-void run();
 void init();
+void run();
 
 std::unique_ptr<EntityRepository> db;
 std::unique_ptr<Timer> timer;
