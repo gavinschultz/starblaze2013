@@ -4,7 +4,7 @@
 class PlayerComponent : public Component
 {
 public:
-	PlayerComponent() : Component(C::player) {}
+	PlayerComponent() : Component(C::cplayer) {}
 	unsigned int lives{ 0 };
 	unsigned int bullet_count{ 255 };
 	unsigned int shields{ 255 };

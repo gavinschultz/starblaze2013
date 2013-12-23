@@ -18,9 +18,10 @@ public:
 
 	void update(Camera& camera)
 	{
-		auto ship_state = (TemporalState2DComponent*)db->getComponentsOfTypeForEntity(E::ship, C::temporalstate);
-		auto ship_orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
-		auto ship_phys = (PhysicalComponent*)db->getComponentsOfTypeForEntity(E::ship, C::physical);
+		auto ship_id = db->getEntityIds(E::eship)[0];
+		auto ship_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(ship_id, C::ctemporalstate);
+		auto ship_orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(ship_id, C::chorient);
+		auto ship_phys = (PhysicalComponent*)db->getComponentOfTypeForEntity(ship_id, C::cphysical);
 		auto playfield = db->getPlayField();
 		auto playarea = playfield->getPlayArea(ship_phys->box);
 

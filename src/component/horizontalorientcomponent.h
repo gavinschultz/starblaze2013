@@ -10,6 +10,6 @@ typedef enum class HorizontalOrientEnum
 class HorizontalOrientComponent : public Component
 {
 public:
-	HorizontalOrientComponent() : Component(C::horient), direction{ HOrient::right } {}
+	HorizontalOrientComponent() : Component(C::chorient), direction{ HOrient::right } {}
 	HorizontalOrientEnum direction;
 };

@@ -8,7 +8,13 @@ class PhysicalComponent;
 class PoweredBodyComponent : public Component
 {
 public:
-	PoweredBodyComponent() : Component(C::poweredbody) {}
+	PoweredBodyComponent(TemporalState2DComponent* state, ThrustComponent* thrust, PhysicalComponent* physical, HorizontalOrientComponent* horient, CollisionComponent* collision) : Component(C::cpoweredbody),
+		state{ state },
+		thrust{ thrust },
+		phys{ physical },
+		horient{ horient },
+		collision{ collision }
+	{}
 	TemporalState2DComponent* state;
 	ThrustComponent* thrust;
 	PhysicalComponent* phys;

@@ -58,15 +58,17 @@ void InputSystem::update()
 	pi->handleJoystickState();
 	pi->handleKeyboardState();
 
-	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	auto ship_id = db->getEntityIds(E::eship)[0];
+	auto thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(ship_id, C::cthrust);
 	if (thrust)
 		motionhistory::add(thrust->current.x, thrust->current.y);
 }
 
 void InputSystem::impl::resetComponentsForInput()
 {
-	auto body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
-	auto fire = (FireBulletsComponent*)db->getComponentsOfTypeForEntity(E::ship, C::firebullets);
+	auto ship_id = db->getEntityIds(E::eship)[0];
+	auto body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(ship_id, C::cpoweredbody);
+	auto fire = (FireBulletsComponent*)db->getComponentOfTypeForEntity(ship_id, C::cfirebullets);
 	if (body)
 		body->thrust->resetCurrent();
 	if (fire)
@@ -108,7 +110,8 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 	if (session::paused && !session::frame_by_frame)
 		return;
 
-	auto body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
+	auto ship_id = db->getEntityIds(E::eship)[0];
+	auto body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(ship_id, C::cpoweredbody);
 	auto thrust = body->thrust;
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	switch (e.keysym.sym)
@@ -148,9 +151,10 @@ void InputSystem::impl::handleKeyboardState() const
 	if (session::paused && !session::frame_by_frame)
 		return;
 
-	auto body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
+	auto ship_id = db->getEntityIds(E::eship)[0];
+	auto body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(ship_id, C::cpoweredbody);
 	auto thrust = body->thrust;
-	auto orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
+	auto orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(ship_id, C::chorient);
 
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	if (keystate[SDL_SCANCODE_UP])
@@ -197,9 +201,10 @@ void InputSystem::impl::handleJoystickState() const
 	if (!SDL_GameControllerGetAttached(controller))
 		return;
 
-	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
-	auto orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
-	auto fire = (FireBulletsComponent*)db->getComponentsOfTypeForEntity(E::ship, C::firebullets);
+	auto ship_id = db->getEntityIds(E::eship)[0];
+	auto thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(ship_id, C::cthrust);
+	auto orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(ship_id, C::chorient);
+	auto fire = (FireBulletsComponent*)db->getComponentOfTypeForEntity(ship_id, C::cfirebullets);
 
 	const static int16_t tolerance_x = 6000;
 	const static int16_t tolerance_y = 8000;

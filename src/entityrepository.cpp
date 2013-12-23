@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "component.h"
+#include <numeric>
+#include "entityrepository.h"
 #include "playfield.h"
 #include "render\rendersystem.h"
 #include "render\textrender.h"
@@ -7,70 +8,80 @@
 class EntityRepository::impl
 {
 public:
-	std::unique_ptr<Entity> ship_;
 	std::unique_ptr<PlayField> playfield_;
-	std::unique_ptr<TextPlate> textplate_;
-	std::vector<std::unique_ptr<Component>> components_;
+	std::array<std::vector<std::unique_ptr<Component>>, 20> components_by_type; // indexed by component type; provides a vector of components of that type
+	std::array<Range, 10> entity_type_ids;										// indexed by entity type; provides the lower/upper range of IDs for the entity
+	std::array<std::vector<unsigned int>, 20> component_indexes_by_entity;		// indexed by [component type][entity id]; provides an index into the components_by_type vector
 };
 
-EntityRepository::EntityRepository() : pi{ new impl() } {}
+EntityRepository::EntityRepository(std::initializer_list<ComponentType> ctypes, std::initializer_list<std::pair<EntityType, Range>> etypes) : pi{ new impl() }
+{
+	for (auto ctype : ctypes)
+	{
+		pi->components_by_type[ctype] = std::vector<std::unique_ptr<Component>>();
+	}
+	for (auto etype : etypes)
+	{
+		pi->entity_type_ids[etype.first] = etype.second;
+	}
+}
 EntityRepository::~EntityRepository() = default;
 
-std::vector<Component*> EntityRepository::getComponentsOfType(ComponentType ctype)
+std::vector<Component*> EntityRepository::getComponentsOfType(ComponentType ctype) const
 {
-	std::vector<Component*> matches;
-	for (auto& c : pi->components_)
+	//return pi->components_by_type[ctype];
+	// TODO: replace all this with:
+	//		return pi->components_by_type[ctype];
+	// have to make changes so clients will accept std::unique_ptr though
+	std::vector<Component*> components;
+	for (auto& c : pi->components_by_type[ctype])
 	{
-		if (c->type == ctype)
-			matches.push_back(c.get());
+		components.push_back(c.get());
 	}
-	return matches;
+	return components;
 }
 
-Component* EntityRepository::getComponentsOfTypeForEntity(EntityType etype, ComponentType ctype)
+std::vector<unsigned int> EntityRepository::getEntityIds(EntityType etype) const
 {
-	for (auto& c : pi->components_)
-	{
-		if (c->type == ctype)
-			return c.get();
-	}
-	return nullptr;
+	if (!hasEntity(etype))
+		return std::vector<unsigned int>{};
+	auto id_range = pi->entity_type_ids[etype];
+	auto ids = std::vector<unsigned int>(id_range.current - id_range.lower + 1);
+	std::iota(ids.begin(), ids.end(), id_range.lower);
+	return ids;
 }
 
-PlayField* EntityRepository::getPlayField()
+Component* EntityRepository::getComponentOfTypeForEntity(unsigned int entity_id, ComponentType ctype) const
+{
+	auto component_index = pi->component_indexes_by_entity[ctype][entity_id];
+	auto& component = pi->components_by_type[ctype][component_index];
+	return component.get();
+}
+
+PlayField* EntityRepository::getPlayField() const
 {
 	return pi->playfield_.get();
 }
 
-Entity* EntityRepository::getPlayer()
+bool EntityRepository::hasEntity(EntityType type) const
 {
-	return pi->ship_.get();
+	return pi->entity_type_ids[type].hasCurrent();
 }
 
-void EntityRepository::registerEntity(EntityType type, std::initializer_list<Component*> components)
+void EntityRepository::registerPlayField()
 {
-	if (type == EntityType::ship)
-	{
-		pi->ship_ = std::make_unique<Entity>();
-		for (auto c : components)
-		{
-			pi->components_.push_back(std::unique_ptr<Component>(c));
-		}
-	}
-	else if (type == EntityType::playfield)
-	{
-		pi->playfield_ = std::make_unique<PlayField>(renderer->getWindow());
-	}
-	else
-	{
-		for (auto c : components)
-		{
-			pi->components_.push_back(std::unique_ptr<Component>(c));
-		}
-	}
+	pi->playfield_ = std::make_unique<PlayField>(renderer->getWindow());
 }
 
-void EntityRepository::registerComponent(Component* c)
+void EntityRepository::registerEntity(EntityType etype, std::initializer_list<Component*> components)
 {
-	pi->components_.push_back(std::unique_ptr<Component>(c));
+	auto& entity_ids = pi->entity_type_ids[etype];
+	entity_ids.reserve();
+	for (auto c : components)
+	{
+		auto& components_by_type = pi->components_by_type[c->type];
+		unsigned int component_index = components_by_type.size();
+		components_by_type.push_back(std::unique_ptr<Component>(c));
+		pi->component_indexes_by_entity[c->type][entity_ids.current] = component_index;
+	}
 }
