@@ -85,6 +85,7 @@ void init_ship()
 	const auto physical = new PhysicalComponent();
 	const auto state = new TemporalState2DComponent();
 	const auto radartrack = new RadarTrackableComponent(physical, state);
+	const auto fire = new FireBulletsComponent();
 	const auto collision = new CollisionComponent(
 	{ 0, 0, 128, 32 },
 	{
@@ -101,7 +102,7 @@ void init_ship()
 	physical->getDecelerationFactor = &PhysicalComponent::getShipDecelerationFactor;
 	physical->box = { 0, 0, 128, 32 };
 
-	db->registerEntity(E::eship, { horient, body, thrust, physical, state, radartrack, collision });
+	db->registerEntity(E::eship, { horient, body, thrust, physical, state, radartrack, collision, fire });
 
 	motionhistory::init(renderer->getWindow().w, thrust->max.x, thrust->max.y);
 }
