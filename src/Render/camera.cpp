@@ -36,8 +36,7 @@ public:
 			turn_speed = 8L;
 		else
 			turn_speed = (int)std::max(std::abs(lround(this->focus_point_vel.x * 0.3)), 8L);
-		debug::set("cam_turn_speed", turn_speed);
-		debug::set("cam focus_point.vel.x", this->focus_point_vel.x);
+
 		int max_velocity{ 0 };
 		int desired_x_abs{ 0 };
 		if (ship_orient->direction == HOrient::right)

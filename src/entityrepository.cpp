@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <numeric>
+#include <unordered_map>
 #include "entityrepository.h"
 #include "playfield.h"
 #include "render\rendersystem.h"
@@ -11,15 +12,16 @@ public:
 	std::unique_ptr<PlayField> playfield_;
 	std::array<std::vector<std::unique_ptr<Component>>, 20> components_by_type; // indexed by component type; provides a vector of components of that type
 	std::array<Range, 10> entity_type_ids;										// indexed by entity type; provides the lower/upper range of IDs for the entity
-	std::array<std::vector<unsigned int>, 20> component_indexes_by_entity;		// indexed by [component type][entity id]; provides an index into the components_by_type vector
+	std::array<std::unordered_map<unsigned int, unsigned int>, 20> component_indexes_by_entity;		// indexed by [component type][entity id]; provides an index into the components_by_type vector
 };
 
 EntityRepository::EntityRepository(std::initializer_list<ComponentType> ctypes, std::initializer_list<std::pair<EntityType, Range>> etypes) : pi{ new impl() }
 {
-	for (auto ctype : ctypes)
-	{
-		pi->components_by_type[ctype] = std::vector<std::unique_ptr<Component>>();
-	}
+	//for (auto ctype : ctypes)
+	//{
+	//	pi->components_by_type[ctype] = std::vector<std::unique_ptr<Component>>();
+	//	pi->component_indexes_by_entity[ctype] = std::unordered_map<unsigned int, unsigned int>();
+	//}
 	for (auto etype : etypes)
 	{
 		pi->entity_type_ids[etype.first] = etype.second;
@@ -53,6 +55,8 @@ std::vector<unsigned int> EntityRepository::getEntityIds(EntityType etype) const
 
 Component* EntityRepository::getComponentOfTypeForEntity(unsigned int entity_id, ComponentType ctype) const
 {
+	if (pi->component_indexes_by_entity[ctype].count(entity_id) == 0)
+		return nullptr;
 	auto component_index = pi->component_indexes_by_entity[ctype][entity_id];
 	auto& component = pi->components_by_type[ctype][component_index];
 	return component.get();
