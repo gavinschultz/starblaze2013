@@ -52,15 +52,24 @@ void init()
 	{
 		program::exit(RetCode::sdl_error, { "Error initializing SDL: ", SDL_GetError() });
 	}
+	db = std::unique_ptr<EntityRepository>(new EntityRepository(
+	{ C::ccollision, C::cfirebullets, C::chorient, C::cinput, C::cphysical, C::cplayer, C::cpoweredbody, C::cradartrackable, C::crender, C::cstation, C::ctemporalstate, C::ctextplate, C::cthrust },
+	{
+		{ E::eship, { 1, 1 } },
+		{ E::eplayfield, { 2, 2 } },
+		{ E::estation, { 3, 5 } },
+		{ E::ealien, { 10, 99 } },
+		{ E::ebullet, { 100, 149 } },
+		{ E::eenemybomb, { 150, 199 } }
+	}));
 
-	db = std::make_unique<EntityRepository>();
 	renderer = std::make_unique<RenderSystem>(1366, 768, 4, 0);
 	timer = std::make_unique<Timer>();
 	physics = std::make_unique<PhysicsSystem>();
 	input = std::make_unique<InputSystem>();
 	thrust = std::make_unique<ThrustSystem>();
 
-	db->registerEntity(E::playfield, {});
+	db->registerPlayField();
 
 	renderer->init();
 
@@ -72,11 +81,10 @@ void init()
 void init_ship()
 {
 	const auto horient = new HorizontalOrientComponent();
-	const auto radartrack = new RadarTrackableComponent();
-	const auto ship_thrust = new ThrustComponent();
+	const auto thrust = new ThrustComponent();
 	const auto physical = new PhysicalComponent();
 	const auto state = new TemporalState2DComponent();
-	const auto body = new PoweredBodyComponent();
+	const auto radartrack = new RadarTrackableComponent(physical, state);
 	const auto collision = new CollisionComponent(
 	{ 0, 0, 128, 32 },
 	{
@@ -86,27 +94,43 @@ void init_ship()
 		{ 32, 16, 72, 16 },
 		{ 104, 20, 24, 12 }
 	});
-	ship_thrust->max = { 6200, 1500 };
-	ship_thrust->reverse_thrust_factor = 0.5;
+	const auto body = new PoweredBodyComponent(state, thrust, physical, horient, collision);
+	thrust->max = { 6200, 1500 };
+	thrust->reverse_thrust_factor = 0.5;
 	physical->weight = 110.0;
 	physical->getDecelerationFactor = &PhysicalComponent::getShipDecelerationFactor;
 	physical->box = { 0, 0, 128, 32 };
-	body->phys = physical;
-	body->state = state;
-	body->thrust = ship_thrust;
-	body->horient = horient;
-	body->collision = collision;
-	radartrack->phys = physical;
-	radartrack->state = state;
 
-	db->registerEntity(E::ship, { horient, body, ship_thrust, physical, state, radartrack, collision });
+	db->registerEntity(E::eship, { horient, body, thrust, physical, state, radartrack, collision });
 
-	motionhistory::init(renderer->getWindow().w, ship_thrust->max.x, ship_thrust->max.y);
+	motionhistory::init(renderer->getWindow().w, thrust->max.x, thrust->max.y);
 }
 
 void init_aliens()
 {
-
+	for (int i = 0; i < 10; i++)
+	{
+		auto physical = new PhysicalComponent();
+		physical->box = { 0, 0, 64, 48 };
+		physical->getDecelerationFactor = &PhysicalComponent::getNoDecelerationFactor;
+		physical->weight = 110.0;
+		auto thrust = new ThrustComponent({ 6200, 1500 }, 1.0);
+		auto state = new TemporalState2DComponent();
+		auto radartrack = new RadarTrackableComponent(physical, state);
+		auto collision = new CollisionComponent(
+		{ 0, 0, 64, 48 },
+		{
+			{ 24, 0, 16, 36 },
+			{ 8, 8, 48, 12 },
+			{ 16, 4, 32, 20 },
+			{ 0, 12, 64, 4 },
+			{ 0, 28, 64, 8 },
+			{ 0, 36, 24, 12 },
+			{ 40, 36, 24, 12 }
+		});
+		auto body = new PoweredBodyComponent(state, thrust, physical, nullptr, collision);
+		db->registerEntity(E::ealien, { physical, state, radartrack, collision });
+	}
 }
 
 void init_station()
@@ -123,7 +147,7 @@ void init_station()
 	);
 	auto station = new StationComponent(StationType::fuel);
 
-	db->registerEntity(E::station, { physical, state, radartrack, collision, station });
+	db->registerEntity(E::estation, { physical, state, radartrack, collision, station });
 }
 
 void run()

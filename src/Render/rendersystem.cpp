@@ -28,7 +28,7 @@ public:
 	Window window;
 	SDL_Window* sdl_window;
 	SDL_Renderer* sdl_renderer;
-	
+
 	std::unique_ptr<SpriteLoader> sprite_loader;
 
 	bool is_fullscreen{ false };
@@ -92,12 +92,12 @@ RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height
 		program::exit(RetCode::runtime_error, { "GLEW initialization error: ", glew_error });
 	}
 
-	if (TTF_Init() == -1) 
+	if (TTF_Init() == -1)
 	{
 		program::exit(RetCode::sdl_error, { "Error initializing SDL_TTF: %s\n", TTF_GetError() });
 	}
 
-	if (!(pi->debug_font = TTF_OpenFont("resources\\ostrich-black.ttf", 48))) 
+	if (!(pi->debug_font = TTF_OpenFont("resources\\ostrich-black.ttf", 48)))
 	{
 		program::exit(RetCode::sdl_error, { "Error opening debug font: %s\n", TTF_GetError() });
 	}
@@ -131,54 +131,58 @@ void RenderSystem::draw(Camera& camera)
 {
 	SDL_RenderClear(pi->sdl_renderer);
 	SDL_SetRenderDrawColor(pi->sdl_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	
+
 	auto playfield = db->getPlayField();
 	if (playfield)
 	{
 		pi->background_render->render(pi->sdl_renderer, camera, *playfield);
 	}
 
-	auto station_st = (StationComponent*)db->getComponentsOfTypeForEntity(E::station, C::station);
-	auto station_state = (TemporalState2DComponent*)db->getComponentsOfTypeForEntity(E::station, C::temporalstate);
-	auto station_phys = (PhysicalComponent*)db->getComponentsOfTypeForEntity(E::station, C::physical);
-	pi->station_render->render(pi->sdl_renderer, camera, *station_st, *station_state, *station_phys);
+	for (auto id : db->getEntityIds(E::estation))
+	{
+		auto station_st = (StationComponent*)db->getComponentOfTypeForEntity(id, C::cstation);
+		auto station_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(id, C::ctemporalstate);
+		auto station_phys = (PhysicalComponent*)db->getComponentOfTypeForEntity(id, C::cphysical);
+		pi->station_render->render(pi->sdl_renderer, camera, *station_st, *station_state, *station_phys);
+	}
 
 	//for (auto e : db->getEntitiesOfType(E::alien))
 	//{
 	//	alien_render.draw(pi->sdl_renderer, camera, (Alien*)e);
 	//}
 
-	auto player_body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
-	auto player_orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
+	auto player_id = db->getEntityIds(E::eship)[0];
+	auto player_body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(player_id, C::cpoweredbody);
+	auto player_orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(player_id, C::chorient);
+	auto player_info = (PlayerComponent*)db->getComponentOfTypeForEntity(player_id, C::cplayer);
 	auto player_thrust = player_body->thrust;
 	auto player_state = player_body->state;
 	auto player_phys = player_body->phys;
-	auto ship = db->getPlayer();
-	if (ship)
+	if (db->hasEntity(E::eship))
 	{
 		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys);
 	}
 
-	//for (auto e : db->getEntitiesOfType(E::debris))
+	//for (auto e : db->getEntitiesOfType(E::edebris))
 	//{
 	//	debris_render.draw(pi->sdl_renderer, camera, (Debris*)e);
 	//}
 
-	//for (auto e : db->getEntitiesOfType(E::bullet))
+	//for (auto e : db->getEntitiesOfType(E::ebullet))
 	//{
 	//	bullet_render.draw(pi->sdl_renderer, camera, (Bullet*)e);
 	//}
 
-	auto player_info = (PlayerComponent*)db->getComponentsOfTypeForEntity(E::ship, C::player);
+	
 	pi->hud_render->render(pi->sdl_renderer, *player_info, session::score, session::lives, *pi->text_render);
 
 	pi->radar_render->renderBox(pi->sdl_renderer);
-	for (auto c : db->getComponentsOfType(C::radartrackable))
+	for (auto c : db->getComponentsOfType(C::cradartrackable))
 	{
 		pi->radar_render->render(pi->sdl_renderer, camera, *(RadarTrackableComponent*)c);
 	}
 
-	for (auto c : db->getComponentsOfType(C::textplate))
+	for (auto c : db->getComponentsOfType(C::ctextplate))
 	{
 		auto textplate_component = (TextPlateComponent*)c;
 		pi->text_render->renderPlate(pi->sdl_renderer, *textplate_component->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
@@ -207,12 +211,12 @@ void RenderSystem::draw(Camera& camera)
 
 	if (prefs::show_collision_boxes)
 	{
-		for (auto c : db->getComponentsOfType(C::collision))
+		for (auto c : db->getComponentsOfType(C::ccollision))
 		{
 			pi->collisionbox_render->render(pi->sdl_renderer, camera, *(CollisionComponent*)c);
 		}
 	}
-	
+
 	if (prefs::show_motionhistory)
 	{
 		pi->motionhistory_render->render(pi->sdl_renderer, pi->window, motionhistory::get(), motionhistory::getThresholds(), motionhistory::getCurrentIndex());
@@ -221,9 +225,9 @@ void RenderSystem::draw(Camera& camera)
 	SDL_RenderPresent(pi->sdl_renderer);
 }
 
-bool RenderSystem::isFullscreen() const 
-{ 
-	return pi->is_fullscreen; 
+bool RenderSystem::isFullscreen() const
+{
+	return pi->is_fullscreen;
 }
 
 void RenderSystem::setFullscreen(bool state)

@@ -102,6 +102,7 @@
     <ClInclude Include="src\component\textplatecomponent.h" />
     <ClInclude Include="src\component\thrustcomponent.h" />
     <ClInclude Include="src\debug.h" />
+    <ClInclude Include="src\entityrepository.h" />
     <ClInclude Include="src\fileloader.h" />
     <ClInclude Include="src\motionhistory.h" />
     <ClInclude Include="src\prefs.h" />

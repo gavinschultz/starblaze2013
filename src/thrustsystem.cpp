@@ -6,7 +6,7 @@
 
 void ThrustSystem::update()
 {
-	for (auto c : db->getComponentsOfType(C::poweredbody))
+	for (auto c : db->getComponentsOfType(C::cpoweredbody))
 	{
 		auto body = (PoweredBodyComponent*)c;
 		auto thrust = body->thrust;

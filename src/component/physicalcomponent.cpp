@@ -19,3 +19,8 @@ Vector2D PhysicalComponent::getShipDecelerationFactor(const TemporalState2DCompo
 
 	return{ x_factor, y_factor };
 }
+
+Vector2D PhysicalComponent::getNoDecelerationFactor(const TemporalState2DComponent& state, const ThrustComponent& thrust)
+{
+	return{ 0.0, 0.0 };
+}
