@@ -72,9 +72,9 @@ bool EntityRepository::hasEntity(EntityType type) const
 	return pi->entity_type_ids[type].hasCurrent();
 }
 
-void EntityRepository::registerPlayField()
+void EntityRepository::registerPlayField(Window window)
 {
-	pi->playfield_ = std::make_unique<PlayField>(renderer->getWindow());
+	pi->playfield_ = std::make_unique<PlayField>(window);
 }
 
 void EntityRepository::registerEntity(EntityType etype, std::initializer_list<Component*> components)

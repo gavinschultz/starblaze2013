@@ -7,5 +7,6 @@ namespace prefs
 	extern bool show_motionhistory;
 	extern bool show_grid;
 	extern bool show_collision_boxes;
+	extern bool vsync;
 	extern bool smooth_animation;
 }

@@ -26,14 +26,14 @@ public:
 	impl();
 	~impl();
 	Window window;
-	SDL_Window* sdl_window;
-	SDL_Renderer* sdl_renderer;
+	SDL_Window* sdl_window{ nullptr };
+	SDL_Renderer* sdl_renderer{ nullptr };
 
 	std::unique_ptr<SpriteLoader> sprite_loader;
 
 	bool is_fullscreen{ false };
 
-	TTF_Font* debug_font;
+	TTF_Font* debug_font{ nullptr };
 
 	void renderDebug(const std::vector<debug::DebugItem>& items) const;
 
@@ -54,12 +54,27 @@ public:
 RenderSystem::impl::impl() = default;
 RenderSystem::impl::~impl() = default;
 
-RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height, unsigned int sprite_scale, int render_width) : pi{ new impl{} }
+RenderSystem::RenderSystem(Window window) : pi{ new impl{} }
+{
+	pi->window = window;
+	init();
+}
+RenderSystem::~RenderSystem() {}
+
+void RenderSystem::init()
 {
 	debug::console({ "Initializing RenderSystem..." });
+	
+	if (pi->sdl_renderer)
+	{
+		SDL_DestroyRenderer(pi->sdl_renderer);
+	}
 
-	pi->window.w = window_width;
-	pi->window.h = window_height;
+	if (pi->sdl_window)
+	{
+		SDL_DestroyWindow(pi->sdl_window);
+	}
+
 	pi->sprite_loader = std::make_unique<SpriteLoader>();
 
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
@@ -71,7 +86,10 @@ RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height
 	}
 
 	setFullscreen(false);
-	if (!(pi->sdl_renderer = SDL_CreateRenderer(pi->sdl_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED)))
+	Uint32 flags = SDL_RENDERER_ACCELERATED;
+	if (prefs::vsync)
+		flags |= SDL_RENDERER_PRESENTVSYNC;
+	if (!(pi->sdl_renderer = SDL_CreateRenderer(pi->sdl_window, -1, flags)))
 	{
 		program::exit(RetCode::sdl_error, { SDL_GetError() });
 	}
@@ -108,11 +126,7 @@ RenderSystem::RenderSystem(unsigned int window_width, unsigned int window_height
 	bmfont::load(pi->sdl_renderer, "resources\\font-ostrich-black.fnt");
 
 	debug::console({ "Renderer info\n--------------\n", getInfo() });
-}
-RenderSystem::~RenderSystem() {}
 
-void RenderSystem::init()
-{
 	pi->background_render = std::make_unique<BackgroundRender>(*this);
 	pi->fps_render = std::make_unique<FPSRender>(pi->debug_font, pi->window);
 	pi->debug_render = std::make_unique<DebugRender>(pi->debug_font);
@@ -122,7 +136,7 @@ void RenderSystem::init()
 	pi->ship_render = std::make_unique<ShipRender>(*this);
 	pi->hud_render = std::make_unique<HUDRender>(*this);
 	pi->radar_render = std::make_unique<RadarRender>(*this);
-	pi->text_render = std::make_unique<TextRender>(*this, renderer->getSpriteLoader().getSprite("characters"));
+	pi->text_render = std::make_unique<TextRender>(*this, pi->sprite_loader->getSprite("characters"));
 	pi->collisionbox_render = std::make_unique<CollisionBoxRender>();
 	pi->station_render = std::make_unique<StationRender>(*this);
 }
