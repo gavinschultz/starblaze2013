@@ -31,5 +31,8 @@ public:
 
 	Rect getPlayArea(const Rect& entity_box) const;
 	double getAltitude(double entity_pos_y, double entity_box_h) const;
+	bool isRightOf(double x1, double x2);
+	bool isLeftOf(double x1, double x2);
 	double getAbsolutePosX(double entity_pos_x) const;
+	double getRelativePosX(double ref_pos_x, double entity_pos_x) const;
 };

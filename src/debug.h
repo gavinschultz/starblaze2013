@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 namespace debug
 {
@@ -14,7 +14,7 @@ namespace debug
 
 	void console(std::initializer_list<std::string> args);
 
-	// TODO: templates - tried, but hard. Maybe see http://stackoverflow.com/questions/16591519/argument-deduction-with-template-member-function-and-non-template-overload
+	// TODO: templates - tried, but harder than I expected. Maybe see http://stackoverflow.com/questions/16591519/argument-deduction-with-template-member-function-and-non-template-overload
 	//template<typename T>
 	//auto debug::set<T>(std::string label, T value) -> decltype(std::to_string(value), void())
 	//{
@@ -25,5 +25,5 @@ namespace debug
 	void set(std::string label, unsigned int value);
 	void set(std::string label, double value);
 	void set(std::string label, std::string value);
-	const std::unordered_map<std::string, std::string>& getItems();
+	const std::map<std::string, std::string>& getItems();
 }

@@ -3,7 +3,7 @@
 #include <SDL_ttf.h>
 #include <memory>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include "program.h"
 #include "component.h"
 #include "phys.h"
@@ -12,7 +12,6 @@
 class RenderSystem;
 class PlayField;
 class Camera;
-//class TextRender;
 struct Window;
 
 class BackgroundRender
@@ -41,6 +40,12 @@ public:
 	void render(SDL_Renderer* sdl_renderer, Window window, Rect playfield_rect) const;
 };
 
+class ZeroLineRender
+{
+public:
+	void render(SDL_Renderer* sdl_renderer, Window window, const Camera& camera) const;
+};
+
 class DebugRender
 {
 private:
@@ -48,7 +53,13 @@ private:
 public:
 	DebugRender(TTF_Font* font);
 	~DebugRender();
-	void render(SDL_Renderer* sdl_renderer, const std::unordered_map<std::string, std::string>& debug_items);
+	void render(SDL_Renderer* sdl_renderer, const std::map<std::string, std::string>& debug_items) const;
+};
+
+class MotionHistoryRender
+{
+public:
+	void render(SDL_Renderer* sdl_renderer, Window window, const std::vector<Vector2D>& points, Vector2D thresholds, unsigned int current_index) const;
 };
 
 class ShipRender
@@ -58,7 +69,7 @@ private:
 public:
 	ShipRender(const RenderSystem& renderer);
 	~ShipRender();
-	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust);
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust, const PhysicalComponent& phys) const;
 };
 
 class HUDRender
@@ -68,7 +79,7 @@ private:
 public:
 	HUDRender(const RenderSystem& renderer);
 	~HUDRender();
-	void render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, unsigned int score, unsigned int lives, const TextRender& text_renderer);
+	void render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, unsigned int score, unsigned int lives, const TextRender& text_renderer) const;
 };
 
 class RadarRender
@@ -78,11 +89,22 @@ private:
 public:
 	RadarRender(const RenderSystem& renderer);
 	~RadarRender();
-	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const RadarTrackableComponent& c);
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const RadarTrackableComponent& c) const;
 	void renderBox(SDL_Renderer* sdl_renderer);
 };
 
-//for (auto c : db->getComponentsOfType(C::radartrackable))
-//{
-//	radar_render.draw(pi->sdl_renderer, camera, (RadarTrackable*)c);
-//}
+class CollisionBoxRender
+{
+public:
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const CollisionComponent& c) const;
+};
+
+class StationRender
+{
+private:
+	class impl; std::unique_ptr<impl> pi;
+public:
+	StationRender(const RenderSystem& renderer);
+	~StationRender();
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const StationComponent& station, const TemporalState2DComponent& state, const PhysicalComponent& phys) const;
+};

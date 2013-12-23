@@ -41,7 +41,7 @@ public:
 
 		this->stripe_offset_ = { 0, 24 };
 		this->burner_offset_ = { -this->burner_textures_[0].getScaledRect().w, ship_texture_.getScaledRect().h - 20 };
-		this->wheels_offset_ = { 0, this->ship_texture_.rect.h };
+		this->wheels_offset_ = { 0, this->ship_texture_.getScaledRect().h };
 		this->taillight_rect_ = { 0, 0, 8, 4 };
 
 		taillight_color_ = renderer.palette->colors[CoCoPaletteEnum::red];
@@ -50,7 +50,7 @@ public:
 
 ShipRender::ShipRender(const RenderSystem& renderer) : pi{ new impl(renderer) } {}
 ShipRender::~ShipRender() = default;
-void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust)
+void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust, const PhysicalComponent& phys) const
 {
 	auto playfield = db->getPlayField();
 
@@ -58,7 +58,7 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 	SDL_RendererFlip flipReverse = (orient.direction == HOrient::left ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
 
 	int32_t entity_x = renderutil::getScreenXForEntityByCameraAndDistance(state.interpolated.x, pi->ship_texture_.getScaledRect().w, (unsigned int)playfield->w, camera, 1.0);
-	int32_t entity_y = std::lround(state.interpolated.y - camera.view_rect.y);
+	int32_t entity_y = std::lround(state.interpolated.y - camera.getViewRect().y);
 	SDL_Rect ship_rect = { entity_x, entity_y, pi->ship_texture_.getScaledRect().w, pi->ship_texture_.getScaledRect().h };
 
 	SDL_Rect stripe_texture_rect = { pi->stripe_texture_.rect.x, pi->stripe_texture_.rect.y, pi->ship_texture_.rect.w, pi->stripe_texture_.rect.h };
@@ -100,9 +100,10 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 
 	SDL_Texture* wheels_texture = nullptr;
 	SDL_Rect wheels_rect = {};
-	if (playfield->getAltitude(state.current.pos.y, pi->ship_texture_.rect.h) == 0.0)
+	double altitude = playfield->getAltitude(state.current.pos.y, phys.box.h);
+	if (altitude == 0.0)
 	{
-		wheels_rect = { ship_rect.x + pi->wheels_offset_.x, ship_rect.y + pi->wheels_offset_.y, pi->wheels_texture_.rect.w, pi->wheels_texture_.rect.h };
+		wheels_rect = { ship_rect.x + pi->wheels_offset_.x, ship_rect.y + pi->wheels_offset_.y, pi->wheels_texture_.getScaledRect().w, pi->wheels_texture_.getScaledRect().h };
 		wheels_texture = pi->wheels_texture_.texture;
 	}
 

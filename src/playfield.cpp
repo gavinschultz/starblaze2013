@@ -52,3 +52,31 @@ double PlayField::getAbsolutePosX(double entity_pos_x) const
 {
 	return mathutil::abswrap(entity_pos_x, this->w);
 }
+
+double PlayField::getRelativePosX(double x1, double x2) const
+{
+	double proposed = std::abs(x1 - x2);
+	if (proposed < this->w / 2)
+	{
+		return std::fmod(proposed, this->w) * std::copysign(1.0, (x2 - x1));
+	}
+	else
+	{
+		return std::fmod(this->w, proposed) * std::copysign(1.0, (x1 - x2));
+	}
+}
+
+// only works for absolute coordinates
+bool PlayField::isRightOf(double x1, double x2)
+{
+	//return std::fmod(std::abs(x1 - x2), this->w) < this->w / 2;
+	if ((x1 - x2) >= 0)
+		return std::fmod((x1 - x2), this->w) < this->w / 2;
+	else
+		return std::fmod((x2 - x1), this->w) > this->w / 2;
+}
+
+bool PlayField::isLeftOf(double x1, double x2)
+{
+	return !isRightOf(x1, x2);
+}

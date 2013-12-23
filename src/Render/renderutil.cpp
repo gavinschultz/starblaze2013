@@ -11,7 +11,7 @@
 
 int32_t renderutil::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, unsigned int entity_sprite_width, unsigned int world_width, const Camera& camera, double distance_factor)
 {
-	double camera_x_abs = camera.view_rect.x;
+	double camera_x_abs = camera.getViewRect().x;
 
 	double camera_x_rel;
 	if (camera_x_abs > world_width / 2)

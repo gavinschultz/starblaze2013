@@ -14,7 +14,8 @@ namespace session
 {
 	void handleKeyboardEvent(const SDL_KeyboardEvent& e);
 	extern bool quit;
-	extern bool is_paused;
+	extern bool paused;
+	extern bool frame_by_frame;
 	extern int score;
 	extern int lives;
 	extern SessionState state;
