@@ -30,6 +30,10 @@ void session::handleKeyboardEvent(const SDL_KeyboardEvent& e)
 	case SDLK_F6:
 		prefs::smooth_animation = !prefs::smooth_animation;
 		break;
+	case SDLK_F8:
+		prefs::vsync = !prefs::vsync;
+		renderer->init();
+		break;
 	case SDLK_f:
 		session::paused = true;
 		session::frame_by_frame = true;

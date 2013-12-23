@@ -3,6 +3,7 @@
 #include "component\component_base.h"
 
 class PlayField;
+struct Window;
 
 typedef enum EntityType
 {
@@ -52,7 +53,7 @@ public:
 	PlayField* getPlayField() const;
 
 	void registerEntity(EntityType type, std::initializer_list<Component*> components);
-	void registerPlayField();
+	void registerPlayField(Window window);
 };
 
 extern std::unique_ptr<EntityRepository> db;

@@ -12,7 +12,7 @@ class RenderSystem : public System
 private:
 	class impl; std::unique_ptr<impl> pi;
 public:
-	RenderSystem(unsigned int window_width, unsigned int window_height, unsigned int sprite_scale, int render_width);
+	RenderSystem(Window window);
 	~RenderSystem();
 
 	SDL_Palette* palette;

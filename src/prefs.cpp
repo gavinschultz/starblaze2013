@@ -14,3 +14,4 @@ bool prefs::show_collision_boxes = false;
 #endif
 bool prefs::show_motionhistory = false;
 bool prefs::smooth_animation = false;
+bool prefs::vsync = true;

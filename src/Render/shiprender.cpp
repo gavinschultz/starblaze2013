@@ -55,7 +55,7 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 	auto playfield = db->getPlayField();
 
 	SDL_RendererFlip flip = (orient.direction == HOrient::left ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-	SDL_RendererFlip flipReverse = (orient.direction == HOrient::left ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
+	//SDL_RendererFlip flipReverse = (orient.direction == HOrient::left ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
 
 	int32_t entity_x = renderutil::getScreenXForEntityByCameraAndDistance(state.interpolated.x, pi->ship_texture_.getScaledRect().w, (unsigned int)playfield->w, camera, 1.0);
 	int32_t entity_y = std::lround(state.interpolated.y - camera.getViewRect().y);
@@ -115,7 +115,7 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 	SDL_RenderCopyEx(sdl_renderer, pi->ship_texture_.texture, &pi->ship_texture_.rect, &ship_rect, 0, NULL, flip);
 	SDL_SetTextureColorMod(pi->ship_texture_.texture, 255, 255, 255); // shared texture, so reset to defaults
 
-	SDL_RenderCopyEx(sdl_renderer, pi->stripe_texture_.texture, &stripe_texture_rect, &stripe_rect, 0, NULL, flipReverse);
+	SDL_RenderCopyEx(sdl_renderer, pi->stripe_texture_.texture, &stripe_texture_rect, &stripe_rect, 0, NULL, flip);
 	if (renderutil::hasDimensions(taillight_rect))
 	{
 		SDL_SetRenderDrawColor(sdl_renderer, pi->taillight_color_.r, pi->taillight_color_.g, pi->taillight_color_.b, pi->taillight_color_.a);

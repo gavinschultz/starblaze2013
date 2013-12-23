@@ -63,15 +63,13 @@ void init()
 		{ E::eenemybomb, { 150, 199 } }
 	}));
 
-	renderer = std::make_unique<RenderSystem>(1366, 768, 4, 0);
+	Window window = { 1366, 768 };
+	db->registerPlayField(window);
+	renderer = std::make_unique<RenderSystem>(window);
 	timer = std::make_unique<Timer>();
 	physics = std::make_unique<PhysicsSystem>();
 	input = std::make_unique<InputSystem>();
 	thrust = std::make_unique<ThrustSystem>();
-
-	db->registerPlayField();
-
-	renderer->init();
 
 	init_ship();
 	init_aliens();
