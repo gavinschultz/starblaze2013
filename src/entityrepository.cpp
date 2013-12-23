@@ -61,6 +61,13 @@ void EntityRepository::registerEntity(EntityType type, std::initializer_list<Com
 	{
 		pi->playfield_ = std::make_unique<PlayField>(renderer->getWindow());
 	}
+	else
+	{
+		for (auto c : components)
+		{
+			pi->components_.push_back(std::unique_ptr<Component>(c));
+		}
+	}
 }
 
 void EntityRepository::registerComponent(Component* c)

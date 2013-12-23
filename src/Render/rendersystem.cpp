@@ -18,6 +18,7 @@
 #include "prefs.h"
 #include "bmfontloader.h"
 #include "playfield.h"
+#include "motionhistory.h"
 
 class RenderSystem::impl
 {
@@ -39,11 +40,15 @@ public:
 	std::unique_ptr<BackgroundRender> background_render;
 	std::unique_ptr<FPSRender> fps_render;
 	std::unique_ptr<DebugRender> debug_render;
+	std::unique_ptr<MotionHistoryRender> motionhistory_render;
 	std::unique_ptr<GridRender> grid_render;
+	std::unique_ptr<ZeroLineRender> zeroline_render;
 	std::unique_ptr<ShipRender> ship_render;
 	std::unique_ptr<HUDRender> hud_render;
 	std::unique_ptr<RadarRender> radar_render;
 	std::unique_ptr<TextRender> text_render;
+	std::unique_ptr<CollisionBoxRender> collisionbox_render;
+	std::unique_ptr<StationRender> station_render;
 };
 
 RenderSystem::impl::impl() = default;
@@ -111,11 +116,15 @@ void RenderSystem::init()
 	pi->background_render = std::make_unique<BackgroundRender>(*this);
 	pi->fps_render = std::make_unique<FPSRender>(pi->debug_font, pi->window);
 	pi->debug_render = std::make_unique<DebugRender>(pi->debug_font);
+	pi->motionhistory_render = std::make_unique<MotionHistoryRender>();
 	pi->grid_render = std::make_unique<GridRender>();
+	pi->zeroline_render = std::make_unique<ZeroLineRender>();
 	pi->ship_render = std::make_unique<ShipRender>(*this);
 	pi->hud_render = std::make_unique<HUDRender>(*this);
 	pi->radar_render = std::make_unique<RadarRender>(*this);
 	pi->text_render = std::make_unique<TextRender>(*this, renderer->getSpriteLoader().getSprite("characters"));
+	pi->collisionbox_render = std::make_unique<CollisionBoxRender>();
+	pi->station_render = std::make_unique<StationRender>(*this);
 }
 
 void RenderSystem::draw(Camera& camera)
@@ -129,23 +138,25 @@ void RenderSystem::draw(Camera& camera)
 		pi->background_render->render(pi->sdl_renderer, camera, *playfield);
 	}
 
-	//for (auto e : db->getEntitiesOfType(E::station))
-	//{
-	//	station_render.draw(pi->sdl_renderer, camera, (Station*)e);
-	//}
+	auto station_st = (StationComponent*)db->getComponentsOfTypeForEntity(E::station, C::station);
+	auto station_state = (TemporalState2DComponent*)db->getComponentsOfTypeForEntity(E::station, C::temporalstate);
+	auto station_phys = (PhysicalComponent*)db->getComponentsOfTypeForEntity(E::station, C::physical);
+	pi->station_render->render(pi->sdl_renderer, camera, *station_st, *station_state, *station_phys);
 
 	//for (auto e : db->getEntitiesOfType(E::alien))
 	//{
 	//	alien_render.draw(pi->sdl_renderer, camera, (Alien*)e);
 	//}
 
-	auto player_state = (TemporalState2DComponent*)db->getComponentsOfTypeForEntity(E::ship, C::temporalstate);
+	auto player_body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
 	auto player_orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
-	auto player_thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	auto player_thrust = player_body->thrust;
+	auto player_state = player_body->state;
+	auto player_phys = player_body->phys;
 	auto ship = db->getPlayer();
 	if (ship)
 	{
-		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust);
+		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys);
 	}
 
 	//for (auto e : db->getEntitiesOfType(E::debris))
@@ -178,7 +189,6 @@ void RenderSystem::draw(Camera& camera)
 		pi->fps_render->render(pi->sdl_renderer, timer->getFrameRate());
 	}
 
-	debug::set("thrust", player_thrust->current.x);
 	if (prefs::show_debug)
 	{
 		pi->debug_render->render(pi->sdl_renderer, debug::getItems());
@@ -192,22 +202,21 @@ void RenderSystem::draw(Camera& camera)
 		else
 			playfield_rect = { 0, 0, 0, 0 };
 		pi->grid_render->render(pi->sdl_renderer, pi->window, playfield_rect);
+		pi->zeroline_render->render(pi->sdl_renderer, pi->window, camera);
 	}
 
-	//if (prefs::show_zeroline)
-	//{
-	//	zeroline_render.draw(pi->sdl_renderer, camera);
-	//}
-
-	//if (prefs::show_collisionboxes)
-	//{
-	//	collisionbox_render.draw(pi->sdl_renderer, camera);
-	//}
-	//
-	//if (prefs::show_motionhistory)
-	//{
-	//	motionhistory_render.draw(pi->sdl_renderer, debug::getMotionHistory())
-	//}
+	if (prefs::show_collision_boxes)
+	{
+		for (auto c : db->getComponentsOfType(C::collision))
+		{
+			pi->collisionbox_render->render(pi->sdl_renderer, camera, *(CollisionComponent*)c);
+		}
+	}
+	
+	if (prefs::show_motionhistory)
+	{
+		pi->motionhistory_render->render(pi->sdl_renderer, pi->window, motionhistory::get(), motionhistory::getThresholds(), motionhistory::getCurrentIndex());
+	}
 
 	SDL_RenderPresent(pi->sdl_renderer);
 }

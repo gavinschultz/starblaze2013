@@ -18,7 +18,7 @@ public:
 	const int point_size{ 8 };
 	int calculateRadarLeft(const Camera& camera, const PlayField& playfield) const
 	{
-		int radar_middle = std::lround(playfield.getAbsolutePosX(camera.view_rect.x + (camera.view_rect.w / 2)));
+		int radar_middle = std::lround(playfield.getAbsolutePosX(camera.getViewRect().x + (camera.getViewRect().w / 2)));
 		int radar_left = std::lround(playfield.getAbsolutePosX(radar_middle - (int)(playfield.w / 2)));
 		return radar_left;
 	}
@@ -37,7 +37,7 @@ public:
 
 		return SDL_Rect{ radar_x, radar_y, point_size, point_size };
 	}
-	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const RadarTrackableComponent& c)
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const RadarTrackableComponent& c) const
 	{
 		PlayField* playfield = db->getPlayField();
 		int radar_left = calculateRadarLeft(camera, *playfield);	// rendered world position at the left-most point of the radar
@@ -48,8 +48,8 @@ public:
 			SDL_Rect point_rect = { radar_rect.x + vp.x, radar_rect.y + vp.y, point_size, point_size };
 			SDL_RenderFillRect(sdl_renderer, &point_rect);
 		}
-
-		SDL_Rect point_rect = transformToRadarView(c.pos.x, c.pos.y, c.box.w, c.box.h, radar_left, *playfield);
+		
+		SDL_Rect point_rect = transformToRadarView(c.state->interpolated.x, c.state->interpolated.y, c.phys->box.w, c.phys->box.h, radar_left, *playfield);
 		SDL_SetRenderDrawColor(sdl_renderer, 255, 255, 255, 255);
 		SDL_RenderFillRect(sdl_renderer, &point_rect);
 	}
@@ -81,7 +81,7 @@ void RadarRender::renderBox(SDL_Renderer* sdl_renderer)
 	SDL_SetRenderDrawColor(sdl_renderer, pi->radar_color.r, pi->radar_color.g, pi->radar_color.b, pi->radar_color.a);
 	SDL_RenderFillRect(sdl_renderer, &pi->radar_rect);
 }
-void RadarRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const RadarTrackableComponent& c)
+void RadarRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const RadarTrackableComponent& c) const
 {
 	pi->render(sdl_renderer, camera, c);
 }

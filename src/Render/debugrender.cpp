@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <algorithm>
+#include <map>
 #include "renderdefs.h"
 #include "renderutil.h"
 #include "program.h"
@@ -18,7 +19,7 @@ public:
 DebugRender::DebugRender(TTF_Font* font) : pi{ new impl{ font } } {}
 DebugRender::~DebugRender() = default;
 
-void DebugRender::render(SDL_Renderer* sdl_renderer, const std::unordered_map<std::string, std::string>& debug_items)
+void DebugRender::render(SDL_Renderer* sdl_renderer, const std::map<std::string, std::string>& debug_items) const
 {
 	static const int initial_y = 40;
 	int y = initial_y;

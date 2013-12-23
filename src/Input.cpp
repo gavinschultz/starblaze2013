@@ -5,6 +5,7 @@
 #include "component.h"
 #include "session.h"
 #include "mathutil.h"
+#include "motionhistory.h"
 
 #include "timer.h"
 
@@ -37,7 +38,7 @@ void InputSystem::update()
 	SDL_Event pevent;
 	while (SDL_PollEvent(&pevent))
 	{
-		if (session::is_paused && pevent.type != SDL_KEYDOWN)
+		if (session::paused && pevent.type != SDL_KEYDOWN)
 			continue;
 
 		switch (pevent.type)
@@ -54,19 +55,20 @@ void InputSystem::update()
 		}
 	}
 
-	if (session::is_paused)
-		return;
-
 	pi->handleJoystickState();
 	pi->handleKeyboardState();
+
+	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	if (thrust)
+		motionhistory::add(thrust->current.x, thrust->current.y);
 }
 
 void InputSystem::impl::resetComponentsForInput()
 {
-	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	auto body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
 	auto fire = (FireBulletsComponent*)db->getComponentsOfTypeForEntity(E::ship, C::firebullets);
-	if (thrust)
-		thrust->resetCurrent();
+	if (body)
+		body->thrust->resetCurrent();
 	if (fire)
 		fire->reset();
 }
@@ -103,6 +105,12 @@ void InputSystem::detect()
 
 void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 {
+	if (session::paused && !session::frame_by_frame)
+		return;
+
+	auto body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
+	auto thrust = body->thrust;
+	auto* keystate = SDL_GetKeyboardState(NULL);
 	switch (e.keysym.sym)
 	{
 	case SDLK_F6:
@@ -114,31 +122,34 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 	case SDLK_F10:
 		//renderer->toggleMotionHistory(!renderer->is_motionhistory_visible);
 		break;
-	case SDLK_F11:
-		//renderer->toggleGrid(!renderer->is_grid_visible);
-		break;
-	case SDLK_p:
-		//game->togglePause(!game->is_paused);
-		break;
-	case SDLK_f:
-		//game->advanceFrameByFrame();
-		break;
 	case SDLK_SPACE:
 		//if (ship)
 		//{
 		//	ship->fire();
 		//}
 		break;
-	case SDLK_RETURN:
-		//if (e.keysym.mod & KMOD_ALT)
-		//	renderer->toggleFullscreen(!renderer->is_fullscreen);
+	case SDLK_t:
+		if (keystate[SDL_SCANCODE_LSHIFT] || keystate[SDL_SCANCODE_RSHIFT])
+		{
+			thrust->max.x -= 200;
+			thrust->max.y -= 200;
+		}
+		else
+		{
+			thrust->max.x += 200;
+			thrust->max.y += 200;
+		}
 		break;
 	}
 }
 
 void InputSystem::impl::handleKeyboardState() const
 {
-	auto thrust = (ThrustComponent*)db->getComponentsOfTypeForEntity(E::ship, C::thrust);
+	if (session::paused && !session::frame_by_frame)
+		return;
+
+	auto body = (PoweredBodyComponent*)db->getComponentsOfTypeForEntity(E::ship, C::poweredbody);
+	auto thrust = body->thrust;
 	auto orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
 
 	auto* keystate = SDL_GetKeyboardState(NULL);
@@ -160,6 +171,9 @@ void InputSystem::impl::handleKeyboardState() const
 
 void InputSystem::impl::handleMouseMotionEvent(const SDL_MouseMotionEvent& e) const
 {
+	if (session::paused && !session::frame_by_frame)
+		return;
+
 	//// Ship control via the mouse is kinda shitty, only because I haven't found a way to easily get perpetual thrust in a single direction
 	//// Needs some experimentation - probably should try non-relative coordinates next
 	//if (!game->is_paused)
@@ -178,6 +192,8 @@ void InputSystem::impl::handleMouseMotionEvent(const SDL_MouseMotionEvent& e) co
 
 void InputSystem::impl::handleJoystickState() const
 {
+	if (session::paused && !session::frame_by_frame)
+		return;
 	if (!SDL_GameControllerGetAttached(controller))
 		return;
 
@@ -185,14 +201,15 @@ void InputSystem::impl::handleJoystickState() const
 	auto orient = (HorizontalOrientComponent*)db->getComponentsOfTypeForEntity(E::ship, C::horient);
 	auto fire = (FireBulletsComponent*)db->getComponentsOfTypeForEntity(E::ship, C::firebullets);
 
-	const static int16_t tolerance = 6000;
-	const double x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance);
-	const double y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance);
+	const static int16_t tolerance_x = 6000;
+	const static int16_t tolerance_y = 8000;
+	const double x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance_x);
+	const double y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance_y);
 	
 	int16_t left_x_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX);
 	int16_t left_y_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY);
-	int16_t left_x = mathutil::getsign(left_x_raw)*std::max(0, (std::abs(left_x_raw) - tolerance));
-	int16_t left_y = mathutil::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance));
+	int16_t left_x = mathutil::getsign(left_x_raw)*std::max(0, (std::abs(left_x_raw) - tolerance_x));
+	int16_t left_y = mathutil::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance_y));
 	if (left_x != 0)
 	{
 		thrust->current.x = left_x * x_modifier;

@@ -64,16 +64,3 @@ struct State2D
 	Vector2D vel;
 	Vector2D acc;
 };
-
-struct TemporalState2D
-{
-	State2D current;
-	State2D prev;
-	Point2D interpolated;
-};
-
-typedef enum class HorizontalOrientEnum
-{
-	left,
-	right
-} HOrient;

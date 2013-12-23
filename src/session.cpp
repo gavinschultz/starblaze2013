@@ -3,7 +3,8 @@
 #include "prefs.h"
 #include "render\rendersystem.h"
 
-bool session::is_paused = false;
+bool session::paused = false;
+bool session::frame_by_frame = false;
 bool session::quit = false;
 int session::lives = 0;
 int session::score = 0;
@@ -21,12 +22,22 @@ void session::handleKeyboardEvent(const SDL_KeyboardEvent& e)
 		prefs::show_fps = !prefs::show_fps;
 		prefs::show_debug = prefs::show_fps;
 		prefs::show_grid = prefs::show_fps;
+		prefs::show_collision_boxes = prefs::show_fps;
+		break;
+	case SDLK_F3:
+		prefs::show_motionhistory = !prefs::show_motionhistory;
 		break;
 	case SDLK_F6:
 		prefs::smooth_animation = !prefs::smooth_animation;
 		break;
-	case SDLK_F10:
-		prefs::tmp_toggle = !prefs::tmp_toggle;
+	case SDLK_f:
+		session::paused = true;
+		session::frame_by_frame = true;
+		break;
+	case SDLK_p:
+		session::paused = !session::paused;
+		if (!session::paused)
+			session::frame_by_frame = false;
 		break;
 	case SDLK_RETURN:
 		if (e.keysym.mod & KMOD_ALT)

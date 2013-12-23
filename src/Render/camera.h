@@ -1,17 +1,15 @@
 #pragma once
-#include <SDL.h>
-#include "Phys.h"
+#include <memory>
+#include "phys.h"
 
 class Camera
 {
+private:
+	class impl; std::unique_ptr<impl> pi;
 public:
 	Camera(const SDL_Rect& window_rect, const SDL_Rect& focus_rect);
-	SDL_Rect view_rect;
-	SDL_Rect focus_rect;
-	SDL_Rect prev_focus_rect;
-	Point2Di focus_point;
-	int focus_loop_count{ 0 };
-	int prev_focus_loop_count{ 0 };
-	Vector2Di focus_point_vel;
-	Point2Di prev_focus_point;
+	~Camera();
+	void update();
+	SDL_Rect getViewRect() const;
+	SDL_Rect getFocusRect() const;
 };

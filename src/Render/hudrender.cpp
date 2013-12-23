@@ -26,7 +26,7 @@ HUDRender::HUDRender(const RenderSystem& renderer) : pi{ new impl() }
 	pi->label_color = renderer.palette->colors[CoCoPaletteEnum::red];
 }
 HUDRender::~HUDRender() = default;
-void HUDRender::render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, unsigned int score, unsigned int lives, const TextRender& text_renderer)
+void HUDRender::render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, unsigned int score, unsigned int lives, const TextRender& text_renderer) const
 {
 	// Fuel, bullets, shields, radar
 	SDL_SetRenderDrawColor(sdl_renderer, pi->gauge_color.r, pi->gauge_color.g, pi->gauge_color.b, 255);

@@ -89,8 +89,21 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\component\collisioncomponent.h" />
+    <ClInclude Include="src\component\component_base.h" />
+    <ClInclude Include="src\component\firebulletscomponent.h" />
+    <ClInclude Include="src\component\horizontalorientcomponent.h" />
+    <ClInclude Include="src\component\physicalcomponent.h" />
+    <ClInclude Include="src\component\playercomponent.h" />
+    <ClInclude Include="src\component\poweredbodycomponent.h" />
+    <ClInclude Include="src\component\radartrackablecomponent.h" />
+    <ClInclude Include="src\component\stationcomponent.h" />
+    <ClInclude Include="src\component\temporalstatecomponent.h" />
+    <ClInclude Include="src\component\textplatecomponent.h" />
+    <ClInclude Include="src\component\thrustcomponent.h" />
     <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\fileloader.h" />
+    <ClInclude Include="src\motionhistory.h" />
     <ClInclude Include="src\prefs.h" />
     <ClInclude Include="src\render\bmfontloader.h" />
     <ClInclude Include="src\render\mappedtexture.h" />
@@ -113,23 +126,31 @@
     <ClInclude Include="src\strutil.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\render\rendersystem.h" />
+    <ClInclude Include="src\thrustsystem.h" />
     <ClInclude Include="src\timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\component\collisioncomponent.cpp" />
+    <ClCompile Include="src\component\physicalcomponent.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\entityrepository.cpp" />
     <ClCompile Include="src\fileloader.cpp" />
+    <ClCompile Include="src\motionhistory.cpp" />
     <ClCompile Include="src\prefs.cpp" />
     <ClCompile Include="src\render\backgroundrender.cpp" />
     <ClCompile Include="src\render\bmfontloader.cpp" />
+    <ClCompile Include="src\render\collisionboxrender.cpp" />
     <ClCompile Include="src\render\debugrender.cpp" />
     <ClCompile Include="src\render\fpsrender.cpp" />
-    <ClCompile Include="src\render\gridrenderable.cpp" />
+    <ClCompile Include="src\render\gridrender.cpp" />
     <ClCompile Include="src\render\hudrender.cpp" />
     <ClCompile Include="src\render\mappedtexture.cpp" />
+    <ClCompile Include="src\render\motionhistoryrender.cpp" />
     <ClCompile Include="src\render\radarrender.cpp" />
     <ClCompile Include="src\render\shiprender.cpp" />
+    <ClCompile Include="src\render\stationrender.cpp" />
     <ClCompile Include="src\render\textrender.cpp" />
+    <ClCompile Include="src\render\zerolinerender.cpp" />
     <ClCompile Include="src\session.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\mathutil.cpp" />
@@ -147,6 +168,7 @@
     </ClCompile>
     <ClCompile Include="src\render\rendersystem.cpp" />
     <ClCompile Include="src\strutil.cpp" />
+    <ClCompile Include="src\thrustsystem.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\usage.cpp" />
   </ItemGroup>
