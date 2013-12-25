@@ -15,13 +15,8 @@ public:
 	std::array<std::unordered_map<unsigned int, unsigned int>, 20> component_indexes_by_entity;		// indexed by [component type][entity id]; provides an index into the components_by_type vector
 };
 
-EntityRepository::EntityRepository(std::initializer_list<ComponentType> ctypes, std::initializer_list<std::pair<EntityType, Range>> etypes) : pi{ new impl() }
+EntityRepository::EntityRepository(std::initializer_list<std::pair<EntityType, Range>> etypes) : pi{ new impl() }
 {
-	//for (auto ctype : ctypes)
-	//{
-	//	pi->components_by_type[ctype] = std::vector<std::unique_ptr<Component>>();
-	//	pi->component_indexes_by_entity[ctype] = std::unordered_map<unsigned int, unsigned int>();
-	//}
 	for (auto etype : etypes)
 	{
 		pi->entity_type_ids[etype.first] = etype.second;
@@ -31,11 +26,11 @@ EntityRepository::~EntityRepository() = default;
 
 std::vector<Component*> EntityRepository::getComponentsOfType(ComponentType ctype) const
 {
-	//return pi->components_by_type[ctype];
 	// TODO: replace all this with:
 	//		return pi->components_by_type[ctype];
 	// have to make changes so clients will accept std::unique_ptr though
 	std::vector<Component*> components;
+	components.reserve(pi->components_by_type[ctype].size());
 	for (auto& c : pi->components_by_type[ctype])
 	{
 		components.push_back(c.get());
@@ -43,7 +38,7 @@ std::vector<Component*> EntityRepository::getComponentsOfType(ComponentType ctyp
 	return components;
 }
 
-std::vector<unsigned int> EntityRepository::getEntityIds(EntityType etype) const
+std::vector<unsigned int> EntityRepository::getEntitiesOfType(EntityType etype) const
 {
 	if (!hasEntity(etype))
 		return std::vector<unsigned int>{ 0 };

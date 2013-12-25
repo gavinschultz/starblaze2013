@@ -42,19 +42,21 @@ class EntityRepository
 private:
 	class impl; std::unique_ptr<impl> pi;
 public:
-	EntityRepository(std::initializer_list<ComponentType> ctypes, std::initializer_list<std::pair<EntityType, Range>> etypes);
+	EntityRepository(std::initializer_list<std::pair<EntityType, Range>> etypes);
 	~EntityRepository();
+
 	std::vector<Component*> EntityRepository::getComponentsOfType(ComponentType ctype) const;
+	Component* getComponentOfTypeForEntity(unsigned int entity_id, ComponentType ctype) const; // currently only allows a single component of a type per entity
 	
-	std::vector<unsigned int> getEntityIds(EntityType etype) const;
+	std::vector<unsigned int> getEntitiesOfType(EntityType etype) const;
 	std::vector<unsigned int> getEntitiesWithComponent(ComponentType ctype) const;
-	Component* getComponentOfTypeForEntity(unsigned int entity_id, ComponentType ctype) const;
 
 	bool hasEntity(EntityType type) const;
-	PlayField* getPlayField() const;
 
 	void registerEntity(EntityType type, std::initializer_list<Component*> components);
+
 	void registerPlayField(Window window);
+	PlayField* getPlayField() const;
 };
 
 extern std::unique_ptr<EntityRepository> db;
