@@ -1,5 +1,5 @@
 @echo off
-set OUTPUTDIR=%~dp0\%1\
+set OUTPUTDIR=%~dp0\%1\%2\
 set RESOURCESDIR=%~dp0\resources\
 set LIBDIR=%~dp0\lib\%2\
 

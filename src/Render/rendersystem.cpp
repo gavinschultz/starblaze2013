@@ -169,9 +169,9 @@ void RenderSystem::draw(Camera& camera)
 	auto player_body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(player_id, C::cpoweredbody);
 	auto player_orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(player_id, C::chorient);
 	auto player_info = (PlayerComponent*)db->getComponentOfTypeForEntity(player_id, C::cplayer);
-	auto player_thrust = player_body->thrust;
-	auto player_state = player_body->state;
-	auto player_phys = player_body->phys;
+	auto player_thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(player_id, C::cthrust);
+	auto player_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(player_id, C::ctemporalstate);
+	auto player_phys = (PhysicalComponent*)db->getComponentOfTypeForEntity(player_id, C::cphysical);
 	if (db->hasEntity(E::eship))
 	{
 		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys);

@@ -75,3 +75,8 @@ double Timer::getFrameStartTime() const
 {
 	return pi->start_time;
 }
+
+double Timer::getAvgFrameRate() const
+{
+	return (pi->frame - 1) / pi->total_time;
+}
