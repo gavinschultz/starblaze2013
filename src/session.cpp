@@ -27,6 +27,9 @@ void session::handleKeyboardEvent(const SDL_KeyboardEvent& e)
 	case SDLK_F3:
 		prefs::show_motionhistory = !prefs::show_motionhistory;
 		break;
+	case SDLK_F4:
+		prefs::show_debug = !prefs::show_debug;
+		break;
 	case SDLK_F6:
 		prefs::smooth_animation = !prefs::smooth_animation;
 		break;

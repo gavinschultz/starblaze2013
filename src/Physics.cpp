@@ -9,7 +9,7 @@ void PhysicsSystem::update(double dt)
 	auto playfield = db->getPlayField();
 	auto boundaries = playfield->boundaries;
 
-	for (auto id : db->getEntitiesWithComponent(C::ctemporalstate))
+	for (auto id : db->getEntitiesWithComponent<TemporalState2DComponent>())
 	{
 		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(id, C::cthrust);
 		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id, C::ctemporalstate);
@@ -76,9 +76,8 @@ void PhysicsSystem::update(double dt)
 void PhysicsSystem::interpolate(double alpha)
 {
 	auto playfield = db->getPlayField();
-	for (auto& c : db->getComponentsOfType(C::ctemporalstate))
+	for (auto& state : db->getComponentsOfType<TemporalState2DComponent>())
 	{
-		auto state = (TemporalState2DComponent*)c;
 		double delta_x = playfield->getRelativePosX(state->current.pos.x, state->prev.pos.x);
 		//if (delta_x != 0)
 		//{

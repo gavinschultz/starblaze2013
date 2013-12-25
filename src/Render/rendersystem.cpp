@@ -191,15 +191,14 @@ void RenderSystem::draw(Camera& camera)
 	pi->hud_render->render(pi->sdl_renderer, *player_info, session::score, session::lives, *pi->text_render);
 
 	pi->radar_render->renderBox(pi->sdl_renderer);
-	for (auto c : db->getComponentsOfType(C::cradartrackable))
+	for (auto c : db->getComponentsOfType<RadarTrackableComponent>())
 	{
-		pi->radar_render->render(pi->sdl_renderer, camera, *(RadarTrackableComponent*)c);
+		pi->radar_render->render(pi->sdl_renderer, camera, *c);
 	}
 
-	for (auto c : db->getComponentsOfType(C::ctextplate))
+	for (auto c : db->getComponentsOfType<TextPlateComponent>())
 	{
-		auto textplate_component = (TextPlateComponent*)c;
-		pi->text_render->renderPlate(pi->sdl_renderer, *textplate_component->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
+		pi->text_render->renderPlate(pi->sdl_renderer, *c->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
 	}
 
 	if (prefs::show_fps)
@@ -225,9 +224,9 @@ void RenderSystem::draw(Camera& camera)
 
 	if (prefs::show_collision_boxes)
 	{
-		for (auto c : db->getComponentsOfType(C::ccollision))
+		for (auto c : db->getComponentsOfType<CollisionComponent>())
 		{
-			pi->collisionbox_render->render(pi->sdl_renderer, camera, *(CollisionComponent*)c);
+			pi->collisionbox_render->render(pi->sdl_renderer, camera, *c);
 		}
 	}
 
