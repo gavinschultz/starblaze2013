@@ -53,7 +53,6 @@ void init()
 		program::exit(RetCode::sdl_error, { "Error initializing SDL: ", SDL_GetError() });
 	}
 	db = std::unique_ptr<EntityRepository>(new EntityRepository(
-	{ C::ccollision, C::cfirebullets, C::chorient, C::cinput, C::cphysical, C::cplayer, C::cpoweredbody, C::cradartrackable, C::crender, C::cstation, C::ctemporalstate, C::ctextplate, C::cthrust },
 	{
 		{ E::eship, { 1, 1 } },
 		{ E::eplayfield, { 2, 2 } },

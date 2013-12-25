@@ -152,7 +152,7 @@ void RenderSystem::draw(Camera& camera)
 		pi->background_render->render(pi->sdl_renderer, camera, *playfield);
 	}
 
-	for (auto id : db->getEntityIds(E::estation))
+	for (auto id : db->getEntitiesOfType(E::estation))
 	{
 		auto station_st = (StationComponent*)db->getComponentOfTypeForEntity(id, C::cstation);
 		auto station_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(id, C::ctemporalstate);
@@ -165,7 +165,7 @@ void RenderSystem::draw(Camera& camera)
 	//	alien_render.draw(pi->sdl_renderer, camera, (Alien*)e);
 	//}
 
-	auto player_id = db->getEntityIds(E::eship)[0];
+	auto player_id = db->getEntitiesOfType(E::eship)[0];
 	auto player_body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(player_id, C::cpoweredbody);
 	auto player_orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(player_id, C::chorient);
 	auto player_info = (PlayerComponent*)db->getComponentOfTypeForEntity(player_id, C::cplayer);
