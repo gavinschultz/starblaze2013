@@ -112,7 +112,8 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 
 	auto ship_id = db->getEntityIds(E::eship)[0];
 	auto body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(ship_id, C::cpoweredbody);
-	auto thrust = body->thrust;
+	auto thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(ship_id, C::cthrust);;
+
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	switch (e.keysym.sym)
 	{
@@ -132,6 +133,9 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 		//}
 		break;
 	case SDLK_t:
+		if (!thrust)
+			return;
+
 		if (keystate[SDL_SCANCODE_LSHIFT] || keystate[SDL_SCANCODE_RSHIFT])
 		{
 			thrust->max.x -= 200;
@@ -153,8 +157,11 @@ void InputSystem::impl::handleKeyboardState() const
 
 	auto ship_id = db->getEntityIds(E::eship)[0];
 	auto body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(ship_id, C::cpoweredbody);
-	auto thrust = body->thrust;
+	auto thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(ship_id, C::cthrust);;
 	auto orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(ship_id, C::chorient);
+
+	if (!thrust)
+		return;
 
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	if (keystate[SDL_SCANCODE_UP])
@@ -206,29 +213,35 @@ void InputSystem::impl::handleJoystickState() const
 	auto orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(ship_id, C::chorient);
 	auto fire = (FireBulletsComponent*)db->getComponentOfTypeForEntity(ship_id, C::cfirebullets);
 
-	const static int16_t tolerance_x = 6000;
-	const static int16_t tolerance_y = 8000;
-	const double x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance_x);
-	const double y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance_y);
-	
-	int16_t left_x_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX);
-	int16_t left_y_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY);
-	int16_t left_x = mathutil::getsign(left_x_raw)*std::max(0, (std::abs(left_x_raw) - tolerance_x));
-	int16_t left_y = mathutil::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance_y));
-	if (left_x != 0)
+	if (thrust)
 	{
-		thrust->current.x = left_x * x_modifier;
-		auto requested_direction = (left_x > 0 ? HOrient::right : HOrient::left);
-		turnWithThrustConsideration(requested_direction, orient->direction, *thrust);
-	}
-	if (std::abs(left_y) > 0)
-	{
-		thrust->current.y = left_y * y_modifier;
+		const static int16_t tolerance_x = 6000;
+		const static int16_t tolerance_y = 8000;
+		const double x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance_x);
+		const double y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance_y);
+
+		int16_t left_x_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX);
+		int16_t left_y_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY);
+		int16_t left_x = mathutil::getsign(left_x_raw)*std::max(0, (std::abs(left_x_raw) - tolerance_x));
+		int16_t left_y = mathutil::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance_y));
+		if (left_x != 0)
+		{
+			thrust->current.x = left_x * x_modifier;
+			auto requested_direction = (left_x > 0 ? HOrient::right : HOrient::left);
+			turnWithThrustConsideration(requested_direction, orient->direction, *thrust);
+		}
+		if (std::abs(left_y) > 0)
+		{
+			thrust->current.y = left_y * y_modifier;
+		}
 	}
 
-	if (fire && SDL_GameControllerGetButton(controller, SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X))
+	if (fire)
 	{
-		fire->fire();
+		if (fire && SDL_GameControllerGetButton(controller, SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X))
+		{
+			fire->fire();
+		}
 	}
 }
 

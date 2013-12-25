@@ -47,6 +47,7 @@ public:
 	std::vector<Component*> EntityRepository::getComponentsOfType(ComponentType ctype) const;
 	
 	std::vector<unsigned int> getEntityIds(EntityType etype) const;
+	std::vector<unsigned int> getEntitiesWithComponent(ComponentType ctype) const;
 	Component* getComponentOfTypeForEntity(unsigned int entity_id, ComponentType ctype) const;
 
 	bool hasEntity(EntityType type) const;

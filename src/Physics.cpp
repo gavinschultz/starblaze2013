@@ -9,25 +9,27 @@ void PhysicsSystem::update(double dt)
 	auto playfield = db->getPlayField();
 	auto boundaries = playfield->boundaries;
 
-	for (auto& c : db->getComponentsOfType(C::cpoweredbody))
+	for (auto id : db->getEntitiesWithComponent(C::ctemporalstate))
 	{
-		auto body = (PoweredBodyComponent*)c;
-		auto thrust = body->thrust;
-		auto state = body->state;
-		auto physical = body->phys;
-		auto collision = body->collision;
-		auto horient = body->horient;
+		auto thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(id, C::cthrust);
+		auto state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(id, C::ctemporalstate);
+		auto physical = (PhysicalComponent*)db->getComponentOfTypeForEntity(id, C::cphysical);
+		auto horient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(id, C::chorient);
+		auto collision = (CollisionComponent*)db->getComponentOfTypeForEntity(id, C::ccollision);
 
 		state->prev = state->current;
 
 		// acceleration
-		state->current.acc.x = (thrust->current.x / (physical->weight / 3600)) * dt;
-		state->current.acc.y = (thrust->current.y / (physical->weight / 3600)) * dt;
+		if (thrust)
+		{
+			state->current.acc.x = (thrust->current.x / physical->weight);
+			state->current.acc.y = (thrust->current.y / physical->weight);
+		}
 		state->current.vel.x += state->current.acc.x * dt;
 		state->current.vel.y += state->current.acc.y * dt;
 
 		// deceleration (from reverse thrust and/or natural atmospheric deceleration)
-		Vector2D deceleration_factor = physical->getDecelerationFactor(*state, *thrust);
+		Vector2D deceleration_factor = physical->getDecelerationFactor(*state, thrust);
 		state->current.vel.x -= state->current.vel.x * (deceleration_factor.x * dt);
 		state->current.vel.y -= state->current.vel.y * (deceleration_factor.y * dt);
 
@@ -55,8 +57,6 @@ void PhysicsSystem::update(double dt)
 			collision->updateCollisionBoxes(state, horient);
 		}
 
-		//entity->updateCollisionBoxes();
-
 		//entity->tick(dt);
 
 		//debug::set("x", state->current.pos.x);
@@ -79,8 +79,14 @@ void PhysicsSystem::interpolate(double alpha)
 	for (auto& c : db->getComponentsOfType(C::ctemporalstate))
 	{
 		auto state = (TemporalState2DComponent*)c;
-		double delta_x = playfield->getRelativePosX(state->prev.pos.x, state->current.pos.x);
+		double delta_x = playfield->getRelativePosX(state->current.pos.x, state->prev.pos.x);
+		//if (delta_x != 0)
+		//{
+		//	debug::console({ "prev.x / current.x / delta_x / alpha: ", std::to_string(state->prev.pos.x), " / ", std::to_string(state->current.pos.x), " / ", std::to_string(delta_x), " / ", std::to_string(alpha) });
+		//	//debug::console({ "state->current.pos.x + delta_x*alpha: ", std::to_string(state->current.pos.x), " + ", std::to_string(delta_x), " * ", std::to_string(alpha) });
+		//}
 		state->interpolated.x = state->current.pos.x + (delta_x)*alpha;
+		//state->interpolated.x = state->current.pos.x*alpha + state->prev.pos.x*(1.0 - alpha);
 		state->interpolated.y = state->current.pos.y*alpha + state->prev.pos.y*(1.0 - alpha);
 	}
 }

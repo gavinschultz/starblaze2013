@@ -94,9 +94,9 @@ void init_ship()
 		{ 104, 20, 24, 12 }
 	});
 	const auto body = new PoweredBodyComponent(state, thrust, physical, horient, collision);
-	thrust->max = { 6200, 1500 };
-	thrust->reverse_thrust_factor = 0.5;
-	physical->weight = 110.0;
+	thrust->max = { 6200, 2800 };
+	thrust->reverse_thrust_factor = 0.9;
+	physical->weight = 2.0;
 	physical->getDecelerationFactor = &PhysicalComponent::getShipDecelerationFactor;
 	physical->box = { 0, 0, 128, 32 };
 
@@ -111,7 +111,7 @@ void init_aliens()
 	{
 		auto physical = new PhysicalComponent();
 		physical->box = { 0, 0, 64, 48 };
-		physical->getDecelerationFactor = &PhysicalComponent::getNoDecelerationFactor;
+		//physical->getDecelerationFactor = &PhysicalComponent::getNoDecelerationFactor;
 		physical->weight = 110.0;
 		auto thrust = new ThrustComponent({ 6200, 1500 }, 1.0);
 		auto state = new TemporalState2DComponent();
@@ -135,8 +135,10 @@ void init_aliens()
 void init_station()
 {
 	auto physical = new PhysicalComponent();
-	physical->box = { 128, 64 };
+	physical->box = { 0, 0, 128, 64 };
 	auto state = new TemporalState2DComponent();
+	auto playarea = db->getPlayField()->getPlayArea(physical->box);
+	state->current.pos.y = playarea.h;
 	auto radartrack = new RadarTrackableComponent(physical, state);
 	auto collision = new CollisionComponent(
 	{ 0, 0, 128, 64 },

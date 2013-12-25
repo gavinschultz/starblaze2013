@@ -24,11 +24,12 @@ StationRender::~StationRender() = default;
 void StationRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const StationComponent& station, const TemporalState2DComponent& state, const PhysicalComponent& phys) const
 {
 	auto playfield = db->getPlayField();
+	auto playarea = playfield->getPlayArea(phys.box);
 	const auto& texture = pi->station_textures[station.station_type];
 	SDL_Rect station_rect =
 	{
 		renderutil::getScreenXForEntityByCameraAndDistance(state.current.pos.x, texture.rect.w, playfield->w, camera, 1.0),
-		playfield->getPlayArea(phys.box).h,
+		playarea.h,
 		texture.getScaledRect().w,
 		texture.getScaledRect().h
 	};

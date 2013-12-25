@@ -6,11 +6,13 @@
 
 void ThrustSystem::update()
 {
-	for (auto c : db->getComponentsOfType(C::cpoweredbody))
+	for (auto eid : db->getEntitiesWithComponent(C::cthrust))
 	{
-		auto body = (PoweredBodyComponent*)c;
-		auto thrust = body->thrust;
-		auto state = body->state;
+		auto thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(eid, C::cthrust);
+		auto state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(eid, C::ctemporalstate);
+
+		if (!thrust || !state)
+			continue;
 
 		double thrust_multiplier = 1.0;
 		if ((state->current.vel.x > 0.0 && thrust->current.x < 0.0) || (state->current.vel.x < 0.0 && thrust->current.x > 0.0))

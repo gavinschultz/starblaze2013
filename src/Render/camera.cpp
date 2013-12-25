@@ -18,6 +18,9 @@ public:
 
 	void update(Camera& camera)
 	{
+		if (!db->hasEntity(E::eship))
+			return;
+
 		auto ship_id = db->getEntityIds(E::eship)[0];
 		auto ship_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(ship_id, C::ctemporalstate);
 		auto ship_orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(ship_id, C::chorient);

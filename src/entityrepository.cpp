@@ -46,10 +46,22 @@ std::vector<Component*> EntityRepository::getComponentsOfType(ComponentType ctyp
 std::vector<unsigned int> EntityRepository::getEntityIds(EntityType etype) const
 {
 	if (!hasEntity(etype))
-		return std::vector<unsigned int>{};
+		return std::vector<unsigned int>{ 0 };
 	auto id_range = pi->entity_type_ids[etype];
 	auto ids = std::vector<unsigned int>(id_range.current - id_range.lower + 1);
 	std::iota(ids.begin(), ids.end(), id_range.lower);
+	return ids;
+}
+
+std::vector<unsigned int> EntityRepository::getEntitiesWithComponent(ComponentType ctype) const
+{
+	auto id_map = pi->component_indexes_by_entity[ctype];
+	auto ids = std::vector<unsigned int>();
+	ids.reserve(id_map.size());
+	for (auto map_item : id_map)
+	{
+		ids.push_back(map_item.first);
+	}
 	return ids;
 }
 
@@ -84,7 +96,7 @@ void EntityRepository::registerEntity(EntityType etype, std::initializer_list<Co
 	for (auto c : components)
 	{
 		auto& components_by_type = pi->components_by_type[c->type];
-		unsigned int component_index = components_by_type.size();
+		unsigned int component_index = (unsigned int)components_by_type.size();
 		components_by_type.push_back(std::unique_ptr<Component>(c));
 		pi->component_indexes_by_entity[c->type][entity_ids.current] = component_index;
 	}

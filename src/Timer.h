@@ -12,6 +12,7 @@ public:
 	void startFrame();
 	void endFrame();
 	double getFrameRate() const;
+	double getAvgFrameRate() const;
 	double getLastFrameDuration() const;
 	unsigned int getTotalFrames() const;
 	double getTime() const;
