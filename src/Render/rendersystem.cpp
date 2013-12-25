@@ -154,9 +154,9 @@ void RenderSystem::draw(Camera& camera)
 
 	for (auto id : db->getEntitiesOfType(E::estation))
 	{
-		auto station_st = (StationComponent*)db->getComponentOfTypeForEntity(id, C::cstation);
-		auto station_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(id, C::ctemporalstate);
-		auto station_phys = (PhysicalComponent*)db->getComponentOfTypeForEntity(id, C::cphysical);
+		auto station_st = db->getComponentOfTypeForEntity<StationComponent>(id, C::cstation);
+		auto station_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id, C::ctemporalstate);
+		auto station_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(id, C::cphysical);
 		pi->station_render->render(pi->sdl_renderer, camera, *station_st, *station_state, *station_phys);
 	}
 
@@ -166,12 +166,12 @@ void RenderSystem::draw(Camera& camera)
 	//}
 
 	auto player_id = db->getEntitiesOfType(E::eship)[0];
-	auto player_body = (PoweredBodyComponent*)db->getComponentOfTypeForEntity(player_id, C::cpoweredbody);
-	auto player_orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(player_id, C::chorient);
-	auto player_info = (PlayerComponent*)db->getComponentOfTypeForEntity(player_id, C::cplayer);
-	auto player_thrust = (ThrustComponent*)db->getComponentOfTypeForEntity(player_id, C::cthrust);
-	auto player_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(player_id, C::ctemporalstate);
-	auto player_phys = (PhysicalComponent*)db->getComponentOfTypeForEntity(player_id, C::cphysical);
+	auto player_body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(player_id, C::cpoweredbody);
+	auto player_orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(player_id, C::chorient);
+	auto player_info = db->getComponentOfTypeForEntity<PlayerComponent>(player_id, C::cplayer);
+	auto player_thrust = db->getComponentOfTypeForEntity<ThrustComponent>(player_id, C::cthrust);
+	auto player_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(player_id, C::ctemporalstate);
+	auto player_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(player_id, C::cphysical);
 	if (db->hasEntity(E::eship))
 	{
 		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys);
