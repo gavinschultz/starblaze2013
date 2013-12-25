@@ -57,10 +57,10 @@ public:
 	template<typename T>
 	T* getComponentOfTypeForEntity(unsigned int entity_id, ComponentType ctype) const // currently only allows a single component of a type per entity
 	{
-		auto indexes = component_indexes_by_entity[ctype];
+		auto& indexes = component_indexes_by_entity[ctype];
 		if (indexes.count(entity_id) == 0)
 			return nullptr;
-		auto component_index = indexes[entity_id];
+		auto component_index = indexes.at(entity_id);
 		auto& component = components_by_type[ctype][component_index];
 		return static_cast<T*>(component.get());
 	}
