@@ -22,9 +22,9 @@ public:
 			return;
 
 		auto ship_id = db->getEntitiesOfType(E::eship)[0];
-		auto ship_state = (TemporalState2DComponent*)db->getComponentOfTypeForEntity(ship_id, C::ctemporalstate);
-		auto ship_orient = (HorizontalOrientComponent*)db->getComponentOfTypeForEntity(ship_id, C::chorient);
-		auto ship_phys = (PhysicalComponent*)db->getComponentOfTypeForEntity(ship_id, C::cphysical);
+		auto ship_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(ship_id, C::ctemporalstate);
+		auto ship_orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(ship_id, C::chorient);
+		auto ship_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(ship_id, C::cphysical);
 		auto playfield = db->getPlayField();
 		auto playarea = playfield->getPlayArea(ship_phys->box);
 
