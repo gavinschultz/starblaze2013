@@ -6,7 +6,7 @@
 
 void ThrustSystem::update()
 {
-	for (auto eid : db->getEntitiesWithComponent(C::cthrust))
+	for (auto eid : db->getEntitiesWithComponent<ThrustComponent>())
 	{
 		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(eid, C::cthrust);
 		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid, C::ctemporalstate);
