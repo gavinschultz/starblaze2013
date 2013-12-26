@@ -196,10 +196,10 @@ void RenderSystem::draw(Camera& camera)
 		pi->radar_render->render(pi->sdl_renderer, camera, *c);
 	}
 
-	//for (auto c : db->getComponentsOfType<TextPlateComponent>())
-	//{
-	//	pi->text_render->renderPlate(pi->sdl_renderer, *c->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
-	//}
+	for (auto c : db->getComponentsOfType<TextPlateComponent>())
+	{
+		pi->text_render->renderPlate(pi->sdl_renderer, *c->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
+	}
 
 	if (prefs::show_fps)
 	{

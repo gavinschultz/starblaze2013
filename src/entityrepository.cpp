@@ -6,7 +6,7 @@
 #include "render\rendersystem.h"
 #include "render\textrender.h"
 
-EntityRepository::EntityRepository(std::initializer_list<std::pair<EntityType, Range>> etypes)
+EntityRepository::EntityRepository(std::initializer_list<std::pair<EntityType, EntityIdRange>> etypes)
 {
 	for (auto etype : etypes)
 	{
