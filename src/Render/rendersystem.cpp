@@ -154,9 +154,9 @@ void RenderSystem::draw(Camera& camera)
 
 	for (auto id : db->getEntitiesOfType(E::estation))
 	{
-		auto station_st = db->getComponentOfTypeForEntity<StationComponent>(id, C::cstation);
-		auto station_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id, C::ctemporalstate);
-		auto station_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(id, C::cphysical);
+		auto station_st = db->getComponentOfTypeForEntity<StationComponent>(id);
+		auto station_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
+		auto station_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(id);
 		pi->station_render->render(pi->sdl_renderer, camera, *station_st, *station_state, *station_phys);
 	}
 
@@ -166,12 +166,12 @@ void RenderSystem::draw(Camera& camera)
 	//}
 
 	auto player_id = db->getEntitiesOfType(E::eship)[0];
-	auto player_body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(player_id, C::cpoweredbody);
-	auto player_orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(player_id, C::chorient);
-	auto player_info = db->getComponentOfTypeForEntity<PlayerComponent>(player_id, C::cplayer);
-	auto player_thrust = db->getComponentOfTypeForEntity<ThrustComponent>(player_id, C::cthrust);
-	auto player_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(player_id, C::ctemporalstate);
-	auto player_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(player_id, C::cphysical);
+	auto player_body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(player_id);
+	auto player_orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(player_id);
+	auto player_info = db->getComponentOfTypeForEntity<PlayerComponent>(player_id);
+	auto player_thrust = db->getComponentOfTypeForEntity<ThrustComponent>(player_id);
+	auto player_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(player_id);
+	auto player_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(player_id);
 	if (db->hasEntity(E::eship))
 	{
 		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys);
@@ -196,10 +196,10 @@ void RenderSystem::draw(Camera& camera)
 		pi->radar_render->render(pi->sdl_renderer, camera, *c);
 	}
 
-	for (auto c : db->getComponentsOfType<TextPlateComponent>())
-	{
-		pi->text_render->renderPlate(pi->sdl_renderer, *c->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
-	}
+	//for (auto c : db->getComponentsOfType<TextPlateComponent>())
+	//{
+	//	pi->text_render->renderPlate(pi->sdl_renderer, *c->textplate.get(), palette->colors[CoCoPaletteEnum::yellow]);
+	//}
 
 	if (prefs::show_fps)
 	{

@@ -8,8 +8,8 @@ void ThrustSystem::update()
 {
 	for (auto eid : db->getEntitiesWithComponent<ThrustComponent>())
 	{
-		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(eid, C::cthrust);
-		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid, C::ctemporalstate);
+		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(eid);
+		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
 
 		if (!thrust || !state)
 			continue;
