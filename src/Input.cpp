@@ -59,7 +59,7 @@ void InputSystem::update()
 	pi->handleKeyboardState();
 
 	auto ship_id = db->getEntitiesOfType(E::eship)[0];
-	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id, C::cthrust);
+	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id);
 	if (thrust)
 		motionhistory::add(thrust->current.x, thrust->current.y);
 }
@@ -67,8 +67,8 @@ void InputSystem::update()
 void InputSystem::impl::resetComponentsForInput()
 {
 	auto ship_id = db->getEntitiesOfType(E::eship)[0];
-	auto body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(ship_id, C::cpoweredbody);
-	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(ship_id, C::cfirebullets);
+	auto body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(ship_id);
+	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(ship_id);
 	if (body)
 		body->thrust->resetCurrent();
 	if (fire)
@@ -111,8 +111,8 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 		return;
 
 	auto ship_id = db->getEntitiesOfType(E::eship)[0];
-	auto body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(ship_id, C::cpoweredbody);
-	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id, C::cthrust);;
+	auto body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(ship_id);
+	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id);
 
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	switch (e.keysym.sym)
@@ -156,9 +156,9 @@ void InputSystem::impl::handleKeyboardState() const
 		return;
 
 	auto ship_id = db->getEntitiesOfType(E::eship)[0];
-	auto body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(ship_id, C::cpoweredbody);
-	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id, C::cthrust);;
-	auto orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(ship_id, C::chorient);
+	auto body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(ship_id);
+	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id);
+	auto orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(ship_id);
 
 	if (!thrust)
 		return;
@@ -209,9 +209,9 @@ void InputSystem::impl::handleJoystickState() const
 		return;
 
 	auto ship_id = db->getEntitiesOfType(E::eship)[0];
-	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id, C::cthrust);
-	auto orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(ship_id, C::chorient);
-	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(ship_id, C::cfirebullets);
+	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id);
+	auto orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(ship_id);
+	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(ship_id);
 
 	if (thrust)
 	{

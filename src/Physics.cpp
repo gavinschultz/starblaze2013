@@ -11,11 +11,11 @@ void PhysicsSystem::update(double dt)
 
 	for (auto id : db->getEntitiesWithComponent<TemporalState2DComponent>())
 	{
-		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(id, C::cthrust);
-		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id, C::ctemporalstate);
-		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(id, C::cphysical);
-		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(id, C::chorient);
-		auto collision = db->getComponentOfTypeForEntity<CollisionComponent>(id, C::ccollision);
+		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(id);
+		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
+		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(id);
+		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(id);
+		auto collision = db->getComponentOfTypeForEntity<CollisionComponent>(id);
 
 		state->prev = state->current;
 

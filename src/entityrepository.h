@@ -46,21 +46,17 @@ class EntityRepository
 private:
 	std::unique_ptr<PlayField> playfield_;
 	std::unordered_map<std::type_index, std::vector<std::unique_ptr<Component>>> components_by_type_;	// indexed by component type; provides a vector of components of that type
-	//std::array<std::vector<std::unique_ptr<Component>>, 20> components_by_type; // indexed by component type; provides a vector of components of that type
 	std::array<Range, 10> entity_type_ids_;										// indexed by entity type; provides the lower/upper range of IDs for the entity
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, unsigned int>> component_indexes_by_entity_;	// indexed by [component type][entity id]; provides an index into the components_by_type vector
-	//std::array<std::unordered_map<unsigned int, unsigned int>, 20> component_indexes_by_entity;		// indexed by [component type][entity id]; provides an index into the components_by_type vector
 
 public:
 	EntityRepository(std::initializer_list<std::pair<EntityType, Range>> etypes);
 	~EntityRepository();
 
 	template<typename T>
-	T* getComponentOfTypeForEntity(unsigned int entity_id, ComponentType ctype) const // currently only allows a single component of a type per entity
+	T* getComponentOfTypeForEntity(unsigned int entity_id) const // currently only allows a single component of a type per entity
 	{
-		static auto component_type = std::type_index(typeid(T));
-		if (component_indexes_by_entity_.count(component_type) == 0)
-			return nullptr;
+		static const auto component_type = std::type_index(typeid(T));
 		auto& indexes = component_indexes_by_entity_.at(component_type);
 		if (indexes.count(entity_id) == 0)
 			return nullptr;
@@ -72,7 +68,7 @@ public:
 	template<typename T>
 	const std::vector<unsigned int> getEntitiesWithComponent() const
 	{
-		static auto component_type = std::type_index(typeid(T));
+		static const auto component_type = std::type_index(typeid(T));
 		auto& id_map = component_indexes_by_entity_.at(component_type);
 		auto ids = std::vector<unsigned int>();
 		ids.reserve(id_map.size());
@@ -84,11 +80,11 @@ public:
 	}
 
 	template<typename T>
-	std::vector<T*> getComponentsOfType() const
+	const std::vector<T*> getComponentsOfType() const
 	{
-		static auto component_type = std::type_index(typeid(T));
-		if (components_by_type_.count(component_type) == 0)
-			return std::vector<T*> {};
+		static const auto component_type = std::type_index(typeid(T));
+		//if (components_by_type_.count(component_type) == 0)
+		//	return std::vector<T*> {};
 		auto& components_with_type = components_by_type_.at(component_type);
 		std::vector<T*> components;
 		components.reserve(components_with_type.size());
@@ -100,7 +96,6 @@ public:
 	}
 
 	std::vector<unsigned int> getEntitiesOfType(EntityType etype) const;
-	//std::vector<unsigned int> getEntitiesWithComponent(ComponentType ctype) const;
 
 	bool hasEntity(EntityType type) const;
 
