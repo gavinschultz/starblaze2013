@@ -115,6 +115,8 @@ void init_aliens()
 		physical->weight = 110.0;
 		auto thrust = new ThrustComponent({ 6200, 1500 }, 1.0);
 		auto state = new TemporalState2DComponent();
+		state->current.pos.x = i * 64;
+		state->current.pos.y = i * 48;
 		auto radartrack = new RadarTrackableComponent(physical, state);
 		auto collision = new CollisionComponent(
 		{ 0, 0, 64, 48 },

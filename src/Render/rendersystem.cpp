@@ -44,6 +44,7 @@ public:
 	std::unique_ptr<GridRender> grid_render;
 	std::unique_ptr<ZeroLineRender> zeroline_render;
 	std::unique_ptr<ShipRender> ship_render;
+	std::unique_ptr<AlienRender> alien_render;
 	std::unique_ptr<HUDRender> hud_render;
 	std::unique_ptr<RadarRender> radar_render;
 	std::unique_ptr<TextRender> text_render;
@@ -134,6 +135,7 @@ void RenderSystem::init()
 	pi->grid_render = std::make_unique<GridRender>();
 	pi->zeroline_render = std::make_unique<ZeroLineRender>();
 	pi->ship_render = std::make_unique<ShipRender>(*this);
+	pi->alien_render = std::make_unique<AlienRender>(*this);
 	pi->hud_render = std::make_unique<HUDRender>(*this);
 	pi->radar_render = std::make_unique<RadarRender>(*this);
 	pi->text_render = std::make_unique<TextRender>(*this, pi->sprite_loader->getSprite("characters"));
@@ -160,10 +162,11 @@ void RenderSystem::draw(Camera& camera)
 		pi->station_render->render(pi->sdl_renderer, camera, *station_st, *station_state, *station_phys);
 	}
 
-	//for (auto e : db->getEntitiesOfType(E::alien))
-	//{
-	//	alien_render.draw(pi->sdl_renderer, camera, (Alien*)e);
-	//}
+	for (auto id : db->getEntitiesOfType(E::ealien))
+	{
+		auto alien_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
+		pi->alien_render->render(pi->sdl_renderer, camera, *alien_state);
+	}
 
 	auto player_id = db->getEntitiesOfType(E::eship)[0];
 	auto player_body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(player_id);
