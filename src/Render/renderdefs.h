@@ -72,6 +72,16 @@ public:
 	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust, const PhysicalComponent& phys) const;
 };
 
+class AlienRender
+{
+private:
+	class impl; std::unique_ptr<impl> pi;
+public:
+	AlienRender(const RenderSystem& renderer);
+	~AlienRender();
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state) const;
+};
+
 class HUDRender
 {
 private:

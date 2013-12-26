@@ -45,8 +45,8 @@ class EntityRepository
 {
 private:
 	std::unique_ptr<PlayField> playfield_;
-	std::unordered_map<std::type_index, std::vector<std::unique_ptr<Component>>> components_by_type_;	// indexed by component type; provides a vector of components of that type
-	std::array<EntityIdRange, 10> entity_type_ids_;										// indexed by entity type; provides the lower/upper range of IDs for the entity
+	std::unordered_map<std::type_index, std::vector<std::unique_ptr<Component>>> components_by_type_;					// indexed by component type; provides a vector of components of that type
+	std::array<EntityIdRange, 10> entity_type_ids_;																		// indexed by entity type; provides the lower/upper range of IDs for the entity
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, unsigned int>> component_indexes_by_entity_;	// indexed by [component type][entity id]; provides an index into the components_by_type vector
 
 public:
@@ -54,6 +54,7 @@ public:
 	~EntityRepository();
 
 	// Note that the get functions here are intentionally not const, as the operator[] (which is not const) is marginally more performant than .at()
+	// Some error-checking omitted for the same reason
 
 	template<typename T>
 	T* getComponentOfTypeForEntity(unsigned int entity_id) // currently only allows a single component of a type per entity
@@ -85,8 +86,6 @@ public:
 	const std::vector<T*> getComponentsOfType()
 	{
 		static const auto component_type = std::type_index(typeid(T));
-		//if (components_by_type_.count(component_type) == 0)
-		//	return std::vector<T*> {};
 		auto& components_with_type = components_by_type_[component_type];
 		std::vector<T*> components;
 		components.reserve(components_with_type.size());

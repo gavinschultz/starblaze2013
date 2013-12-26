@@ -215,6 +215,7 @@
     <ClCompile Include="src\fileloader.cpp" />
     <ClCompile Include="src\motionhistory.cpp" />
     <ClCompile Include="src\prefs.cpp" />
+    <ClCompile Include="src\render\alienrender.cpp" />
     <ClCompile Include="src\render\backgroundrender.cpp" />
     <ClCompile Include="src\render\bmfontloader.cpp" />
     <ClCompile Include="src\render\collisionboxrender.cpp" />
