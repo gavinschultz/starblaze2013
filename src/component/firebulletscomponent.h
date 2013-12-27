@@ -19,7 +19,7 @@ private:
 	int ammo_{ 128 };
 	std::array<Bullet, 30> bullets_;
 public:
-	FireBulletsComponent() : Component(C::cfirebullets) {}
+	FireBulletsComponent() : Component() {}
 	void fire();
 	bool isFireRequired();
 	void reset();

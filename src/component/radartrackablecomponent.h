@@ -4,5 +4,5 @@
 class RadarTrackableComponent : public Component
 {
 public:
-	RadarTrackableComponent() : Component(C::cradartrackable) {}
+	RadarTrackableComponent() : Component() {}
 };

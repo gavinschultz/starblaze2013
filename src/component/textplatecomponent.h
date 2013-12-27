@@ -8,7 +8,7 @@ class TextPlate;
 class TextPlateComponent : public Component
 {
 public:
-	TextPlateComponent(TextPlate* textplate) : Component(C::ctextplate), textplate{ textplate } {}
+	TextPlateComponent(TextPlate* textplate) : Component(), textplate{ textplate } {}
 	bool visible{ false };
 	std::unique_ptr<TextPlate> textplate;
 };

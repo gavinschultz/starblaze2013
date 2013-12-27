@@ -26,28 +26,28 @@ public:
 	EntityType type;
 };
 
-struct EntityIdRange
-{
-	unsigned int lower;
-	unsigned int upper;
-	unsigned int current;
-	bool hasCurrent() const { return current != std::numeric_limits<unsigned int>::max(); }
-	unsigned int reserve()
-	{
-		if (!hasCurrent())
-			current = lower - 1;
-		return ++current;
-	}
-	EntityIdRange(unsigned int lower = 0, unsigned int upper = 0) : lower{ lower }, upper{ upper }, current{ std::numeric_limits<unsigned int>::max() } {}
-};
+//struct EntityIdRange
+//{
+//	unsigned int lower;
+//	unsigned int upper;
+//	unsigned int current;
+//	bool hasCurrent() const { return current != std::numeric_limits<unsigned int>::max(); }
+//	unsigned int reserve()
+//	{
+//		if (!hasCurrent())
+//			current = lower - 1;
+//		return ++current;
+//	}
+//	EntityIdRange(unsigned int lower = 0, unsigned int upper = 0) : lower{ lower }, upper{ upper }, current{ std::numeric_limits<unsigned int>::max() } {}
+//};
 
 class EntityRepository
 {
 private:
 	std::unique_ptr<PlayField> playfield_;
 	std::unordered_map<std::type_index, std::vector<std::unique_ptr<Component>>> components_by_type_;					// indexed by component type; provides a vector of components of that type
-	std::array<EntityIdRange, 10> entity_type_ids_;																		// indexed by entity type; provides the lower/upper range of IDs for the entity
-	//std::unordered_map<std::type_index, std::unordered_map<unsigned int, unsigned int>> component_indexes_by_entity_;	// indexed by [component type][entity id]; provides an index into the components_by_type vector
+	//std::array<EntityIdRange, 10> entity_type_ids_;																		// indexed by entity type; provides the lower/upper range of IDs for the entity
+	std::array<std::vector<unsigned int>, 16> entity_type_ids;
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, Component*>> components_by_type_and_entity_;
 
 public:
@@ -118,6 +118,11 @@ public:
 	bool hasEntity(EntityType type) const;
 
 	void registerEntity(EntityType type, std::initializer_list<Component*> components);
+	void unregisterEntity(EntityType etype, unsigned int entity_id)
+	{
+		auto id_range = entity_type_ids_[etype];
+		id_range.
+	}
 
 	void registerPlayField(Window window);
 	PlayField* getPlayField() const;

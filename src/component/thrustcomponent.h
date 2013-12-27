@@ -5,7 +5,7 @@
 class ThrustComponent : public Component
 {
 public:
-	ThrustComponent(Vector2D max = { 0, 0 }, double reverse_thrust_factor = 1.0) : Component(C::cthrust),
+	ThrustComponent(Vector2D max = { 0, 0 }, double reverse_thrust_factor = 1.0) : Component(),
 		max{ max },
 		reverse_thrust_factor{ reverse_thrust_factor }
 	{}

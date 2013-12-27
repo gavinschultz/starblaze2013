@@ -50,7 +50,6 @@ void EntityRepository::registerEntity(EntityType etype, std::initializer_list<Co
 		auto& components = components_by_type_[component_type];
 		size_t component_index = components.size();
 		components.push_back(std::unique_ptr<Component>(c));
-		components_by_type_and_entity_[component_type][entity_ids.current] = components.back().get();
-		//component_indexes_by_entity_[component_type][entity_ids.current] = component_index;
+		components_by_type_and_entity_[component_type][entity_ids.current] = c;
 	}
 }
