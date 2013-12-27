@@ -8,7 +8,7 @@ class HorizontalOrientComponent;
 class CollisionComponent : public Component
 {
 public:
-	CollisionComponent(Rect base_outer_box, std::initializer_list<Rect> base_inner_boxes) : Component(C::ccollision),
+	CollisionComponent(Rect base_outer_box, std::initializer_list<Rect> base_inner_boxes) : Component(),
 		base_outer_box{ base_outer_box },
 		base_inner_boxes{ base_inner_boxes },
 		outer_box{ base_outer_box },

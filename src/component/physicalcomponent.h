@@ -8,7 +8,7 @@ class ThrustComponent;
 class PhysicalComponent : public Component
 {
 public:
-	PhysicalComponent() : Component(C::cphysical) {}
+	PhysicalComponent() : Component() {}
 	Rect box;
 	double weight{ 0.0 };
 	Vector2D(*getDecelerationFactor)(const TemporalState2DComponent& state, const ThrustComponent* thrust) { PhysicalComponent::getNoDecelerationFactor };
