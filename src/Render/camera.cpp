@@ -21,7 +21,7 @@ public:
 		if (!db->hasEntity(E::eship))
 			return;
 
-		auto ship_id = db->getEntitiesOfType(E::eship)[0];
+		auto ship_id = 1;
 		auto ship_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(ship_id);
 		auto ship_orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(ship_id);
 		auto ship_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(ship_id);

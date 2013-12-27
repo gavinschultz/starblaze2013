@@ -110,7 +110,7 @@ void PhysicsSystem::collide()
 		collide->is_collided = false;
 	}
 
-	auto ship_id = db->getEntitiesOfType(E::eship)[0];
+	auto ship_id = 1;
 	auto ship_collide = db->getComponentOfTypeForEntity<CollisionComponent>(ship_id);
 
 	Rect ship_outer_box = ship_collide->outer_box;
