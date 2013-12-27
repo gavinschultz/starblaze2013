@@ -47,7 +47,8 @@ private:
 	std::unique_ptr<PlayField> playfield_;
 	std::unordered_map<std::type_index, std::vector<std::unique_ptr<Component>>> components_by_type_;					// indexed by component type; provides a vector of components of that type
 	std::array<EntityIdRange, 10> entity_type_ids_;																		// indexed by entity type; provides the lower/upper range of IDs for the entity
-	std::unordered_map<std::type_index, std::unordered_map<unsigned int, unsigned int>> component_indexes_by_entity_;	// indexed by [component type][entity id]; provides an index into the components_by_type vector
+	//std::unordered_map<std::type_index, std::unordered_map<unsigned int, unsigned int>> component_indexes_by_entity_;	// indexed by [component type][entity id]; provides an index into the components_by_type vector
+	std::unordered_map<std::type_index, std::unordered_map<unsigned int, Component*>> components_by_type_and_entity_;
 
 public:
 	EntityRepository(std::initializer_list<std::pair<EntityType, EntityIdRange>> etypes);
@@ -60,19 +61,15 @@ public:
 	T* getComponentOfTypeForEntity(unsigned int entity_id) // currently only allows a single component of a type per entity
 	{
 		static const auto component_type = std::type_index(typeid(T));
-		auto& indexes = component_indexes_by_entity_[component_type];
-		if (indexes.count(entity_id) == 0)
-			return nullptr;
-		auto component_index = indexes[entity_id];
-		auto& component = components_by_type_[component_type][component_index];
-		return static_cast<T*>(component.get());
+		auto component = components_by_type_and_entity_[component_type][entity_id];
+		return static_cast<T*>(component);
 	}
 
 	template<typename T>
 	const std::vector<unsigned int> getEntitiesWithComponent()
 	{
 		static const auto component_type = std::type_index(typeid(T));
-		auto& id_map = component_indexes_by_entity_[component_type];
+		auto& id_map = components_by_type_and_entity_[component_type];
 		auto ids = std::vector<unsigned int>();
 		ids.reserve(id_map.size());
 		for (auto map_item : id_map)
@@ -109,8 +106,8 @@ public:
 		auto& components_with_type = components_by_type_[component_type];
 		for (unsigned int eid = id_range.lower; eid <= id_range.current; eid++)
 		{
-			auto component_index = component_indexes_by_entity_[component_type][eid];
-			components.push_back(static_cast<T*>(components_with_type[component_index].get()));
+			auto component = components_by_type_and_entity_[component_type][eid];
+			components.push_back(static_cast<T*>(component));
 		}
 		
 		return components;
