@@ -113,6 +113,7 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 	auto ship_id = db->getEntitiesOfType(E::eship)[0];
 	auto body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(ship_id);
 	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id);
+	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(ship_id);
 
 	auto* keystate = SDL_GetKeyboardState(NULL);
 	switch (e.keysym.sym)
@@ -127,10 +128,10 @@ void InputSystem::impl::handleKeyboardEvent(const SDL_KeyboardEvent& e) const
 		//renderer->toggleMotionHistory(!renderer->is_motionhistory_visible);
 		break;
 	case SDLK_SPACE:
-		//if (ship)
-		//{
-		//	ship->fire();
-		//}
+		if (fire)
+		{
+			fire->fire();
+		}
 		break;
 	case SDLK_t:
 		if (!thrust)

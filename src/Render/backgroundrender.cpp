@@ -58,7 +58,7 @@ void BackgroundRender::impl::render(SDL_Renderer* sdl_renderer, const Camera& ca
 	SDL_SetRenderDrawColor(sdl_renderer, ground_color.r, ground_color.g, ground_color.b, ground_color.a);
 	SDL_RenderFillRect(sdl_renderer, &ground_rect);
 
-	for (auto hill : playfield.hills)
+	for (auto& hill : playfield.hills)
 	{
 		auto hill_sprite_texture = hill_sprite_textures[hill.type];
 

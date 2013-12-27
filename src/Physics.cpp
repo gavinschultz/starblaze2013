@@ -9,6 +9,18 @@ void PhysicsSystem::update(double dt)
 	auto playfield = db->getPlayField();
 	auto boundaries = playfield->boundaries;
 
+	for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
+	{
+		auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
+		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
+		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(eid);
+
+		if (fire->isFireRequired())
+		{
+			
+		}
+	}
+
 	for (auto id : db->getEntitiesWithComponent<TemporalState2DComponent>())
 	{
 		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(id);
@@ -87,5 +99,56 @@ void PhysicsSystem::interpolate(double alpha)
 		state->interpolated.x = state->current.pos.x + (delta_x)*alpha;
 		//state->interpolated.x = state->current.pos.x*alpha + state->prev.pos.x*(1.0 - alpha);
 		state->interpolated.y = state->current.pos.y*alpha + state->prev.pos.y*(1.0 - alpha);
+	}
+}
+
+void PhysicsSystem::collide()
+{
+	auto playfield = db->getPlayField();
+	for (auto collide : db->getComponentsOfType<CollisionComponent>())
+	{
+		collide->is_collided = false;
+	}
+
+	auto ship_id = db->getEntitiesOfType(E::eship)[0];
+	auto ship_collide = db->getComponentOfTypeForEntity<CollisionComponent>(ship_id);
+
+	Rect ship_outer_box = ship_collide->outer_box;
+
+	for (auto alien_collide : db->getComponentsOfTypeForEntityType<CollisionComponent>(E::ealien))
+	{
+		ship_outer_box.x = alien_collide->outer_box.x + playfield->getRelativePosX(alien_collide->outer_box.x, ship_outer_box.x);
+
+		if (ship_collide && mathutil::areRectanglesIntersecting(ship_outer_box, alien_collide->outer_box))
+		{
+			ship_collide->is_collided = true;
+			alien_collide->is_collided = true;
+		}
+
+		for (auto bullet_collide : db->getComponentsOfTypeForEntityType<CollisionComponent>(E::ebullet))
+		{
+			if (mathutil::areRectanglesIntersecting(bullet_collide->outer_box, alien_collide->outer_box))
+			{
+				bullet_collide->is_collided = true;
+				alien_collide->is_collided = true;
+			}
+		}
+	}
+
+	for (auto station_id : db->getEntitiesOfType(E::estation))
+	{
+		auto station_collide = db->getComponentOfTypeForEntity<CollisionComponent>(station_id);
+		auto station_st = db->getComponentOfTypeForEntity<StationComponent>(station_id);
+		ship_outer_box.x = station_collide->outer_box.x + playfield->getRelativePosX(station_collide->outer_box.x, ship_outer_box.x);
+
+		if (ship_collide && mathutil::areRectanglesIntersecting(ship_outer_box, station_collide->outer_box))
+		{
+			station_st->is_docked = true;
+			ship_collide->is_collided = true;
+		}
+		else
+		{
+			station_st->is_docked = false;
+		}
 	}
 }

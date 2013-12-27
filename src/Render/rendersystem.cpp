@@ -165,7 +165,8 @@ void RenderSystem::draw(Camera& camera)
 	for (auto id : db->getEntitiesOfType(E::ealien))
 	{
 		auto alien_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
-		pi->alien_render->render(pi->sdl_renderer, camera, *alien_state);
+		auto alien_collide = db->getComponentOfTypeForEntity<CollisionComponent>(id);
+		pi->alien_render->render(pi->sdl_renderer, camera, *alien_state, alien_collide);
 	}
 
 	auto player_id = db->getEntitiesOfType(E::eship)[0];
@@ -175,9 +176,10 @@ void RenderSystem::draw(Camera& camera)
 	auto player_thrust = db->getComponentOfTypeForEntity<ThrustComponent>(player_id);
 	auto player_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(player_id);
 	auto player_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(player_id);
+	auto player_collide = db->getComponentOfTypeForEntity<CollisionComponent>(player_id);
 	if (db->hasEntity(E::eship))
 	{
-		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys);
+		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys, player_collide);
 	}
 
 	//for (auto e : db->getEntitiesOfType(E::edebris))
@@ -189,14 +191,15 @@ void RenderSystem::draw(Camera& camera)
 	//{
 	//	bullet_render.draw(pi->sdl_renderer, camera, (Bullet*)e);
 	//}
-
 	
 	pi->hud_render->render(pi->sdl_renderer, *player_info, session::score, session::lives, *pi->text_render);
 
 	pi->radar_render->renderBox(pi->sdl_renderer);
-	for (auto c : db->getComponentsOfType<RadarTrackableComponent>())
+	for (auto eid : db->getEntitiesWithComponent<RadarTrackableComponent>())
 	{
-		pi->radar_render->render(pi->sdl_renderer, camera, *c);
+		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
+		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(eid);
+		pi->radar_render->render(pi->sdl_renderer, camera, state, physical);
 	}
 
 	for (auto c : db->getComponentsOfType<TextPlateComponent>())

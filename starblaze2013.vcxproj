@@ -180,6 +180,7 @@
     <ClInclude Include="src\component\thrustcomponent.h" />
     <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\entityrepository.h" />
+    <ClInclude Include="src\entityrepository2.h" />
     <ClInclude Include="src\fileloader.h" />
     <ClInclude Include="src\motionhistory.h" />
     <ClInclude Include="src\prefs.h" />
@@ -209,6 +210,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\component\collisioncomponent.cpp" />
+    <ClCompile Include="src\component\firebulletscomponent.cpp" />
     <ClCompile Include="src\component\physicalcomponent.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\entityrepository.cpp" />
