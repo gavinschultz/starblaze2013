@@ -81,7 +81,7 @@ void init_ship()
 	const auto thrust = new ThrustComponent();
 	const auto physical = new PhysicalComponent();
 	const auto state = new TemporalState2DComponent();
-	const auto radartrack = new RadarTrackableComponent(physical, state);
+	const auto radartrack = new RadarTrackableComponent();
 	const auto fire = new FireBulletsComponent();
 	const auto player = new PlayerComponent();
 	const auto collision = new CollisionComponent(
@@ -111,13 +111,12 @@ void init_aliens()
 	{
 		auto physical = new PhysicalComponent();
 		physical->box = { 0, 0, 64, 48 };
-		//physical->getDecelerationFactor = &PhysicalComponent::getNoDecelerationFactor;
 		physical->weight = 110.0;
 		auto thrust = new ThrustComponent({ 6200, 1500 }, 1.0);
 		auto state = new TemporalState2DComponent();
 		state->current.pos.x = i * 64;
 		state->current.pos.y = i * 48;
-		auto radartrack = new RadarTrackableComponent(physical, state);
+		auto radartrack = new RadarTrackableComponent();
 		auto collision = new CollisionComponent(
 		{ 0, 0, 64, 48 },
 		{
@@ -141,7 +140,7 @@ void init_station()
 	auto state = new TemporalState2DComponent();
 	auto playarea = db->getPlayField()->getPlayArea(physical->box);
 	state->current.pos.y = playarea.h;
-	auto radartrack = new RadarTrackableComponent(physical, state);
+	auto radartrack = new RadarTrackableComponent();
 	auto collision = new CollisionComponent(
 	{ 0, 0, 128, 64 },
 	{
@@ -190,6 +189,7 @@ void run()
 			{
 				accumulator -= dt;
 				physics->update(dt);
+				physics->collide();
 			}
 			physics->interpolate(accumulator / dt);
 			usage::collect("physics");

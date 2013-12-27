@@ -50,7 +50,7 @@ public:
 
 ShipRender::ShipRender(const RenderSystem& renderer) : pi{ new impl(renderer) } {}
 ShipRender::~ShipRender() = default;
-void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust, const PhysicalComponent& phys) const
+void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust, const PhysicalComponent& phys, const CollisionComponent* collide) const
 {
 	auto playfield = db->getPlayField();
 
@@ -107,10 +107,10 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 		wheels_texture = pi->wheels_texture_.texture;
 	}
 
-	//if (ship.getCollidable().isCollided())
-	//	SDL_SetTextureColorMod(_ship_texture.texture, 0, 0, 0);
-	//else
-	//	SDL_SetTextureColorMod(_ship_texture.texture, 255, 255, 255);
+	if (collide->is_collided)
+		SDL_SetTextureColorMod(pi->ship_texture_.texture, 0, 0, 0);
+	else
+		SDL_SetTextureColorMod(pi->ship_texture_.texture, 255, 255, 255);
 
 	SDL_RenderCopyEx(sdl_renderer, pi->ship_texture_.texture, &pi->ship_texture_.rect, &ship_rect, 0, NULL, flip);
 	SDL_SetTextureColorMod(pi->ship_texture_.texture, 255, 255, 255); // shared texture, so reset to defaults

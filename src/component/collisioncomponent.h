@@ -19,4 +19,6 @@ public:
 	Rect outer_box;
 	std::vector<Rect> inner_boxes;
 	void updateCollisionBoxes(TemporalState2DComponent* state, HorizontalOrientComponent* horient);
+
+	bool is_collided{ false };
 };

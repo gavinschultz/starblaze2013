@@ -69,7 +69,7 @@ private:
 public:
 	ShipRender(const RenderSystem& renderer);
 	~ShipRender();
-	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust, const PhysicalComponent& phys) const;
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const HorizontalOrientComponent& orient, const ThrustComponent& thrust, const PhysicalComponent& phys, const CollisionComponent* collide) const;
 };
 
 class AlienRender
@@ -79,7 +79,7 @@ private:
 public:
 	AlienRender(const RenderSystem& renderer);
 	~AlienRender();
-	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state) const;
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, const CollisionComponent* collide) const;
 };
 
 class HUDRender
@@ -99,7 +99,7 @@ private:
 public:
 	RadarRender(const RenderSystem& renderer);
 	~RadarRender();
-	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const RadarTrackableComponent& c) const;
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent* state, const PhysicalComponent* physical) const;
 	void renderBox(SDL_Renderer* sdl_renderer);
 };
 

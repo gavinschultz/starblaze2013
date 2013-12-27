@@ -96,6 +96,26 @@ public:
 		return components;
 	}
 
+	template<typename T>
+	const std::vector<T*> getComponentsOfTypeForEntityType(EntityType etype)
+	{
+		std::vector<T*> components;
+
+		static const auto component_type = std::type_index(typeid(T));
+		if (!hasEntity(etype)) // TODO:delete?
+			return std::vector<T*>{};
+		EntityIdRange id_range = entity_type_ids_[etype];
+		
+		auto& components_with_type = components_by_type_[component_type];
+		for (unsigned int eid = id_range.lower; eid <= id_range.current; eid++)
+		{
+			auto component_index = component_indexes_by_entity_[component_type][eid];
+			components.push_back(static_cast<T*>(components_with_type[component_index].get()));
+		}
+		
+		return components;
+	}
+
 	std::vector<unsigned int> getEntitiesOfType(EntityType etype) const;
 
 	bool hasEntity(EntityType type) const;

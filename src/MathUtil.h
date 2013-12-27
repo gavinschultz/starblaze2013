@@ -7,6 +7,7 @@ namespace mathutil
 	Vector2D normaliseVector(Vector2D v, double* magnitude);
 	double abswrap(double n, double limit);
 	template <typename T> int getsign(T value);
+	bool areRectanglesIntersecting(const Rect& a, const Rect& b);
 	//int getsign(int value);
 	//int getsign(double value);
 }
