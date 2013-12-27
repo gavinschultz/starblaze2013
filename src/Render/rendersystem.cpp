@@ -169,7 +169,7 @@ void RenderSystem::draw(Camera& camera)
 		pi->alien_render->render(pi->sdl_renderer, camera, *alien_state, alien_collide);
 	}
 
-	auto player_id = db->getEntitiesOfType(E::eship)[0];
+	auto player_id = 1;
 	auto player_body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(player_id);
 	auto player_orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(player_id);
 	auto player_info = db->getComponentOfTypeForEntity<PlayerComponent>(player_id);

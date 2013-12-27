@@ -52,15 +52,7 @@ void init()
 	{
 		program::exit(RetCode::sdl_error, { "Error initializing SDL: ", SDL_GetError() });
 	}
-	db = std::unique_ptr<EntityRepository>(new EntityRepository(
-	{
-		{ E::eship, { 1, 1 } },
-		{ E::eplayfield, { 2, 2 } },
-		{ E::estation, { 3, 5 } },
-		{ E::ealien, { 10, 99 } },
-		{ E::ebullet, { 100, 149 } },
-		{ E::eenemybomb, { 150, 199 } }
-	}));
+	db = std::make_unique<EntityRepository>();
 
 	Window window = { 1366, 768 };
 	db->registerPlayField(window);

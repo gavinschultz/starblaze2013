@@ -47,11 +47,18 @@ private:
 	std::unique_ptr<PlayField> playfield_;
 	std::unordered_map<std::type_index, std::vector<std::unique_ptr<Component>>> components_by_type_;					// indexed by component type; provides a vector of components of that type
 	//std::array<EntityIdRange, 10> entity_type_ids_;																		// indexed by entity type; provides the lower/upper range of IDs for the entity
-	std::array<std::vector<unsigned int>, 16> entity_type_ids;
+	std::array<std::vector<unsigned int>, 10> entity_type_ids_;
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, Component*>> components_by_type_and_entity_;
+	
+	unsigned int nextId()
+	{
+		static unsigned int max_entity_id = 0;
+		max_entity_id++;
+		return max_entity_id;
+	}
 
 public:
-	EntityRepository(std::initializer_list<std::pair<EntityType, EntityIdRange>> etypes);
+	EntityRepository();
 	~EntityRepository();
 
 	// Note that the get functions here are intentionally not const, as the operator[] (which is not const) is marginally more performant than .at()
@@ -101,10 +108,10 @@ public:
 		static const auto component_type = std::type_index(typeid(T));
 		if (!hasEntity(etype)) // TODO:delete?
 			return std::vector<T*>{};
-		EntityIdRange id_range = entity_type_ids_[etype];
+		auto& eids = entity_type_ids_[etype];
 		
 		auto& components_with_type = components_by_type_[component_type];
-		for (unsigned int eid = id_range.lower; eid <= id_range.current; eid++)
+		for (auto eid : eids)
 		{
 			auto component = components_by_type_and_entity_[component_type][eid];
 			components.push_back(static_cast<T*>(component));
@@ -120,8 +127,8 @@ public:
 	void registerEntity(EntityType type, std::initializer_list<Component*> components);
 	void unregisterEntity(EntityType etype, unsigned int entity_id)
 	{
-		auto id_range = entity_type_ids_[etype];
-		id_range.
+		auto& ids = entity_type_ids_[etype];
+		
 	}
 
 	void registerPlayField(Window window);
