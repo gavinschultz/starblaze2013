@@ -14,3 +14,4 @@
 #include "component\playercomponent.h"
 #include "component\firebulletscomponent.h"
 #include "component\stationcomponent.h"
+#include "component\lifetimecomponent.h"

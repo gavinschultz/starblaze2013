@@ -71,14 +71,14 @@ void InputSystem::impl::resetComponentsForInput()
 	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(ship_id);
 	if (body)
 		body->thrust->resetCurrent();
-	if (fire)
-		fire->reset();
 }
 
 void InputSystem::detect()
 {
-	if (!SDL_GameControllerGetAttached(pi->controller))
-		pi->controller = nullptr;
+	if (SDL_GameControllerGetAttached(pi->controller))
+		return;
+
+	pi->controller = nullptr;
 
 	int joystick_count;
 	if ((joystick_count = SDL_NumJoysticks()) < 0)

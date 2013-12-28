@@ -7,7 +7,7 @@ public:
 	virtual ~Component() = default;
 	//ComponentType type;
 	bool active{ true };
-private:
-	Component(const Component&) {};	// no copying
-	Component& operator=(const Component&) {};	// no copying
+//private:
+//	Component(const Component&) {};	// no copying
+//	Component& operator=(const Component&) {};	// no copying
 };

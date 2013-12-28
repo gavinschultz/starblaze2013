@@ -1,28 +1,24 @@
 #pragma once
 #include <array>
 #include "component_base.h"
+#include "bullet.h"
 #include "phys.h"
-
-class Bullet
-{
-public:
-	Rect rect;
-	double age;
-	bool is_active;
-};
 
 // Manages both the trigger to fire a bullet as well as the state of all the bullets themselves
 class FireBulletsComponent : public Component
 {
 private:
+	const static unsigned int BULLETS_MAX = 30;
 	bool fire_{ false };
 	int ammo_{ 128 };
-	std::array<Bullet, 30> bullets_;
+	std::array<Bullet, BULLETS_MAX> bullets_;
+	unsigned int next_available_index{ 0 };
 public:
 	FireBulletsComponent() : Component() {}
 	void fire();
-	bool isFireRequired();
+	bool isFireRequired() const;
 	void reset();
 	void tick(double dt);
-	const std::vector<Bullet*> getActiveBullets();
+	Bullet* loadNext();
+	std::array<Bullet, BULLETS_MAX>& getBullets();
 };

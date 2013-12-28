@@ -50,6 +50,7 @@ public:
 	std::unique_ptr<TextRender> text_render;
 	std::unique_ptr<CollisionBoxRender> collisionbox_render;
 	std::unique_ptr<StationRender> station_render;
+	std::unique_ptr<BulletRender> bullet_render;
 };
 
 RenderSystem::impl::impl() = default;
@@ -141,6 +142,7 @@ void RenderSystem::init()
 	pi->text_render = std::make_unique<TextRender>(*this, pi->sprite_loader->getSprite("characters"));
 	pi->collisionbox_render = std::make_unique<CollisionBoxRender>();
 	pi->station_render = std::make_unique<StationRender>(*this);
+	pi->bullet_render = std::make_unique<BulletRender>(*this);
 }
 
 void RenderSystem::draw(Camera& camera)
@@ -187,10 +189,16 @@ void RenderSystem::draw(Camera& camera)
 	//	debris_render.draw(pi->sdl_renderer, camera, (Debris*)e);
 	//}
 
-	//for (auto e : db->getEntitiesOfType(E::ebullet))
-	//{
-	//	bullet_render.draw(pi->sdl_renderer, camera, (Bullet*)e);
-	//}
+	for (auto fire : db->getComponentsOfType<FireBulletsComponent>())
+	{
+		for (auto& bullet : fire->getBullets())
+		{
+			if (!bullet.lifetime.active)
+				continue;
+
+			pi->bullet_render->render(pi->sdl_renderer, camera, bullet.state, bullet.physical);
+		}
+	}
 	
 	pi->hud_render->render(pi->sdl_renderer, *player_info, session::score, session::lives, *pi->text_render);
 
