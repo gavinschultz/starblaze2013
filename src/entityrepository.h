@@ -6,6 +6,28 @@
 #include <typeindex>
 #include "component\component_base.h"
 
+/*
+I'm aware at this point that this implementation is naive and bad, but I'm going to let it go because I can still make a working game with it - performance is not
+great but it's not killing the whole project.
+
+But for future reference:
+
+1) The idea of the vector in the components_by_type_ structure was to have contiguous memory for components, but it's not really contiguous - the pointers
+   are contiguous but the actual memory the components are stored at is completely arbitrary.
+
+Use memory pools such that the components can actually be stored contiguously.
+Some good ideas here on using intrusive lists and pooling (specifically using boost libraries, but could make our own): http://stackoverflow.com/a/17838320/78216
+
+2) Separating the component types via the unordered_map is flawed for a similar reason - typically we need coordination between many different components (e.g.
+   ~5 components in the physics update), but keeping them separate and looking them up one-by-one also bounces all over our memory space.
+
+Instead, store redundant component data in larger component aggregates - e.g. a "physics" component may store copies of all the other 5 components
+worth of data (at least, the bits it needs) so that all the data is stored contiguously and close together
+
+3) Item removal is slow because we need to iterate through all of the component lists in components_by_type_and_entity_.
+
+*/
+
 class PlayField;
 struct Window;
 
@@ -25,21 +47,6 @@ public:
 	unsigned int id;
 	EntityType type;
 };
-
-//struct EntityIdRange
-//{
-//	unsigned int lower;
-//	unsigned int upper;
-//	unsigned int current;
-//	bool hasCurrent() const { return current != std::numeric_limits<unsigned int>::max(); }
-//	unsigned int reserve()
-//	{
-//		if (!hasCurrent())
-//			current = lower - 1;
-//		return ++current;
-//	}
-//	EntityIdRange(unsigned int lower = 0, unsigned int upper = 0) : lower{ lower }, upper{ upper }, current{ std::numeric_limits<unsigned int>::max() } {}
-//};
 
 class EntityRepository
 {
@@ -127,8 +134,12 @@ public:
 	void registerEntity(EntityType type, std::initializer_list<Component*> components);
 	void unregisterEntity(EntityType etype, unsigned int entity_id)
 	{
-		auto& ids = entity_type_ids_[etype];
-		
+		//auto& ids = entity_type_ids_[etype];
+		//for (auto components_by_entity : components_by_type_and_entity_)
+		//{
+		//	auto c = components_by_entity.second.find(entity_id);
+		//	components_by_entity.second.at(entity_id) = nullptr;
+		//}
 	}
 
 	void registerPlayField(Window window);

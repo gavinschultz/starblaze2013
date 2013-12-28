@@ -14,7 +14,7 @@ void FireBulletsComponent::fire()
 	ammo_--;
 }
 
-bool FireBulletsComponent::isFireRequired()
+bool FireBulletsComponent::isFireRequired() const
 { 
 	return fire_; 
 }
@@ -28,25 +28,19 @@ void FireBulletsComponent::tick(double dt)
 {
 	for (auto& bullet : bullets_)
 	{
-		if (!bullet.is_active)
-			continue;
-
-		bullet.age += dt;
-		if (bullet.age > BULLET_MAX_AGE)
-		{
-			bullet.is_active = false;
-		}
+		bullet.lifetime.tick(dt);
 	}
 }
 
-const std::vector<Bullet*> FireBulletsComponent::getActiveBullets()
+std::array<Bullet, FireBulletsComponent::BULLETS_MAX>& FireBulletsComponent::getBullets()
 {
-	std::vector<Bullet*> active_bullets;
-	active_bullets.reserve(bullets_.size());
-	for (auto& bullet : bullets_)
-	{
-		if (bullet.is_active)
-			active_bullets.push_back(&bullet);
-	}
-	return active_bullets;
+	return bullets_;
+}
+
+Bullet* FireBulletsComponent::loadNext()
+{
+	auto bullet = &bullets_[next_available_index];
+	bullet->lifetime.reset();
+	next_available_index = ++next_available_index % BULLETS_MAX;
+	return bullet;
 }

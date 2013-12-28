@@ -63,4 +63,5 @@ struct State2D
 	Point2D pos;
 	Vector2D vel;
 	Vector2D acc;
+	State2D(Point2D pos = { 0.0, 0.0 }, Vector2D vel = { 0.0, 0.0 }, Vector2D acc = { 0.0, 0.0 }) : pos(pos), vel(vel), acc(acc) {}
 };

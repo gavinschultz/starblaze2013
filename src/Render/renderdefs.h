@@ -118,3 +118,13 @@ public:
 	~StationRender();
 	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const StationComponent& station, const TemporalState2DComponent& state, const PhysicalComponent& phys) const;
 };
+
+class BulletRender
+{
+private:
+	class impl; std::unique_ptr<impl> pi;
+public:
+	BulletRender(const RenderSystem& renderer);
+	~BulletRender();
+	void render(SDL_Renderer* sdl_renderer, const Camera& camera, const TemporalState2DComponent& state, PhysicalComponent& physical) const;
+};

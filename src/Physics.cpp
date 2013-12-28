@@ -4,21 +4,39 @@
 #include "playfield.h"
 #include "mathutil.h"
 
+#include <sstream>
+
 void PhysicsSystem::update(double dt)
 {
-	auto playfield = db->getPlayField();
-	auto boundaries = playfield->boundaries;
-
 	for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
 	{
 		auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
 		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
 		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(eid);
-
 		if (fire->isFireRequired())
 		{
-			
+ 			auto bullet = fire->loadNext();
+			auto direction_multiplier = (horient->direction == HOrient::right ? 1 : -1);
+			bullet->state.current.pos = { state->current.pos.x, state->current.pos.y };
+			bullet->state.current.vel = { direction_multiplier * 1000.0, 0.0 };
+			bullet->state.prev = bullet->state.current;
+			bullet->thrust.current.x = direction_multiplier * bullet->thrust.max.x; 
+			fire->reset();
 		}
+
+		fire->tick(dt);
+
+		for (auto& bullet : fire->getBullets())
+		{
+			if (!bullet.lifetime.active)
+				continue;
+
+			update_impl(&bullet.state, &bullet.thrust, &bullet.physical, nullptr, &bullet.collision);
+		}
+		//auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
+		//auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
+		//auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(eid);
+
 	}
 
 	for (auto id : db->getEntitiesWithComponent<TemporalState2DComponent>())
@@ -29,45 +47,7 @@ void PhysicsSystem::update(double dt)
 		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(id);
 		auto collision = db->getComponentOfTypeForEntity<CollisionComponent>(id);
 
-		state->prev = state->current;
-
-		// acceleration
-		if (thrust)
-		{
-			state->current.acc.x = (thrust->current.x / physical->weight);
-			state->current.acc.y = (thrust->current.y / physical->weight);
-		}
-		state->current.vel.x += state->current.acc.x * dt;
-		state->current.vel.y += state->current.acc.y * dt;
-
-		// deceleration (from reverse thrust and/or natural atmospheric deceleration)
-		Vector2D deceleration_factor = physical->getDecelerationFactor(*state, thrust);
-		state->current.vel.x -= state->current.vel.x * (deceleration_factor.x * dt);
-		state->current.vel.y -= state->current.vel.y * (deceleration_factor.y * dt);
-
-		state->current.pos.x += (state->current.vel.x * dt) + (state->current.acc.x * 0.5 * dt * dt);
-		state->current.pos.x = mathutil::abswrap(state->current.pos.x, playfield->w);
-
-		state->current.pos.y += state->current.vel.y * dt + (state->current.acc.y * 0.5 * dt * dt);
-		double altitude = playfield->getAltitude(state->current.pos.y, physical->box.h);
-		if (altitude == 0.0)
-		{
-			state->current.pos.y = boundaries.y + boundaries.h - physical->box.h;
-			state->current.vel.y = 0.0;
-		}
-		else if (state->current.pos.y < boundaries.y)
-		{
-			state->current.pos.y = boundaries.y;
-			state->current.vel.y = 0.0;
-		}
-
-		physical->box.x = state->current.pos.x;
-		physical->box.y = state->current.pos.y;
-
-		if (collision)
-		{
-			collision->updateCollisionBoxes(state, horient);
-		}
+		update_impl(state, thrust, physical, horient, collision);
 
 		//entity->tick(dt);
 
@@ -75,13 +55,59 @@ void PhysicsSystem::update(double dt)
 		//debug::set("vel.x", state->current.vel.x);
 		//debug::set("acc.x", state->current.acc.x);
 		//debug::set("thrust.x", thrust->current.x);
-		
+
 		//debug::set("y", state->current.pos.y);
 		//debug::set("vel.y", state->current.vel.y);
 		//debug::set("acc.y", state->current.acc.y);
 		//debug::set("thrust.y", thrust->current.y);
 
 		//debug::set("deceleration", std::to_string(deceleration_factor.x) + " / " + std::to_string(deceleration_factor.y));
+	}
+}
+
+void PhysicsSystem::update_impl(TemporalState2DComponent* state, ThrustComponent* thrust, PhysicalComponent* physical, HorizontalOrientComponent* horient, CollisionComponent* collision)
+{
+	auto playfield = db->getPlayField();
+	auto boundaries = playfield->boundaries;
+
+	state->prev = state->current;
+
+	// acceleration
+	if (thrust)
+	{
+		state->current.acc.x = (thrust->current.x / physical->weight);
+		state->current.acc.y = (thrust->current.y / physical->weight);
+	}
+	state->current.vel.x += state->current.acc.x * dt;
+	state->current.vel.y += state->current.acc.y * dt;
+
+	// deceleration (from reverse thrust and/or natural atmospheric deceleration)
+	Vector2D deceleration_factor = physical->getDecelerationFactor(*state, thrust);
+	state->current.vel.x -= state->current.vel.x * (deceleration_factor.x * dt);
+	state->current.vel.y -= state->current.vel.y * (deceleration_factor.y * dt);
+
+	state->current.pos.x += (state->current.vel.x * dt) + (state->current.acc.x * 0.5 * dt * dt);
+	state->current.pos.x = mathutil::abswrap(state->current.pos.x, playfield->w);
+
+	state->current.pos.y += state->current.vel.y * dt + (state->current.acc.y * 0.5 * dt * dt);
+	double altitude = playfield->getAltitude(state->current.pos.y, physical->box.h);
+	if (altitude == 0.0)
+	{
+		state->current.pos.y = boundaries.y + boundaries.h - physical->box.h;
+		state->current.vel.y = 0.0;
+	}
+	else if (state->current.pos.y < boundaries.y)
+	{
+		state->current.pos.y = boundaries.y;
+		state->current.vel.y = 0.0;
+	}
+
+	physical->box.x = state->current.pos.x;
+	physical->box.y = state->current.pos.y;
+
+	if (collision)
+	{
+		collision->updateCollisionBoxes(state, horient);
 	}
 }
 
@@ -99,6 +125,21 @@ void PhysicsSystem::interpolate(double alpha)
 		state->interpolated.x = state->current.pos.x + (delta_x)*alpha;
 		//state->interpolated.x = state->current.pos.x*alpha + state->prev.pos.x*(1.0 - alpha);
 		state->interpolated.y = state->current.pos.y*alpha + state->prev.pos.y*(1.0 - alpha);
+	}
+
+	for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
+	{
+		auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
+
+		for (auto& bullet : fire->getBullets())
+		{
+			if (!bullet.lifetime.active)
+				continue;
+
+			double delta_x = playfield->getRelativePosX(bullet.state.current.pos.x, bullet.state.prev.pos.x);
+			bullet.state.interpolated.x = bullet.state.current.pos.x + (delta_x)*alpha;
+			bullet.state.interpolated.y = bullet.state.current.pos.y*alpha + bullet.state.prev.pos.y*(1.0 - alpha);
+		}
 	}
 }
 

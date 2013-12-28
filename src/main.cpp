@@ -26,6 +26,8 @@ std::unique_ptr<PhysicsSystem> physics;
 std::unique_ptr<InputSystem> input;
 std::unique_ptr<ThrustSystem> thrust;
 
+#include <sstream>
+
 int main(int argc, char* args[])
 {
 	try
@@ -142,6 +144,18 @@ void init_station()
 	auto station = new StationComponent(StationType::fuel);
 
 	db->registerEntity(E::estation, { physical, state, radartrack, collision, station });
+}
+
+void init_bullets()
+{
+	for (int i = 0; i < 30; i++)
+	{
+		auto thrust = new ThrustComponent{ { 500.0, 0.0 }, { 0.0 } };
+		auto state = new TemporalState2DComponent{};
+		auto physical = new PhysicalComponent{ { 0.0, 0.0, 4.0, 4.0 }, 1.0 };
+		auto collision = new CollisionComponent { { 0.0, 0.0, 4.0, 4.0 }, {} };
+		auto lifetime = new LifetimeComponent{ 0.7 };
+	}
 }
 
 void run()
