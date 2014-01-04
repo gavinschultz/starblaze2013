@@ -17,6 +17,7 @@ void init();
 void init_ship();
 void init_aliens();
 void init_station();
+void init_bullets();
 void run();
 
 std::unique_ptr<EntityRepository> db;
@@ -64,6 +65,7 @@ void init()
 	input = std::make_unique<InputSystem>();
 	thrust = std::make_unique<ThrustSystem>();
 
+	init_bullets();
 	init_ship();
 	init_aliens();
 	init_station();
@@ -93,6 +95,10 @@ void init_ship()
 	physical->weight = 2.0;
 	physical->getDecelerationFactor = &PhysicalComponent::getShipDecelerationFactor;
 	physical->box = { 0, 0, 128, 32 };
+
+	// Get ID of first bullet
+	auto bullet_lower_id = db->getEntitiesOfType(E::ebullet)[0];
+	fire->registerBullets(bullet_lower_id);
 
 	db->registerEntity(E::eship, { horient, body, thrust, physical, state, radartrack, collision, fire, player });
 
@@ -150,11 +156,13 @@ void init_bullets()
 {
 	for (int i = 0; i < 30; i++)
 	{
-		auto thrust = new ThrustComponent{ { 500.0, 0.0 }, { 0.0 } };
+		auto thrust = new ThrustComponent{ { 6000.0, 0.0 }, { 0.0 } };
 		auto state = new TemporalState2DComponent{};
-		auto physical = new PhysicalComponent{ { 0.0, 0.0, 4.0, 4.0 }, 1.0 };
-		auto collision = new CollisionComponent { { 0.0, 0.0, 4.0, 4.0 }, {} };
+		auto physical = new PhysicalComponent{ { 0.0, 0.0, 16.0, 8.0 }, 1.0 };
+		auto collision = new CollisionComponent { { 0.0, 0.0, 16.0, 8.0 }, {} };
 		auto lifetime = new LifetimeComponent{ 0.7 };
+
+		db->registerEntity(E::ebullet, { state, thrust, physical, collision, lifetime });
 	}
 }
 
@@ -166,6 +174,8 @@ void run()
 	double accumulator = 0.0;
 	while (true)
 	{
+		auto& db1 = *db.get(); // for debugging only
+
 		timer->startFrame();
 		usage::start();
 
@@ -177,15 +187,16 @@ void run()
 		}
 
 		input->update();
-		thrust->update();
 
 		if (session::quit)
 			break;
 
 		usage::collect("input");
-
+		
 		if (!session::paused || session::frame_by_frame)
 		{
+			thrust->update();
+
 			if (session::frame_by_frame)
 				session::frame_by_frame = false;
 
@@ -203,6 +214,11 @@ void run()
 			camera.update();
 			usage::collect("camera");
 		}
+		
+		debug::set("getcomponentsoftype", db->debug_getcomponentsoftype_calls);
+		debug::set("getentitiesoftype", db->debug_getentitiesoftype_calls);
+		debug::set("getentitieswithcomponent", db->debug_getentitieswithcomponent_calls);
+		debug::set("getcomponentsoftypeforentity", db->debug_getcomponentsoftypeforentity_calls);
 
 		renderer->draw(camera);
 		usage::collect("render");

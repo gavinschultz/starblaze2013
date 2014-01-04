@@ -166,7 +166,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\bullet.h" />
     <ClInclude Include="src\component\collisioncomponent.h" />
     <ClInclude Include="src\component\component_base.h" />
     <ClInclude Include="src\component\firebulletscomponent.h" />

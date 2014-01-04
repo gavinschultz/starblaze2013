@@ -9,8 +9,14 @@
 EntityRepository::EntityRepository() = default;
 EntityRepository::~EntityRepository() = default;
 
+unsigned int EntityRepository::debug_getcomponentsoftype_calls{ 0 };
+unsigned int EntityRepository::debug_getentitiesoftype_calls{ 0 };
+unsigned int EntityRepository::debug_getcomponentsoftypeforentity_calls{ 0 };
+unsigned int EntityRepository::debug_getentitieswithcomponent_calls{ 0 };
+
 std::vector<unsigned int> EntityRepository::getEntitiesOfType(EntityType etype) const
 {
+	debug_getentitiesoftype_calls++;
 	if (!hasEntity(etype))
 		return std::vector<unsigned int>{ 0 };
 	return entity_type_ids_.at(etype);
