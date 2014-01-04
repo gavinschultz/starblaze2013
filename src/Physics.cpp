@@ -12,31 +12,26 @@ void PhysicsSystem::update(double dt)
 	{
 		auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
 		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
+		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(eid);
 		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(eid);
 		if (fire->isFireRequired())
 		{
- 			auto bullet = fire->loadNext();
+			unsigned int bullet_id = fire->loadNextBullet();
+			auto bullet_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(bullet_id);
+			auto bullet_lifetime = db->getComponentOfTypeForEntity<LifetimeComponent>(bullet_id);
+			auto bullet_thrust = db->getComponentOfTypeForEntity<ThrustComponent>(bullet_id);
+
+			bullet_lifetime->reset();
 			auto direction_multiplier = (horient->direction == HOrient::right ? 1 : -1);
-			bullet->state.current.pos = { state->current.pos.x, state->current.pos.y };
-			bullet->state.current.vel = { direction_multiplier * 1000.0, 0.0 };
-			bullet->state.prev = bullet->state.current;
-			bullet->thrust.current.x = direction_multiplier * bullet->thrust.max.x; 
+			bullet_state->current.pos.x = (horient->direction == HOrient::right ? state->current.pos.x + physical->box.w : state->current.pos.x);
+			bullet_state->current.pos.y = state->current.pos.y + 24.0;
+			bullet_state->current.vel = { state->current.vel.x + (direction_multiplier * 1000.0), 0.0 };
+			bullet_state->prev = bullet_state->current;
+			bullet_thrust->current.x = direction_multiplier * bullet_thrust->max.x;
 			fire->reset();
 		}
 
-		fire->tick(dt);
-
-		for (auto& bullet : fire->getBullets())
-		{
-			if (!bullet.lifetime.active)
-				continue;
-
-			update_impl(&bullet.state, &bullet.thrust, &bullet.physical, nullptr, &bullet.collision);
-		}
-		//auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
-		//auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
-		//auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(eid);
-
+		//fire->tick(dt);
 	}
 
 	for (auto id : db->getEntitiesWithComponent<TemporalState2DComponent>())
@@ -46,6 +41,10 @@ void PhysicsSystem::update(double dt)
 		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(id);
 		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(id);
 		auto collision = db->getComponentOfTypeForEntity<CollisionComponent>(id);
+		auto lifetime = db->getComponentOfTypeForEntity<LifetimeComponent>(id);
+
+		if (lifetime && !lifetime->active)
+			continue;
 
 		update_impl(state, thrust, physical, horient, collision);
 
@@ -127,20 +126,20 @@ void PhysicsSystem::interpolate(double alpha)
 		state->interpolated.y = state->current.pos.y*alpha + state->prev.pos.y*(1.0 - alpha);
 	}
 
-	for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
-	{
-		auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
+	//for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
+	//{
+	//	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
 
-		for (auto& bullet : fire->getBullets())
-		{
-			if (!bullet.lifetime.active)
-				continue;
+	//	for (auto& bullet : fire->getBullets())
+	//	{
+	//		if (!bullet.lifetime.active)
+	//			continue;
 
-			double delta_x = playfield->getRelativePosX(bullet.state.current.pos.x, bullet.state.prev.pos.x);
-			bullet.state.interpolated.x = bullet.state.current.pos.x + (delta_x)*alpha;
-			bullet.state.interpolated.y = bullet.state.current.pos.y*alpha + bullet.state.prev.pos.y*(1.0 - alpha);
-		}
-	}
+	//		double delta_x = playfield->getRelativePosX(bullet.state.current.pos.x, bullet.state.prev.pos.x);
+	//		bullet.state.interpolated.x = bullet.state.current.pos.x + (delta_x)*alpha;
+	//		bullet.state.interpolated.y = bullet.state.current.pos.y*alpha + bullet.state.prev.pos.y*(1.0 - alpha);
+	//	}
+	//}
 }
 
 void PhysicsSystem::collide()
@@ -151,7 +150,7 @@ void PhysicsSystem::collide()
 		collide->is_collided = false;
 	}
 
-	auto ship_id = 1;
+	auto ship_id = db->getEntitiesOfType(E::eship)[0];
 	auto ship_collide = db->getComponentOfTypeForEntity<CollisionComponent>(ship_id);
 
 	Rect ship_outer_box = ship_collide->outer_box;
@@ -166,8 +165,14 @@ void PhysicsSystem::collide()
 			alien_collide->is_collided = true;
 		}
 
-		for (auto bullet_collide : db->getComponentsOfTypeForEntityType<CollisionComponent>(E::ebullet))
+		for (auto bullet_id : db->getEntitiesOfType(E::ebullet))
 		{
+			auto bullet_collide = db->getComponentOfTypeForEntity<CollisionComponent>(bullet_id);
+			auto bullet_lifetime = db->getComponentOfTypeForEntity<LifetimeComponent>(bullet_id);
+
+			if (!bullet_lifetime->active)
+				continue;
+
 			if (mathutil::areRectanglesIntersecting(bullet_collide->outer_box, alien_collide->outer_box))
 			{
 				bullet_collide->is_collided = true;

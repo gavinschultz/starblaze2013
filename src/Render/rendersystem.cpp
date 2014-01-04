@@ -171,7 +171,7 @@ void RenderSystem::draw(Camera& camera)
 		pi->alien_render->render(pi->sdl_renderer, camera, *alien_state, alien_collide);
 	}
 
-	auto player_id = 1;
+	auto player_id = db->getEntitiesOfType(E::eship)[0];
 	auto player_body = db->getComponentOfTypeForEntity<PoweredBodyComponent>(player_id);
 	auto player_orient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(player_id);
 	auto player_info = db->getComponentOfTypeForEntity<PlayerComponent>(player_id);
@@ -189,15 +189,16 @@ void RenderSystem::draw(Camera& camera)
 	//	debris_render.draw(pi->sdl_renderer, camera, (Debris*)e);
 	//}
 
-	for (auto fire : db->getComponentsOfType<FireBulletsComponent>())
+	for (auto id : db->getEntitiesOfType(E::ebullet))
 	{
-		for (auto& bullet : fire->getBullets())
-		{
-			if (!bullet.lifetime.active)
-				continue;
+		auto bullet_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
+		auto bullet_physical = db->getComponentOfTypeForEntity<PhysicalComponent>(id);
+		auto bullet_lifetime = db->getComponentOfTypeForEntity<LifetimeComponent>(id);
 
-			pi->bullet_render->render(pi->sdl_renderer, camera, bullet.state, bullet.physical);
-		}
+		if (!bullet_lifetime->active)
+			continue;
+
+		pi->bullet_render->render(pi->sdl_renderer, camera, *bullet_state, *bullet_physical);
 	}
 	
 	pi->hud_render->render(pi->sdl_renderer, *player_info, session::score, session::lives, *pi->text_render);

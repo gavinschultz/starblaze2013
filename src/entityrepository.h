@@ -56,7 +56,7 @@ private:
 	//std::array<EntityIdRange, 10> entity_type_ids_;																		// indexed by entity type; provides the lower/upper range of IDs for the entity
 	std::array<std::vector<unsigned int>, 10> entity_type_ids_;
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, Component*>> components_by_type_and_entity_;
-	
+
 	unsigned int nextId()
 	{
 		static unsigned int max_entity_id = 0;
@@ -68,12 +68,18 @@ public:
 	EntityRepository();
 	~EntityRepository();
 
+	static unsigned int debug_getcomponentsoftype_calls;
+	static unsigned int debug_getentitiesoftype_calls;
+	static unsigned int debug_getcomponentsoftypeforentity_calls;
+	static unsigned int debug_getentitieswithcomponent_calls;
+
 	// Note that the get functions here are intentionally not const, as the operator[] (which is not const) is marginally more performant than .at()
 	// Some error-checking omitted for the same reason
 
 	template<typename T>
 	T* getComponentOfTypeForEntity(unsigned int entity_id) // currently only allows a single component of a type per entity
 	{
+		debug_getcomponentsoftypeforentity_calls++;
 		static const auto component_type = std::type_index(typeid(T));
 		auto component = components_by_type_and_entity_[component_type][entity_id];
 		return static_cast<T*>(component);
@@ -82,6 +88,7 @@ public:
 	template<typename T>
 	const std::vector<unsigned int> getEntitiesWithComponent()
 	{
+		debug_getentitieswithcomponent_calls++;
 		static const auto component_type = std::type_index(typeid(T));
 		auto& id_map = components_by_type_and_entity_[component_type];
 		auto ids = std::vector<unsigned int>();
@@ -96,6 +103,7 @@ public:
 	template<typename T>
 	const std::vector<T*> getComponentsOfType()
 	{
+		debug_getcomponentsoftype_calls++;
 		static const auto component_type = std::type_index(typeid(T));
 		auto& components_with_type = components_by_type_[component_type];
 		std::vector<T*> components;

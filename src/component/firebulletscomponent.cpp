@@ -16,7 +16,7 @@ void FireBulletsComponent::fire()
 
 bool FireBulletsComponent::isFireRequired() const
 { 
-	return fire_; 
+	return fire_;
 }
 
 void FireBulletsComponent::reset()
@@ -24,23 +24,30 @@ void FireBulletsComponent::reset()
 	fire_ = false; 
 }
 
-void FireBulletsComponent::tick(double dt)
+void FireBulletsComponent::registerBullets(unsigned int lower_id)
 {
-	for (auto& bullet : bullets_)
+	for (int i = 0; i < BULLETS_MAX; i++)
 	{
-		bullet.lifetime.tick(dt);
+		bullet_ids_[i] = lower_id + i;
 	}
 }
 
-std::array<Bullet, FireBulletsComponent::BULLETS_MAX>& FireBulletsComponent::getBullets()
-{
-	return bullets_;
-}
+//void FireBulletsComponent::tick(double dt)
+//{
+//	for (auto& bullet : bullets_)
+//	{
+//		bullet.lifetime.tick(dt);
+//	}
+//}
+//
+//std::array<Bullet, FireBulletsComponent::BULLETS_MAX>& FireBulletsComponent::getBullets()
+//{
+//	return bullets_;
+//}
 
-Bullet* FireBulletsComponent::loadNext()
+unsigned int FireBulletsComponent::loadNextBullet()
 {
-	auto bullet = &bullets_[next_available_index];
-	bullet->lifetime.reset();
-	next_available_index = ++next_available_index % BULLETS_MAX;
-	return bullet;
+	auto bullet_id = bullet_ids_[next_available_index_];
+	next_available_index_ = ++next_available_index_ % BULLETS_MAX;
+	return bullet_id;
 }
