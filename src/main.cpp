@@ -69,6 +69,8 @@ void init()
 	init_ship();
 	init_aliens();
 	init_station();
+
+	debug::console({ db->getInfo() });
 }
 
 void init_ship()
@@ -100,7 +102,16 @@ void init_ship()
 	auto bullet_lower_id = db->getEntitiesOfType(E::ebullet)[0];
 	fire->registerBullets(bullet_lower_id);
 
-	db->registerEntity(E::eship, { horient, body, thrust, physical, state, radartrack, collision, fire, player });
+	auto id = db->registerEntity(E::eship);
+	db->registerComponent(horient, id);
+	db->registerComponent(body, id);
+	db->registerComponent(thrust, id);
+	db->registerComponent(physical, id);
+	db->registerComponent(state, id);
+	db->registerComponent(radartrack, id);
+	db->registerComponent(collision, id);
+	db->registerComponent(fire, id);
+	db->registerComponent(player, id);
 
 	motionhistory::init(renderer->getWindow().w, thrust->max.x, thrust->max.y);
 }
@@ -129,7 +140,11 @@ void init_aliens()
 			{ 40, 36, 24, 12 }
 		});
 		auto body = new PoweredBodyComponent(state, thrust, physical, nullptr, collision);
-		db->registerEntity(E::ealien, { physical, state, radartrack, collision });
+		auto id = db->registerEntity(E::ealien);  
+		db->registerComponent(physical, id);
+		db->registerComponent(state, id);
+		db->registerComponent(radartrack, id);
+		db->registerComponent(collision, id);
 	}
 }
 
@@ -149,7 +164,12 @@ void init_station()
 	);
 	auto station = new StationComponent(StationType::fuel);
 
-	db->registerEntity(E::estation, { physical, state, radartrack, collision, station });
+	auto id = db->registerEntity(E::estation);
+	db->registerComponent(physical, id);
+	db->registerComponent(state, id);
+	db->registerComponent(radartrack, id);
+	db->registerComponent(collision, id);
+	db->registerComponent(station, id);
 }
 
 void init_bullets()
@@ -159,10 +179,15 @@ void init_bullets()
 		auto thrust = new ThrustComponent{ { 6000.0, 0.0 }, { 0.0 } };
 		auto state = new TemporalState2DComponent{};
 		auto physical = new PhysicalComponent{ { 0.0, 0.0, 16.0, 8.0 }, 1.0 };
-		auto collision = new CollisionComponent { { 0.0, 0.0, 16.0, 8.0 }, {} };
+		auto collision = new CollisionComponent{ { 0.0, 0.0, 16.0, 8.0 }, {} };
 		auto lifetime = new LifetimeComponent{ 0.7 };
 
-		db->registerEntity(E::ebullet, { state, thrust, physical, collision, lifetime });
+		auto id = db->registerEntity(E::ebullet);
+		db->registerComponent(state, id);
+		db->registerComponent(thrust, id);
+		db->registerComponent(physical, id);
+		db->registerComponent(collision, id);
+		db->registerComponent(lifetime, id);
 	}
 }
 
@@ -192,7 +217,7 @@ void run()
 			break;
 
 		usage::collect("input");
-		
+
 		if (!session::paused || session::frame_by_frame)
 		{
 			thrust->update();
@@ -214,7 +239,7 @@ void run()
 			camera.update();
 			usage::collect("camera");
 		}
-		
+
 		debug::set("getcomponentsoftype", db->debug_getcomponentsoftype_calls);
 		debug::set("getentitiesoftype", db->debug_getentitiesoftype_calls);
 		debug::set("getentitieswithcomponent", db->debug_getentitieswithcomponent_calls);
