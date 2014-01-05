@@ -19,6 +19,7 @@ public:
 
 	void init();
 	void draw(Camera& camera);
+	void flip();
 
 	void setFullscreen(bool state);
 	bool isFullscreen() const;

@@ -4,6 +4,7 @@
 #include "renderdefs.h"
 #include "renderutil.h"
 #include "program.h"
+#include "timer.h"
 
 class DebugRender::impl
 {

@@ -85,16 +85,17 @@ void init_ship()
 	const auto collision = new CollisionComponent(
 	{ 0, 0, 128, 32 },
 	{
-		{ 0, 4, 16, 28 },
+		{ 0, 4, 16, 28 }, // tail end
 		{ 16, 8, 8, 24 },
 		{ 24, 12, 8, 20 },
 		{ 32, 16, 72, 16 },
 		{ 104, 20, 24, 12 }
 	});
 	const auto body = new PoweredBodyComponent(state, thrust, physical, horient, collision);
+	state->ignore_acc.y = true;	// don't consider y acceleration when determining y velocity - may be less realistic but feels better
 	thrust->max = { 6200, 2800 };
 	thrust->reverse_thrust_factor = 0.9;
-	physical->weight = 2.0;
+	physical->weight = 3.0;
 	physical->getDecelerationFactor = &PhysicalComponent::getShipDecelerationFactor;
 	physical->box = { 0, 0, 128, 32 };
 
@@ -140,7 +141,7 @@ void init_aliens()
 			{ 40, 36, 24, 12 }
 		});
 		auto body = new PoweredBodyComponent(state, thrust, physical, nullptr, collision);
-		auto id = db->registerEntity(E::ealien);  
+		auto id = db->registerEntity(E::ealien);
 		db->registerComponent(physical, id);
 		db->registerComponent(state, id);
 		db->registerComponent(radartrack, id);
@@ -156,12 +157,12 @@ void init_station()
 	auto playarea = db->getPlayField()->getPlayArea(physical->box);
 	state->current.pos.y = playarea.h;
 	auto radartrack = new RadarTrackableComponent();
-	auto collision = new CollisionComponent(
-	{ 0, 0, 128, 64 },
-	{
-		{ 0, 0, 128, 64 }
-	}
-	);
+	auto collision = new CollisionComponent{
+		{ 0, 0, 128, 64 },
+		{
+			{ 0, 0, 128, 64 }
+		}
+	};
 	auto station = new StationComponent(StationType::fuel);
 
 	auto id = db->registerEntity(E::estation);
@@ -179,7 +180,12 @@ void init_bullets()
 		auto thrust = new ThrustComponent{ { 6000.0, 0.0 }, { 0.0 } };
 		auto state = new TemporalState2DComponent{};
 		auto physical = new PhysicalComponent{ { 0.0, 0.0, 16.0, 8.0 }, 1.0 };
-		auto collision = new CollisionComponent{ { 0.0, 0.0, 16.0, 8.0 }, {} };
+		auto collision = new CollisionComponent{
+			{ 0.0, 0.0, 16.0, 8.0 },
+			{
+				{ 0.0, 0.0, 16.0, 8.0 }
+			}
+		};
 		auto lifetime = new LifetimeComponent{ 0.7f };
 
 		auto id = db->registerEntity(E::ebullet);
@@ -199,7 +205,12 @@ void run()
 	float accumulator = 0.0;
 	while (true)
 	{
-		auto& db1 = *db.get(); // for debugging only
+		/* debug */
+		auto& db1 = *db.get();
+		db->debug_getcomponentsoftype_calls = 0;
+		db->debug_getcomponentsoftypeforentity_calls = 0;
+		db->debug_getentitiesoftype_calls = 0;
+		db->debug_getentitieswithcomponent_calls = 0;
 
 		timer->startFrame();
 		usage::start();
@@ -240,13 +251,16 @@ void run()
 			usage::collect("camera");
 		}
 
-		debug::set("getcomponentsoftype", db->debug_getcomponentsoftype_calls);
-		debug::set("getentitiesoftype", db->debug_getentitiesoftype_calls);
-		debug::set("getentitieswithcomponent", db->debug_getentitieswithcomponent_calls);
-		debug::set("getcomponentsoftypeforentity", db->debug_getcomponentsoftypeforentity_calls);
+		//debug::set("getcomponentsoftype", db->debug_getcomponentsoftype_calls); // 3/frame
+		//debug::set("getentitiesoftype", db->debug_getentitiesoftype_calls); // 28/frame
+		//debug::set("getentitieswithcomponent", db->debug_getentitieswithcomponent_calls); // 5/frame
+		//debug::set("getcomponentsoftypeforentity", db->debug_getcomponentsoftypeforentity_calls);	// 1811/frame
 
 		renderer->draw(camera);
 		usage::collect("render");
+
+		renderer->flip();
+		usage::collect("vsync");
 
 		timer->endFrame();
 		usage::finish();

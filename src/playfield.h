@@ -31,6 +31,7 @@ public:
 
 	Rect getPlayArea(const Rect& entity_box) const;
 	float getAltitude(float entity_pos_y, float entity_box_h) const;
+	float getTakeoffSpeed();
 	bool isRightOf(float x1, float x2);
 	bool isLeftOf(float x1, float x2);
 	float getAbsolutePosX(float entity_pos_x) const;

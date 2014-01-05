@@ -6,14 +6,53 @@
 
 #include <sstream>
 
+namespace
+{
+	bool testCollide(CollisionComponent& c1, CollisionComponent& c2, PlayField& playfield)
+	{
+		// Broad sector check (may not really be necessary - outer box checking may be good enough)
+		if (!(c2.sector.x == c1.sector.x || (mathutil::abswrap(c2.sector.x - 1, c2.sector_max.x)) == c1.sector.x || mathutil::abswrap(c2.sector.x + 1, c2.sector_max.x) == c1.sector.x))
+			return false;
+		if (!(c2.sector.y == c1.sector.y || (mathutil::abswrap(c2.sector.y - 1, c2.sector_max.y)) == c1.sector.y || mathutil::abswrap(c2.sector.y + 1, c2.sector_max.y) == c1.sector.y))
+			return false;
+
+		// Outer bounds box check
+		float outer_rel_offset_x = playfield.getRelativePosX(c2.outer_box.x, c1.outer_box.x);
+		Rect c1_outer_box = c1.outer_box;
+		c1_outer_box.x = c2.outer_box.x + outer_rel_offset_x;
+
+		if (!mathutil::areRectanglesIntersecting(c1_outer_box, c2.outer_box))
+		{
+			return false;
+		}
+
+		// Inner box checks
+		for (auto c1_inner_box : c1.inner_boxes) // note copy, not reference, as we will be modifying to get relative pos
+		{
+			for (auto& c2_inner_box : c2.inner_boxes) // note reference, not copy
+			{
+				float inner_rel_offset_x = playfield.getRelativePosX(c2_inner_box.x, c1_inner_box.x);
+				c1_inner_box.x = c2_inner_box.x + inner_rel_offset_x;
+				if (mathutil::areRectanglesIntersecting(c1_inner_box, c2_inner_box))
+				{
+					return true;
+				}
+			}	
+		}
+
+		return false;
+	}
+}
+
 void PhysicsSystem::update(float dt)
 {
 	for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
 	{
-		auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
-		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
-		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(eid);
-		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(eid);
+		FireBulletsComponent* fire;
+		TemporalState2DComponent* state;
+		PhysicalComponent* physical;
+		HorizontalOrientComponent* horient;
+		db->getComponentsOfTypeForEntity<FireBulletsComponent, TemporalState2DComponent, PhysicalComponent, HorizontalOrientComponent>(eid, &fire, &state, &physical, &horient);
 		if (fire->isFireRequired())
 		{
 			unsigned int bullet_id = fire->loadNextBullet();
@@ -30,83 +69,94 @@ void PhysicsSystem::update(float dt)
 			bullet_thrust->current.x = direction_multiplier * bullet_thrust->max.x;
 			fire->reset();
 		}
-
-		//fire->tick(dt);
 	}
 
 	for (auto id : db->getEntitiesWithComponent<TemporalState2DComponent>())
 	{
-		auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(id);
-		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
-		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(id);
-		auto horient = db->getComponentOfTypeForEntity<HorizontalOrientComponent>(id);
-		auto collision = db->getComponentOfTypeForEntity<CollisionComponent>(id);
-		auto lifetime = db->getComponentOfTypeForEntity<LifetimeComponent>(id);
+		ThrustComponent* thrust = nullptr;
+		TemporalState2DComponent* state = nullptr;
+		PhysicalComponent* physical = nullptr;
+		HorizontalOrientComponent* horient = nullptr;
+		CollisionComponent* collision = nullptr;
+		LifetimeComponent* lifetime = nullptr;
+		
+		db->getComponentsOfTypeForEntity<ThrustComponent, TemporalState2DComponent, PhysicalComponent, HorizontalOrientComponent, CollisionComponent, LifetimeComponent>(
+			id, &thrust, &state, &physical, &horient, &collision, &lifetime
+			);
 
-		if (lifetime && !lifetime->active)
-			continue;
+		if (lifetime)
+		{
+			if (!lifetime->active)
+				continue;
+			lifetime->tick(dt);
+		}
 
-		update_impl(state, thrust, physical, horient, collision);
+		auto playfield = db->getPlayField();
+		auto boundaries = playfield->boundaries;
+
+		state->prev = state->current;
+
+		// acceleration
+		if (thrust)
+		{
+			state->current.acc.x = (thrust->current.x / physical->weight);
+			state->current.acc.y = (thrust->current.y / physical->weight);
+		}
+		state->current.vel.x += state->current.acc.x * dt;
+		state->current.vel.y += state->current.acc.y * dt;
+
+		// deceleration (from reverse thrust and/or natural atmospheric deceleration)
+		Vector2D deceleration_factor = physical->getDecelerationFactor(*state, thrust);
+		state->current.vel.x -= state->current.vel.x * (deceleration_factor.x * dt);
+		state->current.vel.y -= state->current.vel.y * (deceleration_factor.y * dt);
+
+		if (!state->ignore_acc.x)
+			state->current.pos.x += (state->current.vel.x * dt) + (state->current.acc.x * 0.5 * dt * dt);
+		else
+			state->current.pos.x += state->current.vel.x * dt;
+		state->current.pos.x = mathutil::abswrap(state->current.pos.x, playfield->w);
+
+		if (!state->ignore_acc.y)
+			state->current.pos.y += state->current.vel.y * dt + (state->current.acc.y * 0.5 * dt * dt);
+		else
+			state->current.pos.y += state->current.vel.y * dt;
+
+		float altitude = playfield->getAltitude(state->current.pos.y, physical->box.h);
+		if (altitude == 0.0)
+		{
+			state->current.pos.y = boundaries.y + boundaries.h - physical->box.h;
+			state->current.vel.y = 0.0;
+		}
+		else if (state->current.pos.y < boundaries.y)
+		{
+			state->current.pos.y = boundaries.y;
+			state->current.vel.y = 0.0;
+		}
+
+		physical->box.x = state->current.pos.x;
+		physical->box.y = state->current.pos.y;
+
+		if (collision)
+		{
+			collision->updateCollisionBoxes(state, horient, playfield->w, playfield->boundaries.h);
+		}
 
 		//entity->tick(dt);
 
-		//debug::set("x", state->current.pos.x);
-		//debug::set("vel.x", state->current.vel.x);
-		//debug::set("acc.x", state->current.acc.x);
-		//debug::set("thrust.x", thrust->current.x);
+		if (horient) // i.e. ship
+		{
+			//debug::set("x", state->current.pos.x);
+			//debug::set("vel.x", state->current.vel.x);
+			//debug::set("acc.x", state->current.acc.x);
+			//debug::set("thrust.x", thrust->current.x);
 
-		//debug::set("y", state->current.pos.y);
-		//debug::set("vel.y", state->current.vel.y);
-		//debug::set("acc.y", state->current.acc.y);
-		//debug::set("thrust.y", thrust->current.y);
+			//debug::set("y", state->current.pos.y);
+			debug::set("current.vel.y", state->current.vel.y);
+			debug::set("current.acc.y", state->current.acc.y);
+			//debug::set("thrust.y", thrust->current.y);
 
-		//debug::set("deceleration", std::to_string(deceleration_factor.x) + " / " + std::to_string(deceleration_factor.y));
-	}
-}
-
-void PhysicsSystem::update_impl(TemporalState2DComponent* state, ThrustComponent* thrust, PhysicalComponent* physical, HorizontalOrientComponent* horient, CollisionComponent* collision)
-{
-	auto playfield = db->getPlayField();
-	auto boundaries = playfield->boundaries;
-
-	state->prev = state->current;
-
-	// acceleration
-	if (thrust)
-	{
-		state->current.acc.x = (thrust->current.x / physical->weight);
-		state->current.acc.y = (thrust->current.y / physical->weight);
-	}
-	state->current.vel.x += state->current.acc.x * dt;
-	state->current.vel.y += state->current.acc.y * dt;
-
-	// deceleration (from reverse thrust and/or natural atmospheric deceleration)
-	Vector2D deceleration_factor = physical->getDecelerationFactor(*state, thrust);
-	state->current.vel.x -= state->current.vel.x * (deceleration_factor.x * dt);
-	state->current.vel.y -= state->current.vel.y * (deceleration_factor.y * dt);
-
-	state->current.pos.x += (state->current.vel.x * dt) + (state->current.acc.x * 0.5 * dt * dt);
-	state->current.pos.x = mathutil::abswrap(state->current.pos.x, playfield->w);
-
-	state->current.pos.y += state->current.vel.y * dt + (state->current.acc.y * 0.5 * dt * dt);
-	float altitude = playfield->getAltitude(state->current.pos.y, physical->box.h);
-	if (altitude == 0.0)
-	{
-		state->current.pos.y = boundaries.y + boundaries.h - physical->box.h;
-		state->current.vel.y = 0.0;
-	}
-	else if (state->current.pos.y < boundaries.y)
-	{
-		state->current.pos.y = boundaries.y;
-		state->current.vel.y = 0.0;
-	}
-
-	physical->box.x = state->current.pos.x;
-	physical->box.y = state->current.pos.y;
-
-	if (collision)
-	{
-		collision->updateCollisionBoxes(state, horient);
+			//debug::set("deceleration", std::to_string(deceleration_factor.x) + " / " + std::to_string(deceleration_factor.y));
+		}
 	}
 }
 
@@ -116,30 +166,9 @@ void PhysicsSystem::interpolate(float alpha)
 	for (auto& state : db->getComponentsOfType<TemporalState2DComponent>())
 	{
 		float delta_x = playfield->getRelativePosX(state->current.pos.x, state->prev.pos.x);
-		//if (delta_x != 0)
-		//{
-		//	debug::console({ "prev.x / current.x / delta_x / alpha: ", std::to_string(state->prev.pos.x), " / ", std::to_string(state->current.pos.x), " / ", std::to_string(delta_x), " / ", std::to_string(alpha) });
-		//	//debug::console({ "state->current.pos.x + delta_x*alpha: ", std::to_string(state->current.pos.x), " + ", std::to_string(delta_x), " * ", std::to_string(alpha) });
-		//}
 		state->interpolated.x = state->current.pos.x + (delta_x)*alpha;
-		//state->interpolated.x = state->current.pos.x*alpha + state->prev.pos.x*(1.0 - alpha);
 		state->interpolated.y = state->current.pos.y*alpha + state->prev.pos.y*(1.0 - alpha);
 	}
-
-	//for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
-	//{
-	//	auto fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(eid);
-
-	//	for (auto& bullet : fire->getBullets())
-	//	{
-	//		if (!bullet.lifetime.active)
-	//			continue;
-
-	//		float delta_x = playfield->getRelativePosX(bullet.state.current.pos.x, bullet.state.prev.pos.x);
-	//		bullet.state.interpolated.x = bullet.state.current.pos.x + (delta_x)*alpha;
-	//		bullet.state.interpolated.y = bullet.state.current.pos.y*alpha + bullet.state.prev.pos.y*(1.0 - alpha);
-	//	}
-	//}
 }
 
 void PhysicsSystem::collide()
@@ -152,28 +181,31 @@ void PhysicsSystem::collide()
 
 	auto ship_id = db->getEntitiesOfType(E::eship)[0];
 	auto ship_collide = db->getComponentOfTypeForEntity<CollisionComponent>(ship_id);
+	//debug::set("ship_sector.x", ship_collide->sector.x);
+	//debug::set("ship_sector.y", ship_collide->sector.y);
 
-	Rect ship_outer_box = ship_collide->outer_box;
+	std::vector<CollisionComponent*> bullet_collides;
+	for (auto bullet_id : db->getEntitiesOfType(E::ebullet))
+	{
+		CollisionComponent* bullet_collide = nullptr;
+		LifetimeComponent* bullet_lifetime = nullptr;
+		db->getComponentsOfTypeForEntity<CollisionComponent, LifetimeComponent>(bullet_id, &bullet_collide, &bullet_lifetime);
+		if (!bullet_lifetime->active)
+			continue;
+		bullet_collides.push_back(bullet_collide);
+	}
 
 	for (auto alien_collide : db->getComponentsOfTypeForEntityType<CollisionComponent>(E::ealien))
 	{
-		ship_outer_box.x = alien_collide->outer_box.x + playfield->getRelativePosX(alien_collide->outer_box.x, ship_outer_box.x);
-
-		if (ship_collide && mathutil::areRectanglesIntersecting(ship_outer_box, alien_collide->outer_box))
+		if (ship_collide && testCollide(*ship_collide, *alien_collide, *playfield))
 		{
 			ship_collide->is_collided = true;
 			alien_collide->is_collided = true;
 		}
 
-		for (auto bullet_id : db->getEntitiesOfType(E::ebullet))
+		for (auto bullet_collide : bullet_collides)
 		{
-			auto bullet_collide = db->getComponentOfTypeForEntity<CollisionComponent>(bullet_id);
-			auto bullet_lifetime = db->getComponentOfTypeForEntity<LifetimeComponent>(bullet_id);
-
-			if (!bullet_lifetime->active)
-				continue;
-
-			if (mathutil::areRectanglesIntersecting(bullet_collide->outer_box, alien_collide->outer_box))
+			if (testCollide(*bullet_collide, *alien_collide, *playfield))
 			{
 				bullet_collide->is_collided = true;
 				alien_collide->is_collided = true;
@@ -185,9 +217,8 @@ void PhysicsSystem::collide()
 	{
 		auto station_collide = db->getComponentOfTypeForEntity<CollisionComponent>(station_id);
 		auto station_st = db->getComponentOfTypeForEntity<StationComponent>(station_id);
-		ship_outer_box.x = station_collide->outer_box.x + playfield->getRelativePosX(station_collide->outer_box.x, ship_outer_box.x);
 
-		if (ship_collide && mathutil::areRectanglesIntersecting(ship_outer_box, station_collide->outer_box))
+		if (ship_collide && testCollide(*ship_collide, *station_collide, *playfield))
 		{
 			station_st->is_docked = true;
 			ship_collide->is_collided = true;

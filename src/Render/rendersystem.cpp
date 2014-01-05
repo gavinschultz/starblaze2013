@@ -166,8 +166,9 @@ void RenderSystem::draw(Camera& camera)
 
 	for (auto id : db->getEntitiesOfType(E::ealien))
 	{
-		auto alien_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
-		auto alien_collide = db->getComponentOfTypeForEntity<CollisionComponent>(id);
+		TemporalState2DComponent* alien_state = nullptr;
+		CollisionComponent* alien_collide = nullptr;
+		db->getComponentsOfTypeForEntity<TemporalState2DComponent, CollisionComponent>(id, &alien_state, &alien_collide);
 		pi->alien_render->render(pi->sdl_renderer, camera, *alien_state, alien_collide);
 	}
 
@@ -189,11 +190,14 @@ void RenderSystem::draw(Camera& camera)
 	//	debris_render.draw(pi->sdl_renderer, camera, (Debris*)e);
 	//}
 
+	int i = 0;
 	for (auto id : db->getEntitiesOfType(E::ebullet))
 	{
-		auto bullet_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(id);
-		auto bullet_physical = db->getComponentOfTypeForEntity<PhysicalComponent>(id);
-		auto bullet_lifetime = db->getComponentOfTypeForEntity<LifetimeComponent>(id);
+		i++;
+		TemporalState2DComponent* bullet_state = nullptr;
+		PhysicalComponent* bullet_physical = nullptr;
+		LifetimeComponent* bullet_lifetime = nullptr;
+		db->getComponentsOfTypeForEntity<TemporalState2DComponent, PhysicalComponent, LifetimeComponent>(id, &bullet_state, &bullet_physical, &bullet_lifetime);
 
 		if (!bullet_lifetime->active)
 			continue;
@@ -206,8 +210,9 @@ void RenderSystem::draw(Camera& camera)
 	pi->radar_render->renderBox(pi->sdl_renderer);
 	for (auto eid : db->getEntitiesWithComponent<RadarTrackableComponent>())
 	{
-		auto state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(eid);
-		auto physical = db->getComponentOfTypeForEntity<PhysicalComponent>(eid);
+		TemporalState2DComponent* state = nullptr;
+		PhysicalComponent* physical = nullptr;
+		db->getComponentsOfTypeForEntity<TemporalState2DComponent, PhysicalComponent>(eid, &state, &physical);
 		pi->radar_render->render(pi->sdl_renderer, camera, state, physical);
 	}
 
@@ -249,7 +254,10 @@ void RenderSystem::draw(Camera& camera)
 	{
 		pi->motionhistory_render->render(pi->sdl_renderer, pi->window, motionhistory::get(), motionhistory::getThresholds(), motionhistory::getCurrentIndex());
 	}
+}
 
+void RenderSystem::flip()
+{
 	SDL_RenderPresent(pi->sdl_renderer);
 }
 

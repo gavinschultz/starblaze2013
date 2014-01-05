@@ -8,8 +8,6 @@ class CollisionComponent;
 
 class PhysicsSystem
 {
-private:
-	void update_impl(TemporalState2DComponent* state, ThrustComponent* thrust, PhysicalComponent* physical, HorizontalOrientComponent* horient, CollisionComponent* collision);
 public:
 	void update(float dt);
 	void interpolate(float alpha);

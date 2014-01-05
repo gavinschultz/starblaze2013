@@ -26,6 +26,16 @@ float mathutil::abswrap(float n, float limit)
 		return n;
 }
 
+int mathutil::abswrap(int n, int limit)
+{
+	if (n < 0)
+		return limit + (n % limit);
+	else if (n > limit)
+		return n % limit;
+	else
+		return n;
+}
+
 //TODO: make templates
 bool mathutil::areRectanglesIntersecting(const Rect& a, const Rect& b)
 {

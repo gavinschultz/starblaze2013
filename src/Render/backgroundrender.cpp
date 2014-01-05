@@ -50,7 +50,7 @@ BackgroundRender::impl::impl(const RenderSystem& renderer)
 
 void BackgroundRender::impl::render(SDL_Renderer* sdl_renderer, const Camera& camera, const PlayField& playfield) const
 {
-	const std::array<int, 4> y_channel_coords = { { 0 - HILL_HEIGHT, 36, 68, 100 } };
+	static const std::array<int, 4> y_channel_coords = { { 0 - HILL_HEIGHT, 36, 68, 100 } };
 	SDL_SetRenderDrawColor(sdl_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
 	SDL_RenderFillRect(sdl_renderer, &bg_rect);
 	SDL_SetRenderDrawColor(sdl_renderer, sky_color.r, sky_color.g, sky_color.b, sky_color.a);
@@ -58,6 +58,7 @@ void BackgroundRender::impl::render(SDL_Renderer* sdl_renderer, const Camera& ca
 	SDL_SetRenderDrawColor(sdl_renderer, ground_color.r, ground_color.g, ground_color.b, ground_color.a);
 	SDL_RenderFillRect(sdl_renderer, &ground_rect);
 
+	int skipped{ 0 };
 	for (auto& hill : playfield.hills)
 	{
 		auto hill_sprite_texture = hill_sprite_textures[hill.type];
@@ -67,12 +68,20 @@ void BackgroundRender::impl::render(SDL_Renderer* sdl_renderer, const Camera& ca
 		else
 			SDL_SetTextureColorMod(hill_sprite_texture.texture, sky_color.r, sky_color.g, sky_color.b);
 		int32_t entity_x_at_camera_x = renderutil::getScreenXForEntityByCameraAndDistance(hill.x, hill_sprite_texture.rect.w, (int)playfield.w, camera, hill.distance_factor);
+
+		if (entity_x_at_camera_x < 0 - HILL_WIDTH || entity_x_at_camera_x > camera.getViewRect().w)
+		{
+			skipped++;
+			continue;
+		}
+
 		SDL_Rect hill_rect = {
 			entity_x_at_camera_x,
 			SKY_HEIGHT + y_channel_coords[hill.y_channel],
 			HILL_WIDTH,
 			HILL_HEIGHT
 		};
+
 		SDL_RenderCopy(sdl_renderer, hill_sprite_texture.texture, &hill_sprite_texture.rect, &hill_rect);
 		SDL_SetTextureColorMod(hill_sprite_texture.texture, 255, 255, 255);
 	}
