@@ -13,13 +13,13 @@ great but it's not killing the whole project.
 But for future reference:
 
 1) The idea of the vector in the components_by_type_ structure was to have contiguous memory for components, but it's not really contiguous - the pointers
-   are contiguous but the actual memory the components are stored at is completely arbitrary.
+are contiguous but the actual memory the components are stored at is completely arbitrary.
 
 Use memory pools such that the components can actually be stored contiguously.
 Some good ideas here on using intrusive lists and pooling (specifically using boost libraries, but could make our own): http://stackoverflow.com/a/17838320/78216
 
 2) Separating the component types via the unordered_map is flawed for a similar reason - typically we need coordination between many different components (e.g.
-   ~5 components in the physics update), but keeping them separate and looking them up one-by-one also bounces all over our memory space.
+~5 components in the physics update), but keeping them separate and looking them up one-by-one also bounces all over our memory space.
 
 Instead, store redundant component data in larger component aggregates - e.g. a "physics" component may store copies of all the other 5 components
 worth of data (at least, the bits it needs) so that all the data is stored contiguously and close together
@@ -51,6 +51,8 @@ public:
 class EntityRepository
 {
 private:
+	std::unordered_map<std::type_index, unsigned int> component_sizes_;
+	std::map<unsigned int, unsigned int> entity_sizes_;
 	std::unique_ptr<PlayField> playfield_;
 	std::unordered_map<std::type_index, std::vector<std::unique_ptr<Component>>> components_by_type_;					// indexed by component type; provides a vector of components of that type
 	//std::array<EntityIdRange, 10> entity_type_ids_;																		// indexed by entity type; provides the lower/upper range of IDs for the entity
@@ -75,6 +77,20 @@ public:
 
 	// Note that the get functions here are intentionally not const, as the operator[] (which is not const) is marginally more performant than .at()
 	// Some error-checking omitted for the same reason
+
+	template<typename T>
+	void registerComponent(T* component, unsigned int entity_id)
+	{
+		auto component_type = std::type_index(typeid(T));
+		auto& components = components_by_type_[component_type];
+		size_t component_index = components.size();
+		components.push_back(std::unique_ptr<Component>(component));
+		components_by_type_and_entity_[component_type][entity_id] = component;
+
+		if (component_sizes_.count(component_type) == 0)
+			component_sizes_[component_type] = sizeof(T);
+		entity_sizes_[entity_id] += sizeof(T);
+	}
 
 	template<typename T>
 	T* getComponentOfTypeForEntity(unsigned int entity_id) // currently only allows a single component of a type per entity
@@ -124,14 +140,14 @@ public:
 		if (!hasEntity(etype)) // TODO:delete?
 			return std::vector<T*>{};
 		auto& eids = entity_type_ids_[etype];
-		
+
 		auto& components_with_type = components_by_type_[component_type];
 		for (auto eid : eids)
 		{
 			auto component = components_by_type_and_entity_[component_type][eid];
 			components.push_back(static_cast<T*>(component));
 		}
-		
+
 		return components;
 	}
 
@@ -139,7 +155,7 @@ public:
 
 	bool hasEntity(EntityType type) const;
 
-	void registerEntity(EntityType type, std::initializer_list<Component*> components);
+	unsigned int registerEntity(EntityType type);
 	void unregisterEntity(EntityType etype, unsigned int entity_id)
 	{
 		//auto& ids = entity_type_ids_[etype];
@@ -152,6 +168,7 @@ public:
 
 	void registerPlayField(Window window);
 	PlayField* getPlayField() const;
+	std::string getInfo() const;
 };
 
 extern std::unique_ptr<EntityRepository> db;
