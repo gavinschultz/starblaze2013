@@ -7,6 +7,7 @@ namespace renderutil
 {
 	int32_t getScreenXForEntityByCameraAndDistance(float entity_x_at_zero, unsigned int entity_sprite_width, unsigned int world_width, const Camera& camera, float distance_factor);
 	SDL_Texture* loadTextureFromFile(SDL_Renderer* sdl_renderer, std::string imagePath, SDL_Rect* texture_rect);
+	void loadGlTextureFromFile(SDL_Renderer* sdl_renderer, std::string imagePath, SDL_Rect* texture_rect);
 	SDL_Rect scaleRect(const SDL_Rect& rect, unsigned int scaling);
 	bool hasDimensions(SDL_Rect rect);
 }

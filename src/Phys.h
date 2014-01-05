@@ -51,6 +51,14 @@ struct Vector2Du
 	Vector2Du(unsigned int x = 0, unsigned int y = 0) : x(x), y(y) {}
 };
 
+// A simple X/Y boolean pair
+struct Bool2D
+{
+	bool x;
+	bool y;
+	Bool2D(bool x = false, bool y = false) : x(x), y(y) {}
+};
+
 struct Rect
 {
 	float x, y;

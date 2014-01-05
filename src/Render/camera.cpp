@@ -12,6 +12,7 @@ public:
 	SDL_Rect view_rect;
 	SDL_Rect focus_rect;
 	SDL_Rect prev_focus_rect;
+	Vector2Di focus_rect_vel;
 	Point2Di focus_point;
 	Vector2Di focus_point_vel;
 	Point2Di prev_focus_point;
@@ -39,12 +40,13 @@ public:
 			turn_speed = 8L;
 		else
 			turn_speed = (int)std::max(std::abs(lround(this->focus_point_vel.x * 0.3)), 8L);
+		//turn_speed = std::min(turn_speed, std::abs(this->focus_rect_vel.x) + 1);
 
 		int max_velocity{ 0 };
 		int desired_x_abs{ 0 };
 		if (ship_orient->direction == HOrient::right)
 		{
-			desired_x_abs = mathutil::abswrap(this->focus_point.x, playfield->w);
+			desired_x_abs = mathutil::abswrap(this->focus_point.x, (int)playfield->w);
 			max_velocity = this->focus_point_vel.x + turn_speed;
 		}
 		else
@@ -57,17 +59,18 @@ public:
 		if (ship_orient->direction == HOrient::right)
 		{	
 			if (playfield->isRightOf(desired_x_abs, proposed_x_abs))
-				this->focus_rect.x = mathutil::abswrap(proposed_x_abs, playfield->w);
+				this->focus_rect.x = mathutil::abswrap(proposed_x_abs, (int)playfield->w);
 			else
 				this->focus_rect.x = desired_x_abs;
 		}
 		else
 		{
 			if (playfield->isLeftOf(desired_x_abs, proposed_x_abs))
-				this->focus_rect.x = mathutil::abswrap(proposed_x_abs, playfield->w);
+				this->focus_rect.x = mathutil::abswrap(proposed_x_abs, (int)playfield->w);
 			else
 				this->focus_rect.x = desired_x_abs;
 		}
+		this->focus_rect_vel.x = std::lround(playfield->getRelativePosX(this->prev_focus_rect.x, this->focus_rect.x));
 
 		this->view_rect.x = mathutil::abswrap(this->focus_rect.x - playfield->boundaries.x, playfield->w);
 	}

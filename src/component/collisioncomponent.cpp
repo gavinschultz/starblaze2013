@@ -3,7 +3,9 @@
 #include "temporalstatecomponent.h"
 #include "horizontalorientcomponent.h"
 
-void CollisionComponent::updateCollisionBoxes(TemporalState2DComponent* state, HorizontalOrientComponent* horient)
+const Point2Di CollisionComponent::sector_max{ 64, 8 };
+
+void CollisionComponent::updateCollisionBoxes(TemporalState2DComponent* state, HorizontalOrientComponent* horient, float playfield_width, float playfield_height)
 {
 	outer_box.x = state->current.pos.x;
 	outer_box.y = state->current.pos.y;
@@ -24,4 +26,7 @@ void CollisionComponent::updateCollisionBoxes(TemporalState2DComponent* state, H
 			inner_boxes[i].y = state->current.pos.y + base_inner_boxes[i].y;
 		}
 	}
+
+	sector.x = std::lround((state->current.pos.x / playfield_width) * sector_max.x) % sector_max.x;
+	sector.y = (int)((state->current.pos.y / playfield_height) * sector_max.y);
 }

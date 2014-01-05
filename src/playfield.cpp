@@ -48,6 +48,11 @@ float PlayField::getAltitude(float entity_pos_y, float entity_box_h) const
 	return std::max((float)0.0, this->boundaries.y + this->boundaries.h - entity_pos_y - entity_box_h);
 }
 
+float PlayField::getTakeoffSpeed()
+{
+	return 1100.0;
+}
+
 float PlayField::getAbsolutePosX(float entity_pos_x) const
 {
 	return mathutil::abswrap(entity_pos_x, this->w);

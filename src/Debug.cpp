@@ -25,6 +25,7 @@ void debug::console(std::initializer_list<std::string> args)
 
 void debug::set(std::string label, std::string value)
 {
+	//if (label.find("render") != std::string::npos)	// testing only
 	items[label] = value;
 }
 

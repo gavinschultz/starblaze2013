@@ -9,4 +9,5 @@ public:
 	State2D current;
 	State2D prev;
 	Point2D interpolated;
+	Bool2D ignore_acc;
 };

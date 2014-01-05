@@ -5,7 +5,6 @@
 #include "component.h"
 #include "session.h"
 #include "mathutil.h"
-#include "motionhistory.h"
 
 #include "timer.h"
 
@@ -57,11 +56,6 @@ void InputSystem::update()
 
 	pi->handleJoystickState();
 	pi->handleKeyboardState();
-
-	auto ship_id = db->getEntitiesOfType(E::eship)[0];
-	auto thrust = db->getComponentOfTypeForEntity<ThrustComponent>(ship_id);
-	if (thrust)
-		motionhistory::add(thrust->current.x, thrust->current.y);
 }
 
 void InputSystem::impl::resetComponentsForInput()

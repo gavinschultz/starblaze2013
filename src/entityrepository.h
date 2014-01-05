@@ -81,7 +81,7 @@ public:
 	template<typename T>
 	void registerComponent(T* component, unsigned int entity_id)
 	{
-		auto component_type = std::type_index(typeid(T));
+		static const auto component_type = std::type_index(typeid(T));
 		auto& components = components_by_type_[component_type];
 		size_t component_index = components.size();
 		components.push_back(std::unique_ptr<Component>(component));
@@ -129,6 +129,91 @@ public:
 			components.push_back(static_cast<T*>(c.get()));
 		}
 		return components;
+	}
+
+	template<typename T0, typename T1>
+	void getComponentsOfTypeForEntity(unsigned int entity_id, T0** t0, T1** t1)
+	{
+		debug_getcomponentsoftypeforentity_calls++;
+		static const std::type_index ti0 = std::type_index(typeid(T0));
+		static const std::type_index ti1 = std::type_index(typeid(T1));
+
+		for (auto& c : components_by_type_and_entity_)
+		{
+			if (c.first == ti0)
+				*t0 = static_cast<T0*>(c.second[entity_id]);
+			else if (c.first == ti1)
+				*t1 = static_cast<T1*>(c.second[entity_id]);
+		}
+	}
+
+	template<typename T0, typename T1, typename T2>
+	void getComponentsOfTypeForEntity(unsigned int entity_id, T0** t0, T1** t1, T2** t2)
+	{
+		debug_getcomponentsoftypeforentity_calls++;
+		static const std::type_index ti0 = std::type_index(typeid(T0));
+		static const std::type_index ti1 = std::type_index(typeid(T1));
+		static const std::type_index ti2 = std::type_index(typeid(T2));
+
+		for (auto& c : components_by_type_and_entity_)
+		{
+			if (c.first == ti0)
+				*t0 = static_cast<T0*>(c.second[entity_id]);
+			else if (c.first == ti1)
+				*t1 = static_cast<T1*>(c.second[entity_id]);
+			else if (c.first == ti2)
+				*t2 = static_cast<T2*>(c.second[entity_id]);
+		}
+	}
+
+	template<typename T0, typename T1, typename T2, typename T3>
+	void getComponentsOfTypeForEntity(unsigned int entity_id, T0** t0, T1** t1, T2** t2, T3** t3)
+	{
+		debug_getcomponentsoftypeforentity_calls++;
+		static const std::type_index ti0 = std::type_index(typeid(T0));
+		static const std::type_index ti1 = std::type_index(typeid(T1));
+		static const std::type_index ti2 = std::type_index(typeid(T2));
+		static const std::type_index ti3 = std::type_index(typeid(T3));
+
+		for (auto& c : components_by_type_and_entity_)
+		{
+			if (c.first == ti0)
+				*t0 = static_cast<T0*>(c.second[entity_id]);
+			else if (c.first == ti1)
+				*t1 = static_cast<T1*>(c.second[entity_id]);
+			else if (c.first == ti2)
+				*t2 = static_cast<T2*>(c.second[entity_id]);
+			else if (c.first == ti3)
+				*t3 = static_cast<T3*>(c.second[entity_id]);
+		}
+	}
+
+	template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
+	void getComponentsOfTypeForEntity(unsigned int entity_id, T0** t0, T1** t1, T2** t2, T3** t3, T4** t4, T5** t5)
+	{
+		debug_getcomponentsoftypeforentity_calls++;
+		static const std::type_index ti0 = std::type_index(typeid(T0));  
+		static const std::type_index ti1 = std::type_index(typeid(T1));
+		static const std::type_index ti2 = std::type_index(typeid(T2));
+		static const std::type_index ti3 = std::type_index(typeid(T3));
+		static const std::type_index ti4 = std::type_index(typeid(T4));
+		static const std::type_index ti5 = std::type_index(typeid(T5));
+
+		for (auto& c : components_by_type_and_entity_)
+		{
+			if (c.first == ti0)
+				*t0 = static_cast<T0*>(c.second[entity_id]);
+			else if (c.first == ti1)
+				*t1 = static_cast<T1*>(c.second[entity_id]);
+			else if (c.first == ti2)
+				*t2 = static_cast<T2*>(c.second[entity_id]);
+			else if (c.first == ti3)
+				*t3 = static_cast<T3*>(c.second[entity_id]);
+			else if (c.first == ti4)
+				*t4 = static_cast<T4*>(c.second[entity_id]);
+			else if (c.first == ti5)
+				*t5 = static_cast<T5*>(c.second[entity_id]);
+		}
 	}
 
 	template<typename T>

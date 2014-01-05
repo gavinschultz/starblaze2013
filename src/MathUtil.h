@@ -6,6 +6,7 @@ namespace mathutil
 	float round(float value, int sf);
 	Vector2D normaliseVector(Vector2D v, float* magnitude);
 	float abswrap(float n, float limit);
+	int abswrap(int n, int limit);
 	template <typename T> int getsign(T value);
 	bool areRectanglesIntersecting(const Rect& a, const Rect& b);
 	//int getsign(int value);

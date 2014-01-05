@@ -18,7 +18,10 @@ public:
 	const std::vector<Rect> base_inner_boxes;
 	Rect outer_box;
 	std::vector<Rect> inner_boxes;
-	void updateCollisionBoxes(TemporalState2DComponent* state, HorizontalOrientComponent* horient);
+
+	Point2Di sector{ 0, 0 };
+	static const Point2Di sector_max;
+	void updateCollisionBoxes(TemporalState2DComponent* state, HorizontalOrientComponent* horient, float playfield_width, float playfield_height);
 
 	bool is_collided{ false };
 };
