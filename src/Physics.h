@@ -11,8 +11,8 @@ class PhysicsSystem
 private:
 	void update_impl(TemporalState2DComponent* state, ThrustComponent* thrust, PhysicalComponent* physical, HorizontalOrientComponent* horient, CollisionComponent* collision);
 public:
-	void update(double dt);
-	void interpolate(double alpha);
+	void update(float dt);
+	void interpolate(float alpha);
 	void collide();
-	double dt{ 1.0 / 120.0 };
+	float dt{ 1.0 / 120.0 };
 };

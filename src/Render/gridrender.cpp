@@ -24,13 +24,13 @@ void GridRender::render(SDL_Renderer* sdl_renderer, Window window, Rect playfiel
 	glLineWidth(1.0f);
 	glEnable(GL_LINE_STIPPLE);
 	glLineStipple(1, 0x0101);
-	for (uint32_t x = 0; x < window.w; x += std::lround((double)(window.w) / 8))
+	for (uint32_t x = 0; x < window.w; x += std::lround((float)(window.w) / 8))
 	{
 		SDL_RenderDrawLine(sdl_renderer, x, 0, x, window.h);
 	}
 	SDL_RenderDrawLine(sdl_renderer, window.w - 1, 0, window.w - 1, window.h);
 
-	for (uint32_t y = 0; y <= window.h; y += std::lround((double)(window.h) / 4))
+	for (uint32_t y = 0; y <= window.h; y += std::lround((float)(window.h) / 4))
 	{
 		SDL_RenderDrawLine(sdl_renderer, 0, y, window.w - 1, y);
 	}

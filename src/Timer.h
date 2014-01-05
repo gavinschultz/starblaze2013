@@ -11,12 +11,12 @@ public:
 	~Timer();
 	void startFrame();
 	void endFrame();
-	double getFrameRate() const;
-	double getAvgFrameRate() const;
-	double getLastFrameDuration() const;
+	float getFrameRate() const;
+	float getAvgFrameRate() const;
+	float getLastFrameDuration() const;
 	unsigned int getTotalFrames() const;
-	double getTime() const;
-	double getFrameStartTime() const;
+	float getTime() const;
+	float getFrameStartTime() const;
 };
 
 extern std::unique_ptr<Timer> timer; // TODO: if we never have use for any other instance of timer, maybe convert this to a namespace

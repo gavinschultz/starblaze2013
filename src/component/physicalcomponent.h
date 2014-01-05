@@ -8,9 +8,9 @@ class ThrustComponent;
 class PhysicalComponent : public Component
 {
 public:
-	PhysicalComponent(Rect box = { 0.0, 0.0, 0.0, 0.0 }, double weight = 1.0) : Component(), box(box), weight(weight) {}
+	PhysicalComponent(Rect box = { 0.0, 0.0, 0.0, 0.0 }, float weight = 1.0) : Component(), box(box), weight(weight) {}
 	Rect box;
-	double weight;
+	float weight;
 	Vector2D(*getDecelerationFactor)(const TemporalState2DComponent& state, const ThrustComponent* thrust) { PhysicalComponent::getNoDecelerationFactor };
 
 	static Vector2D getShipDecelerationFactor(const TemporalState2DComponent& state, const ThrustComponent* thrust);

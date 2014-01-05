@@ -18,7 +18,7 @@ public:
 	bool isFireRequired() const;
 	void reset();
 	void registerBullets(unsigned int lower_id);
-	//void tick(double dt);
+	//void tick(float dt);
 	unsigned int loadNextBullet();
 	//std::array<unsigned int, BULLETS_MAX>& getBullets();
 };

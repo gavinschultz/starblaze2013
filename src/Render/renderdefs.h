@@ -31,7 +31,7 @@ private:
 public:
 	FPSRender(TTF_Font* font, const Window& window);
 	~FPSRender();
-	void render(SDL_Renderer* sdl_renderer, double fps) const;
+	void render(SDL_Renderer* sdl_renderer, float fps) const;
 };
 
 class GridRender

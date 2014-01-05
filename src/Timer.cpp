@@ -7,9 +7,9 @@ class Timer::impl
 {
 public:
 	int fps;
-	double start_time;
-	double elapsed_time;
-	double total_time;
+	float start_time;
+	float elapsed_time;
+	float total_time;
 	unsigned int frame;
 };
 
@@ -38,18 +38,18 @@ void Timer::endFrame()
 	pi->total_time += pi->elapsed_time;
 }
 
-double Timer::getFrameRate() const
+float Timer::getFrameRate() const
 {
 	return 1.0 / pi->elapsed_time;
 }
 
-double Timer::getLastFrameDuration() const
+float Timer::getLastFrameDuration() const
 {
 	return pi->elapsed_time;
 }
 
 // Get time in seconds since the simulation has started
-double Timer::getTime() const
+float Timer::getTime() const
 {
 	static uint64_t start = 0;
 	static uint64_t frequency = 0;
@@ -63,7 +63,7 @@ double Timer::getTime() const
 
 	QueryPerformanceCounter((LARGE_INTEGER*)&counter);
 
-	return ((double)(counter - start) / (double)frequency);
+	return ((float)(counter - start) / (float)frequency);
 }
 
 unsigned int Timer::getTotalFrames() const
@@ -71,12 +71,12 @@ unsigned int Timer::getTotalFrames() const
 	return pi->frame;
 }
 
-double Timer::getFrameStartTime() const
+float Timer::getFrameStartTime() const
 {
 	return pi->start_time;
 }
 
-double Timer::getAvgFrameRate() const
+float Timer::getAvgFrameRate() const
 {
 	return (pi->frame - 1) / pi->total_time;
 }

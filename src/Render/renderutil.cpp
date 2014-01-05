@@ -9,17 +9,17 @@
 
 #include "prefs.h"
 
-int32_t renderutil::getScreenXForEntityByCameraAndDistance(double entity_x_at_zero, unsigned int entity_sprite_width, unsigned int world_width, const Camera& camera, double distance_factor)
+int32_t renderutil::getScreenXForEntityByCameraAndDistance(float entity_x_at_zero, unsigned int entity_sprite_width, unsigned int world_width, const Camera& camera, float distance_factor)
 {
-	double camera_x_abs = camera.getViewRect().x;
+	float camera_x_abs = camera.getViewRect().x;
 
-	double camera_x_rel;
+	float camera_x_rel;
 	if (camera_x_abs > world_width / 2)
 		camera_x_rel = camera_x_abs - world_width;
 	else
 		camera_x_rel = camera_x_abs;
 
-	double entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
+	float entity_x_at_camera_x = entity_x_at_zero - (camera_x_rel * distance_factor);
 
 	if (entity_x_at_camera_x + entity_sprite_width > world_width * distance_factor)
 		entity_x_at_camera_x -= world_width * distance_factor;

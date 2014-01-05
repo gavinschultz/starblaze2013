@@ -9,9 +9,9 @@ class UsagePoint
 {
 public:
 	std::string label;
-	double time1;
-	double time2;
-	double getUsagePercentage(double frame_time)
+	float time1;
+	float time2;
+	float getUsagePercentage(float frame_time)
 	{
 		return mathutil::round(((time2 - time1) / frame_time), 4) * 100.0;
 	}
@@ -20,7 +20,7 @@ public:
 namespace
 {
 	std::vector<UsagePoint> usage_points;
-	double frame_duration;
+	float frame_duration;
 }
 
 void usage::start()
@@ -31,7 +31,7 @@ void usage::start()
 
 void usage::collect(std::string label)
 {
-	double time1, time2;
+	float time1, time2;
 	if (usage_points.size() == 0)
 		time1 = timer->getFrameStartTime();
 	else
@@ -52,8 +52,8 @@ void usage::to_screen()
 
 	for (auto& up : usage_points)
 	{
-		double percent_usage = up.getUsagePercentage(frame_duration);
-		double duration_ms = (up.time2 - up.time1) * 1000.0;
+		float percent_usage = up.getUsagePercentage(frame_duration);
+		float duration_ms = (up.time2 - up.time1) * 1000.0;
 		char buffer[20];
 		std::sprintf(buffer, "%05.2f (%05.2fms)", percent_usage, duration_ms);
 		debug::set("Usage (" + up.label + ") %", buffer);

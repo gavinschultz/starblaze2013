@@ -5,18 +5,18 @@
 
 Vector2D PhysicalComponent::getShipDecelerationFactor(const TemporalState2DComponent& state, const ThrustComponent* thrust)
 {
-	double thrust_x = 0.0, thrust_y = 0.0;
+	float thrust_x = 0.0, thrust_y = 0.0;
 	if (thrust)
 	{
 		thrust_x = thrust->current.x;
 		thrust_y = thrust->current.y;
 	}
 
-	double y_factor = 4.0;
+	float y_factor = 4.0;
 	if (std::abs(thrust_y) > 0)
 		y_factor = 0.0;
 
-	double x_factor;
+	float x_factor;
 	if (std::abs(state.current.vel.x) > 800 || std::abs(thrust_x) > 0)
 		x_factor = 0.63;
 	else if (std::abs(state.current.vel.x) > 200) // slow more when already slow and no thrust

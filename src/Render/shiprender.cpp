@@ -100,7 +100,7 @@ void ShipRender::render(SDL_Renderer* sdl_renderer, const Camera& camera, const 
 
 	SDL_Texture* wheels_texture = nullptr;
 	SDL_Rect wheels_rect = {};
-	double altitude = playfield->getAltitude(state.current.pos.y, phys.box.h);
+	float altitude = playfield->getAltitude(state.current.pos.y, phys.box.h);
 	if (altitude == 0.0)
 	{
 		wheels_rect = { ship_rect.x + pi->wheels_offset_.x, ship_rect.y + pi->wheels_offset_.y, pi->wheels_texture_.getScaledRect().w, pi->wheels_texture_.getScaledRect().h };

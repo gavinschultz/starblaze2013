@@ -14,7 +14,7 @@ public:
 	TTF_Font* font_;
 	mutable int cached_fps_{ 0 };
 	Point2Di pos_;
-	void render(SDL_Renderer* sdl_renderer, double fps) const;
+	void render(SDL_Renderer* sdl_renderer, float fps) const;
 };
 
 FPSRender::impl::impl(TTF_Font* font, const Window& window) : font_{ font }
@@ -28,7 +28,7 @@ FPSRender::impl::impl(TTF_Font* font, const Window& window) : font_{ font }
 	pos_ = { (int)window.w - text_w, 40 };
 }
 
-void FPSRender::impl::render(SDL_Renderer* sdl_renderer, double fps) const
+void FPSRender::impl::render(SDL_Renderer* sdl_renderer, float fps) const
 {
 	if (timer->getTotalFrames() % 10 == 0 || cached_fps_ == 0)
 		cached_fps_ = std::lround(fps);
@@ -39,7 +39,7 @@ void FPSRender::impl::render(SDL_Renderer* sdl_renderer, double fps) const
 FPSRender::FPSRender(TTF_Font* font, const Window& window) : pi{ new impl{ font, window } } {}
 FPSRender::~FPSRender() = default;
 
-void FPSRender::render(SDL_Renderer* sdl_renderer, double fps) const
+void FPSRender::render(SDL_Renderer* sdl_renderer, float fps) const
 {
 	pi->render(sdl_renderer, fps);
 }

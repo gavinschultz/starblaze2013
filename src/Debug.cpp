@@ -28,7 +28,7 @@ void debug::set(std::string label, std::string value)
 	items[label] = value;
 }
 
-void debug::set(std::string label, double value) { debug::set(label, std::to_string(value)); }
+void debug::set(std::string label, float value) { debug::set(label, std::to_string(value)); }
 void debug::set(std::string label, int value) { debug::set(label, std::to_string(value)); }
 void debug::set(std::string label, unsigned int value) { debug::set(label, std::to_string(value)); }
 

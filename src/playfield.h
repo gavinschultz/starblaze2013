@@ -12,15 +12,15 @@ class Hill
 public:
 	int type{ 0 };
 	int y_channel{ 0 };
-	double x{ 0.0 };
-	double distance_factor{ 0.0 };
+	float x{ 0.0 };
+	float distance_factor{ 0.0 };
 };
 
 class PlayField
 {
 public:
 	PlayField(const Window& window, int hill_count = 100);
-	const double w{ 1024.0 * 16 }; // 16 screens wide
+	const float w{ 1024.0 * 16 }; // 16 screens wide
 	std::vector<Hill> hills;
 	
 	/**
@@ -30,9 +30,9 @@ public:
 	Rect boundaries;
 
 	Rect getPlayArea(const Rect& entity_box) const;
-	double getAltitude(double entity_pos_y, double entity_box_h) const;
-	bool isRightOf(double x1, double x2);
-	bool isLeftOf(double x1, double x2);
-	double getAbsolutePosX(double entity_pos_x) const;
-	double getRelativePosX(double ref_pos_x, double entity_pos_x) const;
+	float getAltitude(float entity_pos_y, float entity_box_h) const;
+	bool isRightOf(float x1, float x2);
+	bool isLeftOf(float x1, float x2);
+	float getAbsolutePosX(float entity_pos_x) const;
+	float getRelativePosX(float ref_pos_x, float entity_pos_x) const;
 };

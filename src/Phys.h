@@ -11,9 +11,9 @@ public:
 
 struct Point2D
 {
-	double x;
-	double y;
-	Point2D(double x = 0.0, double y = 0.0) : x(x), y(y) {};
+	float x;
+	float y;
+	Point2D(float x = 0.0, float y = 0.0) : x(x), y(y) {};
 };
 
 struct Point2Di
@@ -32,9 +32,9 @@ struct Point2Du
 
 struct Vector2D
 {
-	double x;
-	double y;
-	Vector2D(double x = 0.0, double y = 0.0) : x(x), y(y) {}
+	float x;
+	float y;
+	Vector2D(float x = 0.0, float y = 0.0) : x(x), y(y) {}
 };
 
 struct Vector2Di
@@ -53,9 +53,9 @@ struct Vector2Du
 
 struct Rect
 {
-	double x, y;
-	double w, h;
-	Rect(double x = 0.0, double y = 0.0, double w = 0.0, double h = 0.0) : x(x), y(y), w(w), h(h) {}
+	float x, y;
+	float w, h;
+	Rect(float x = 0.0, float y = 0.0, float w = 0.0, float h = 0.0) : x(x), y(y), w(w), h(h) {}
 };
 
 struct State2D
