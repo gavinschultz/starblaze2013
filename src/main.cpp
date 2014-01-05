@@ -180,7 +180,7 @@ void init_bullets()
 		auto state = new TemporalState2DComponent{};
 		auto physical = new PhysicalComponent{ { 0.0, 0.0, 16.0, 8.0 }, 1.0 };
 		auto collision = new CollisionComponent{ { 0.0, 0.0, 16.0, 8.0 }, {} };
-		auto lifetime = new LifetimeComponent{ 0.7 };
+		auto lifetime = new LifetimeComponent{ 0.7f };
 
 		auto id = db->registerEntity(E::ebullet);
 		db->registerComponent(state, id);
@@ -196,7 +196,7 @@ void run()
 	PlayField* playfield = db->getPlayField();
 	auto camera = Camera{ SDL_Rect{ 0, 0, 1366, 768 }, SDL_Rect{ (int)playfield->boundaries.x, (int)playfield->boundaries.y, (int)playfield->boundaries.w, (int)playfield->boundaries.h } };
 
-	double accumulator = 0.0;
+	float accumulator = 0.0;
 	while (true)
 	{
 		auto& db1 = *db.get(); // for debugging only
@@ -204,7 +204,7 @@ void run()
 		timer->startFrame();
 		usage::start();
 
-		double lastframe_delta = timer->getLastFrameDuration();
+		float lastframe_delta = timer->getLastFrameDuration();
 		if (lastframe_delta > 0.25)
 		{
 			debug::console({ "Warning, excessive delta time from last frame (", std::to_string(lastframe_delta), ")" });
@@ -225,7 +225,7 @@ void run()
 			if (session::frame_by_frame)
 				session::frame_by_frame = false;
 
-			double dt = physics->dt;
+			float dt = physics->dt;
 			accumulator += lastframe_delta;
 			while (accumulator >= dt)
 			{

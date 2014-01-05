@@ -11,19 +11,19 @@ namespace
 	Vector2D motion_max_thresholds{ Vector2D{ 0.0, 0.0 } };
 }
 
-void motionhistory::init(unsigned int max_data_points, double threshold_x, double threshold_y)
+void motionhistory::init(unsigned int max_data_points, float threshold_x, float threshold_y)
 {
 	motion_history_limit = max_data_points;
 	motion_history = std::vector<Vector2D>(motion_history_limit);
 	motion_max_thresholds = Vector2D{ threshold_x, threshold_y };
 }
 //
-//void motionhistory::setMotionRecordMaxThresholds(double x, double y)
+//void motionhistory::setMotionRecordMaxThresholds(float x, float y)
 //{
 //	motion_max_thresholds = Vector2D{ x, y };
 //}
 
-void motionhistory::add(double x, double y)
+void motionhistory::add(float x, float y)
 {
 	if (motion_history_counter >= motion_history.size() - 1)
 		motion_history_counter = 0;

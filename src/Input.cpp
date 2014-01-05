@@ -218,8 +218,8 @@ void InputSystem::impl::handleJoystickState() const
 	{
 		const static int16_t tolerance_x = 6000;
 		const static int16_t tolerance_y = 8000;
-		const double x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance_x);
-		const double y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance_y);
+		const float x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance_x);
+		const float y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance_y);
 
 		int16_t left_x_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX);
 		int16_t left_y_raw = SDL_GameControllerGetAxis(controller, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY);

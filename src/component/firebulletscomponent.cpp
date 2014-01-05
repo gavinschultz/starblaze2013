@@ -3,7 +3,7 @@
 
 namespace
 {
-	const double BULLET_MAX_AGE = 0.7;
+	const float BULLET_MAX_AGE = 0.7;
 }
 
 void FireBulletsComponent::fire()
@@ -32,7 +32,7 @@ void FireBulletsComponent::registerBullets(unsigned int lower_id)
 	}
 }
 
-//void FireBulletsComponent::tick(double dt)
+//void FireBulletsComponent::tick(float dt)
 //{
 //	for (auto& bullet : bullets_)
 //	{

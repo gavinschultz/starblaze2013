@@ -14,7 +14,7 @@ PlayField::PlayField(const Window& window, int hill_count)
 	auto rnd_hill_y_channel = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine((uint32_t)time(0)));
 	auto rnd_hill_x_channel = std::bind(std::uniform_int_distribution<int>{0, (int)(this->w / 8) - 1}, std::default_random_engine((uint32_t)time(0) - 1));
 	auto rnd_type = std::bind(std::uniform_int_distribution<int>{0, 3}, std::default_random_engine((uint32_t)time(0) - 2));
-	const std::array<double, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };
+	const std::array<float, 4> y_channel_speeds = { 0.1, 0.25, 0.5, 0.75 };
 	hills.reserve(hill_count);
 	for (int i = 0; i < hill_count; i++)
 	{
@@ -43,19 +43,19 @@ Rect PlayField::getPlayArea(const Rect& entity_box) const
 	};
 }
 
-double PlayField::getAltitude(double entity_pos_y, double entity_box_h) const
+float PlayField::getAltitude(float entity_pos_y, float entity_box_h) const
 {
-	return std::max(0.0, this->boundaries.y + this->boundaries.h - entity_pos_y - entity_box_h);
+	return std::max((float)0.0, this->boundaries.y + this->boundaries.h - entity_pos_y - entity_box_h);
 }
 
-double PlayField::getAbsolutePosX(double entity_pos_x) const
+float PlayField::getAbsolutePosX(float entity_pos_x) const
 {
 	return mathutil::abswrap(entity_pos_x, this->w);
 }
 
-double PlayField::getRelativePosX(double x1, double x2) const
+float PlayField::getRelativePosX(float x1, float x2) const
 {
-	double proposed = std::abs(x1 - x2);
+	float proposed = std::abs(x1 - x2);
 	if (proposed < this->w / 2)
 	{
 		return std::fmod(proposed, this->w) * std::copysign(1.0, (x2 - x1));
@@ -67,7 +67,7 @@ double PlayField::getRelativePosX(double x1, double x2) const
 }
 
 // only works for absolute coordinates
-bool PlayField::isRightOf(double x1, double x2)
+bool PlayField::isRightOf(float x1, float x2)
 {
 	//return std::fmod(std::abs(x1 - x2), this->w) < this->w / 2;
 	if ((x1 - x2) >= 0)
@@ -76,7 +76,7 @@ bool PlayField::isRightOf(double x1, double x2)
 		return std::fmod((x2 - x1), this->w) > this->w / 2;
 }
 
-bool PlayField::isLeftOf(double x1, double x2)
+bool PlayField::isLeftOf(float x1, float x2)
 {
 	return !isRightOf(x1, x2);
 }

@@ -23,7 +23,7 @@ namespace debug
 
 	void set(std::string label, int value);
 	void set(std::string label, unsigned int value);
-	void set(std::string label, double value);
+	void set(std::string label, float value);
 	void set(std::string label, std::string value);
 	const std::map<std::string, std::string>& getItems();
 }

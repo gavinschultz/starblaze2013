@@ -4,13 +4,13 @@
 class LifetimeComponent : public Component
 {
 public:
-	LifetimeComponent(double max_age = 1.0, bool active = false) : Component(), max_age(max_age) 
+	LifetimeComponent(float max_age = 1.0, bool active = false) : Component(), max_age(max_age) 
 	{
 		Component::active = active;
 	}
-	const double max_age;
-	double age{ 0.0 };
-	void tick(double dt)
+	const float max_age;
+	float age{ 0.0 };
+	void tick(float dt)
 	{
 		if (!active)
 			return;

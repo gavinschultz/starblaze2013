@@ -22,7 +22,7 @@ public:
 		int radar_left = std::lround(playfield.getAbsolutePosX(radar_middle - (int)(playfield.w / 2)));
 		return radar_left;
 	}
-	SDL_Rect transformToRadarView(double entity_x, double entity_y, double entity_width, double entity_height, int radar_left, const PlayField& playfield) const
+	SDL_Rect transformToRadarView(float entity_x, float entity_y, float entity_width, float entity_height, int radar_left, const PlayField& playfield) const
 	{
 		// X
 		int entity_x_midpoint = std::lround(entity_x + (entity_width / 2));
@@ -62,8 +62,8 @@ RadarRender::RadarRender(const RenderSystem& renderer) : pi{ new impl() }
 	pi->point_color = renderer.palette->colors[CoCoPaletteEnum::yellow];
 
 	pi->radar_rect = { 256, 624, renderer.getWindow().w - (2*256), 144 };
-	pi->radar_scaling.x = pi->radar_rect.w / (double)playfield->w;
-	pi->radar_scaling.y = pi->radar_rect.h / (double)(playfield->boundaries.h);
+	pi->radar_scaling.x = pi->radar_rect.w / (float)playfield->w;
+	pi->radar_scaling.y = pi->radar_rect.h / (float)(playfield->boundaries.h);
 	int viewport_width_radar = pi->radar_rect.w / ((int)playfield->w / renderer.getWindow().w);
 	int viewport_radar_left = (pi->radar_rect.w / 2) - viewport_width_radar / 2 - (pi->point_size / 2);
 	int viewport_radar_right = (pi->radar_rect.w / 2) + viewport_width_radar / 2 - (pi->point_size / 2);

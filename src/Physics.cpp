@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-void PhysicsSystem::update(double dt)
+void PhysicsSystem::update(float dt)
 {
 	for (auto eid : db->getEntitiesWithComponent<FireBulletsComponent>())
 	{
@@ -25,7 +25,7 @@ void PhysicsSystem::update(double dt)
 			auto direction_multiplier = (horient->direction == HOrient::right ? 1 : -1);
 			bullet_state->current.pos.x = (horient->direction == HOrient::right ? state->current.pos.x + physical->box.w : state->current.pos.x);
 			bullet_state->current.pos.y = state->current.pos.y + 24.0;
-			bullet_state->current.vel = { state->current.vel.x + (direction_multiplier * 1000.0), 0.0 };
+			bullet_state->current.vel = { state->current.vel.x + (direction_multiplier * 1000.0f), 0.0f };
 			bullet_state->prev = bullet_state->current;
 			bullet_thrust->current.x = direction_multiplier * bullet_thrust->max.x;
 			fire->reset();
@@ -89,7 +89,7 @@ void PhysicsSystem::update_impl(TemporalState2DComponent* state, ThrustComponent
 	state->current.pos.x = mathutil::abswrap(state->current.pos.x, playfield->w);
 
 	state->current.pos.y += state->current.vel.y * dt + (state->current.acc.y * 0.5 * dt * dt);
-	double altitude = playfield->getAltitude(state->current.pos.y, physical->box.h);
+	float altitude = playfield->getAltitude(state->current.pos.y, physical->box.h);
 	if (altitude == 0.0)
 	{
 		state->current.pos.y = boundaries.y + boundaries.h - physical->box.h;
@@ -110,12 +110,12 @@ void PhysicsSystem::update_impl(TemporalState2DComponent* state, ThrustComponent
 	}
 }
 
-void PhysicsSystem::interpolate(double alpha)
+void PhysicsSystem::interpolate(float alpha)
 {
 	auto playfield = db->getPlayField();
 	for (auto& state : db->getComponentsOfType<TemporalState2DComponent>())
 	{
-		double delta_x = playfield->getRelativePosX(state->current.pos.x, state->prev.pos.x);
+		float delta_x = playfield->getRelativePosX(state->current.pos.x, state->prev.pos.x);
 		//if (delta_x != 0)
 		//{
 		//	debug::console({ "prev.x / current.x / delta_x / alpha: ", std::to_string(state->prev.pos.x), " / ", std::to_string(state->current.pos.x), " / ", std::to_string(delta_x), " / ", std::to_string(alpha) });
@@ -135,7 +135,7 @@ void PhysicsSystem::interpolate(double alpha)
 	//		if (!bullet.lifetime.active)
 	//			continue;
 
-	//		double delta_x = playfield->getRelativePosX(bullet.state.current.pos.x, bullet.state.prev.pos.x);
+	//		float delta_x = playfield->getRelativePosX(bullet.state.current.pos.x, bullet.state.prev.pos.x);
 	//		bullet.state.interpolated.x = bullet.state.current.pos.x + (delta_x)*alpha;
 	//		bullet.state.interpolated.y = bullet.state.current.pos.y*alpha + bullet.state.prev.pos.y*(1.0 - alpha);
 	//	}

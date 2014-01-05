@@ -3,13 +3,13 @@
 
 namespace mathutil
 {
-	double round(double value, int sf);
-	Vector2D normaliseVector(Vector2D v, double* magnitude);
-	double abswrap(double n, double limit);
+	float round(float value, int sf);
+	Vector2D normaliseVector(Vector2D v, float* magnitude);
+	float abswrap(float n, float limit);
 	template <typename T> int getsign(T value);
 	bool areRectanglesIntersecting(const Rect& a, const Rect& b);
 	//int getsign(int value);
-	//int getsign(double value);
+	//int getsign(float value);
 }
 
 template <typename T>
@@ -33,7 +33,7 @@ int mathutil::getsign(T value)
 //		return -1;
 //}
 //
-//int util::getsign(double value)
+//int util::getsign(float value)
 //{
 //	if (value == 0)
 //		return 0;

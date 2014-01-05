@@ -38,8 +38,8 @@ void MotionHistoryRender::render(SDL_Renderer* sdl_renderer, Window window, cons
 		Vector2D p = points[i];
 		glPointSize(1.0f);
 
-		int scaled_xmotion = std::lround(((double)threshold_line_offset / thresholds.x) * p.x); // X motion
-		int scaled_ymotion = std::lround(((double)threshold_line_offset / thresholds.y) * p.y); // Y motion
+		int scaled_xmotion = std::lround(((float)threshold_line_offset / thresholds.x) * p.x); // X motion
+		int scaled_ymotion = std::lround(((float)threshold_line_offset / thresholds.y) * p.y); // Y motion
 
 		if (i > 0)
 		{
