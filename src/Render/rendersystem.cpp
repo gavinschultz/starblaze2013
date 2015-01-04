@@ -82,7 +82,7 @@ void RenderSystem::init()
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 
-	if (!(pi->sdl_window = SDL_CreateWindow("unnamed", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pi->window.w, pi->window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL)))
+	if (!(pi->sdl_window = SDL_CreateWindow("unnamed", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pi->window.w, pi->window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI)))
 	{
 		program::exit(RetCode::sdl_error, { SDL_GetError() });
 	}
@@ -279,6 +279,14 @@ void RenderSystem::setFullscreen(bool state)
 	{
 		debug::console({ "Error setting fullscreen to ", std::to_string(state), ": ", SDL_GetError() });
 	}
+
+	int window_w, window_h;
+	int gl_drawable_w, gl_drawable_h;
+	SDL_GL_GetDrawableSize(pi->sdl_window, &gl_drawable_w, &gl_drawable_h);
+	SDL_GetWindowSize(pi->sdl_window, &window_w, &window_h);
+	debug::console({ "Fullscreen: ", state ? "true" : "false",
+		+", Window: ", std::to_string(window_w), " x ", std::to_string(window_h),
+		+", Drawable GL size: ", std::to_string(gl_drawable_w), " x ", std::to_string(gl_drawable_h) });
 }
 
 const SpriteLoader& RenderSystem::getSpriteLoader() const

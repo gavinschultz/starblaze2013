@@ -11,7 +11,7 @@ public:
 	SDL_Rect bullets_rect;
 	SDL_Rect shields_rect;
 	SDL_Rect radar_rect;
-	std::array<SDL_Rect*, 4> gauge_rects{ { &fuel_rect, &bullets_rect, &shields_rect, &radar_rect } };
+	std::array<SDL_Rect*, 4> gauge_rects = std::array<SDL_Rect*, 4>{ { &fuel_rect, &bullets_rect, &shields_rect, &radar_rect } };
 	SDL_Color gauge_color;
 	SDL_Color label_color;
 };

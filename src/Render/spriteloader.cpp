@@ -3,8 +3,7 @@
 #include <regex>
 #include <exception>
 #include <rapidjson\rapidjson.h>
-#include <rapidjson\filestream.h>
-#include <rapidjson\reader.h>
+#include <rapidjson\filereadstream.h>
 #include <rapidjson\document.h>
 #include "spriteloader.h"
 #include "renderutil.h"
@@ -70,12 +69,12 @@ void SpriteLoader::load(SDL_Renderer* sdl_renderer, const std::string& spriteshe
 	FileLoader file_loader{ spritesheet_json_path, "r" };
 	FILE* file_spritesheet = file_loader();
 
-	Reader reader;
-	FileStream json_is{ file_spritesheet };
+	char readBuffer[65535];
+	FileReadStream json_is{ file_spritesheet, readBuffer, sizeof(readBuffer) };
 
 	Document json_doc;
 
-	if (json_doc.ParseStream<0, FileStream>(json_is).HasParseError())
+	if (json_doc.ParseStream(json_is).HasParseError())
 		throw std::runtime_error("The JSON in file " + spritesheet_json_path + " could not be parsed.");
 
 	if (!json_doc.HasMember("meta"))

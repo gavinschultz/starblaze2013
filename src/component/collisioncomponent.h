@@ -9,10 +9,10 @@ class CollisionComponent : public Component
 {
 public:
 	CollisionComponent(Rect base_outer_box, std::initializer_list<Rect> base_inner_boxes) : Component(),
-		base_outer_box{ base_outer_box },
-		base_inner_boxes{ base_inner_boxes },
-		outer_box{ base_outer_box },
-		inner_boxes{ base_inner_boxes }
+		base_outer_box(base_outer_box),
+		base_inner_boxes(base_inner_boxes),
+		outer_box(base_outer_box),
+		inner_boxes(base_inner_boxes)
 	{}
 	const Rect base_outer_box;
 	const std::vector<Rect> base_inner_boxes;
