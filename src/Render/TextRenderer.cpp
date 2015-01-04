@@ -71,7 +71,7 @@ void TextRenderer::RenderPlate(SDL_Renderer* sdl_renderer, const TextPlate& plat
 	}
 }
 
-TextLine::TextLine(const std::string& text, Point2Di offset) : text{ text }, offset{ offset } {}
+TextLine::TextLine(const std::string& text, Point2Di offset) : text(text), offset(offset) {}
 
 TextPlate::TextPlate(std::initializer_list<TextLine> lines)
 {

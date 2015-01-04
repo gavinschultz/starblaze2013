@@ -41,7 +41,7 @@ Renderer::~Renderer()
 void Renderer::init()
 {
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-	sdl_window = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL);
+	sdl_window = SDL_CreateWindow("Starblaze", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window.w, window.h, SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 	if (!sdl_window)
 	{
 		console_debug({ SDL_GetError() });
@@ -101,6 +101,14 @@ void Renderer::toggleFullscreen(bool state)
 		SDL_SetWindowFullscreen(sdl_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	else
 		SDL_SetWindowFullscreen(sdl_window, 0);
+
+	int window_w, window_h;
+	int gl_drawable_w, gl_drawable_h;
+	SDL_GL_GetDrawableSize(sdl_window, &gl_drawable_w, &gl_drawable_h);
+	SDL_GetWindowSize(sdl_window, &window_w, &window_h);
+	console_debug({ "Fullscreen: ", state ? "true" : "false", 
+		", Window: ", std::to_string(window_w), " x ", std::to_string(window_h), 
+		", Drawable GL size: ", std::to_string(gl_drawable_w), " x ", std::to_string(gl_drawable_h) });
 }
 
 void Renderer::toggleGrid(bool state)
