@@ -212,6 +212,11 @@ void InputSystem::impl::handleJoystickState() const
 	{
 		const static int16_t tolerance_x = 6000;
 		const static int16_t tolerance_y = 8000;
+
+		// at least on my controller, especially when going up-left, up-right, down-left, down-right, the X-thrust diminishes
+		// so we need to make it a bit more sensitive i.e. go full-thrust even when not 100% left or right
+		const static float x_sensitivity = 1.4F;
+		const static float y_sensitivity = 1.4F;
 		const float x_modifier = thrust->max.x / (std::numeric_limits<int16_t>::max() - tolerance_x);
 		const float y_modifier = thrust->max.y / (std::numeric_limits<int16_t>::max() - tolerance_y);
 
@@ -221,13 +226,14 @@ void InputSystem::impl::handleJoystickState() const
 		int16_t left_y = mathutil::getsign(left_y_raw)*std::max(0, (std::abs(left_y_raw) - tolerance_y));
 		if (left_x != 0)
 		{
-			thrust->current.x = left_x * x_modifier;
+			thrust->current.x = mathutil::getsign(left_x) * std::min(thrust->max.x, std::abs(left_x * x_modifier * x_sensitivity));
 			auto requested_direction = (left_x > 0 ? HOrient::right : HOrient::left);
 			turnWithThrustConsideration(requested_direction, orient->direction, *thrust);
 		}
 		if (std::abs(left_y) > 0)
 		{
 			thrust->current.y = left_y * y_modifier;
+			thrust->current.y = mathutil::getsign(left_y) * std::min(thrust->max.y, std::abs(left_y * y_modifier * y_sensitivity));
 		}
 	}
 

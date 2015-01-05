@@ -151,8 +151,8 @@ void PhysicsSystem::update(float dt)
 			//debug::set("thrust.x", thrust->current.x);
 
 			//debug::set("y", state->current.pos.y);
-			debug::set("current.vel.y", state->current.vel.y);
-			debug::set("current.acc.y", state->current.acc.y);
+			//debug::set("current.vel.y", state->current.vel.y);
+			//debug::set("current.acc.y", state->current.acc.y);
 			//debug::set("thrust.y", thrust->current.y);
 
 			//debug::set("deceleration", std::to_string(deceleration_factor.x) + " / " + std::to_string(deceleration_factor.y));

@@ -16,7 +16,8 @@ void ThrustSystem::update()
 		if (!thrust || !state)
 			continue;
 
-		motionhistory::add(thrust->current.x, thrust->current.y);
+		if (thrust->is_motion_tracked)
+			motionhistory::add(thrust->current.x, thrust->current.y);
 
 		float thrust_multiplier = 1.0;
 		if ((state->current.vel.x > 0.0 && thrust->current.x < 0.0) || (state->current.vel.x < 0.0 && thrust->current.x > 0.0))

@@ -76,7 +76,7 @@ void init()
 void init_ship()
 {
 	const auto horient = new HorizontalOrientComponent();
-	const auto thrust = new ThrustComponent();
+	const auto thrust = new ThrustComponent({ 0, 0 }, 1.0F, true);
 	const auto physical = new PhysicalComponent();
 	const auto state = new TemporalState2DComponent();
 	const auto radartrack = new RadarTrackableComponent();
