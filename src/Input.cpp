@@ -243,6 +243,10 @@ void InputSystem::impl::handleJoystickState() const
 		{
 			fire->fire();
 		}
+		else if (fire->isReloadRequired()) // reload whenever the X button is not down and there's no bullet available
+		{
+			fire->reload();
+		}
 	}
 }
 

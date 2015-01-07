@@ -180,6 +180,7 @@ void RenderSystem::draw(Camera& camera)
 	auto player_state = db->getComponentOfTypeForEntity<TemporalState2DComponent>(player_id);
 	auto player_phys = db->getComponentOfTypeForEntity<PhysicalComponent>(player_id);
 	auto player_collide = db->getComponentOfTypeForEntity<CollisionComponent>(player_id);
+	auto player_fire = db->getComponentOfTypeForEntity<FireBulletsComponent>(player_id);
 	if (db->hasEntity(E::eship))
 	{
 		pi->ship_render->render(pi->sdl_renderer, camera, *player_state, *player_orient, *player_thrust, *player_phys, player_collide);
@@ -205,7 +206,7 @@ void RenderSystem::draw(Camera& camera)
 		pi->bullet_render->render(pi->sdl_renderer, camera, *bullet_state, *bullet_physical);
 	}
 	
-	pi->hud_render->render(pi->sdl_renderer, *player_info, session::score, session::lives, *pi->text_render);
+	pi->hud_render->render(pi->sdl_renderer, *player_info, *player_fire, session::score, session::lives, *pi->text_render);
 
 	pi->radar_render->renderBox(pi->sdl_renderer);
 	for (auto eid : db->getEntitiesWithComponent<RadarTrackableComponent>())

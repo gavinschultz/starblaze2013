@@ -80,7 +80,7 @@ void init_ship()
 	const auto physical = new PhysicalComponent();
 	const auto state = new TemporalState2DComponent();
 	const auto radartrack = new RadarTrackableComponent();
-	const auto fire = new FireBulletsComponent();
+	const auto fire = new FireBulletsComponent(13);
 	const auto player = new PlayerComponent();
 	const auto collision = new CollisionComponent(
 	{ 0, 0, 128, 32 },

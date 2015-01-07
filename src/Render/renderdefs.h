@@ -89,7 +89,7 @@ private:
 public:
 	HUDRender(const RenderSystem& renderer);
 	~HUDRender();
-	void render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, unsigned int score, unsigned int lives, const TextRender& text_renderer) const;
+	void render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, const FireBulletsComponent& fire, unsigned int score, unsigned int lives, const TextRender& text_renderer) const;
 };
 
 class RadarRender

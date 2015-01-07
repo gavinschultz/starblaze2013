@@ -3,6 +3,7 @@
 #include "cocopalette.h"
 #include "renderdefs.h"
 #include "textrender.h"
+#include "mathutil.h"
 
 class HUDRender::impl
 {
@@ -26,11 +27,18 @@ HUDRender::HUDRender(const RenderSystem& renderer) : pi{ new impl() }
 	pi->label_color = renderer.palette->colors[CoCoPaletteEnum::red];
 }
 HUDRender::~HUDRender() = default;
-void HUDRender::render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, unsigned int score, unsigned int lives, const TextRender& text_renderer) const
+void HUDRender::render(SDL_Renderer* sdl_renderer, const PlayerComponent& player, const FireBulletsComponent& fire, unsigned int score, unsigned int lives, const TextRender& text_renderer) const
 {
 	// Fuel, bullets, shields, radar
 	SDL_SetRenderDrawColor(sdl_renderer, pi->gauge_color.r, pi->gauge_color.g, pi->gauge_color.b, 255);
 	SDL_RenderFillRects(sdl_renderer, *(pi->gauge_rects.data()), 4);
+
+	float ammo_percent = (float)fire.currentAmmoCount() / (float)fire.maxAmmoCount();
+	pi->bullets_rect.h = std::ceil(96 * ammo_percent);
+	pi->bullets_rect.y = 724 - pi->bullets_rect.h;
+	//debug::set("Ammo", std::to_string(fire.currentAmmoCount()));
+	//debug::set("Ammo %", std::to_string(ammo_percent));
+	//debug::set("T height", std::to_string(pi->bullets_rect.h));
 
 	text_renderer.renderChar(sdl_renderer, 'F', { 8, 736 }, pi->label_color);
 	text_renderer.renderChar(sdl_renderer, 'T', { 72, 736 }, pi->label_color);

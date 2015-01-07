@@ -8,15 +8,28 @@ namespace
 
 void FireBulletsComponent::fire()
 {
-	if (ammo_ <= 0)
+	if (current_ammo_ == 0)
+		return;
+	if (reload_required_)
 		return;
 	fire_ = true;
-	ammo_--;
+	reload_required_ = true;
+	current_ammo_--;
 }
 
 bool FireBulletsComponent::isFireRequired() const
 { 
 	return fire_;
+}
+
+bool FireBulletsComponent::isReloadRequired() const
+{
+	return reload_required_;
+}
+
+void FireBulletsComponent::reload()
+{
+	reload_required_ = false;
 }
 
 void FireBulletsComponent::reset()
@@ -50,4 +63,14 @@ unsigned int FireBulletsComponent::loadNextBullet()
 	auto bullet_id = bullet_ids_[next_available_index_];
 	next_available_index_ = ++next_available_index_ % BULLETS_MAX;
 	return bullet_id;
+}
+
+unsigned int FireBulletsComponent::maxAmmoCount() const
+{
+	return max_ammo_;
+}
+
+unsigned int FireBulletsComponent::currentAmmoCount() const
+{
+	return current_ammo_;
 }
